@@ -32,10 +32,11 @@ public class InkyMessage implements ComponentSerializer<Component, Component, St
             ClickModifier.INSTANCE
     );
 
-    public static final char SPECIAL_CHAR = 0;
+    public static final char SPECIAL_CHAR = '§';
     public static final String SPECIAL = String.valueOf(SPECIAL_CHAR);
 
     public @NotNull Component deserialize(@NotNull String text, @NotNull ModifiersResolver modsResolver) {
+        text = text.replace('§', '&');
         List<RichText> richTexts = new ArrayList<>();
         for (Matcher matcher = RICH_PATTERN.matcher(text); matcher.find(); matcher = RICH_PATTERN.matcher(text)) {
             text = matcher.replaceAll((result) -> {

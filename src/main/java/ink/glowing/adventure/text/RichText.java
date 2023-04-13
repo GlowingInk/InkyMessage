@@ -9,6 +9,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 
+import static ink.glowing.adventure.InkyMessage.SPECIAL_CHAR;
 import static net.kyori.adventure.text.Component.text;
 
 public class RichText {
@@ -33,11 +34,11 @@ public class RichText {
         int lastAppend = 0;
         for (int i = 0; i < text.length(); i++) {
             char ch = text.charAt(i);
-            if (ch == 0) {
+            if (ch == SPECIAL_CHAR) {
                 result = result.append(text(text.substring(lastAppend, i)).style(lastStyle));
                 int start = i + 1;
                 //noinspection StatementWithEmptyBody
-                while (text.charAt(++i) != 0);
+                while (text.charAt(++i) != SPECIAL_CHAR);
                 IncludedText included = richTexts.get(Integer.parseInt(text.substring(start, i))).render(richTexts);
                 result = result.append(included.component());
                 lastStyle = included.lastStyle();
