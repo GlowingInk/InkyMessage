@@ -20,7 +20,7 @@ public enum ColorModifier implements Modifier {
     }
 
     @Override
-    public @NotNull Component modify(@NotNull Component text, @NotNull String param, @NotNull Component value) {
+    public @NotNull Component modify(@NotNull Component text, @NotNull String param, @NotNull Component value) { // TODO Doesn't really work
         if (HEX.test(param)) {
             return text.color(TextColor.fromHexString(param));
         } else {

@@ -8,7 +8,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 
-public interface Modifier extends Namespaced { // TODO
+public interface Modifier extends Namespaced {
     @NotNull Component modify(@NotNull Component text, @NotNull String param, @NotNull Component value);
 
     record Prepared(@NotNull Modifier modifier, @NotNull String param, @NotNull RichText value) {
