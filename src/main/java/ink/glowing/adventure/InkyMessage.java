@@ -7,7 +7,6 @@ import ink.glowing.adventure.modifier.Modifier;
 import ink.glowing.adventure.modifier.ModifiersResolver;
 import ink.glowing.adventure.text.RichText;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.Style;
 import net.kyori.adventure.text.serializer.ComponentSerializer;
 import org.jetbrains.annotations.NotNull;
 
@@ -20,14 +19,13 @@ public class InkyMessage implements ComponentSerializer<Component, Component, St
     private static final Pattern RICH_PATTERN = Pattern.compile("""
                     (?x)
                     &\\[(
-                      (?:(?!&\\[).)+
+                      (?:(?!&\\[).)+?
                     )](
                       (?!\\()|((?:\\(
                         (?:(?!&\\[)[^)])+
                       \\))+)
                     )
                     """);
-    private static final Pattern MODIFIERS_PATTERN = Pattern.compile("\\((\\w+):(\\w+)?(?: ([^)]+))?\\)");
     private static final ModifiersResolver DEFAULT_MODIFIERS = new ModifiersResolver(
             ColorModifier.INSTANCE,
             HoverModifier.INSTANCE,
@@ -37,39 +35,24 @@ public class InkyMessage implements ComponentSerializer<Component, Component, St
     public static final char SPECIAL_CHAR = 0;
     public static final String SPECIAL = String.valueOf(SPECIAL_CHAR);
 
-    public @NotNull Component deserialize(@NotNull String text, @NotNull ModifiersResolver modResolvers) {
+    public @NotNull Component deserialize(@NotNull String text, @NotNull ModifiersResolver modsResolver) {
         List<RichText> richTexts = new ArrayList<>();
         for (Matcher matcher = RICH_PATTERN.matcher(text); matcher.find(); matcher = RICH_PATTERN.matcher(text)) {
             text = matcher.replaceAll((result) -> {
                 String modifiersStr = result.group(2);
                 List<Modifier.Prepared> mods = modifiersStr != null
-                        ? parseModifiers(modifiersStr, modResolvers)
+                        ? modsResolver.parseModifiers(modifiersStr)
                         : List.of();
                 richTexts.add(new RichText(result.group(1), mods));
                 return SPECIAL + (richTexts.size() - 1) + SPECIAL;
             });
         }
-        return new RichText(text, List.of()).render(Style.empty(), richTexts).component().compact();
+        return new RichText(text, List.of()).render(richTexts).component().compact();
     }
 
     @Override
     public @NotNull Component deserialize(@NotNull String text) {
         return deserialize(text, DEFAULT_MODIFIERS);
-    }
-
-    private List<Modifier.Prepared> parseModifiers(String modifiersStr, ModifiersResolver modsResolver) {
-        List<Modifier.Prepared> mods = new ArrayList<>();
-        Matcher matcher = MODIFIERS_PATTERN.matcher(modifiersStr);
-        while (matcher.find()) {
-            Modifier modifier = modsResolver.getModifier(matcher.group(1));
-            if (modifier == null) continue;
-            mods.add(new Modifier.Prepared(
-                    modifier,
-                    matcher.group(2) == null ? "" : matcher.group(2),
-                    matcher.group(3) == null ? RichText.EMPTY : new RichText(matcher.group(3), List.of())
-            ));
-        }
-        return mods;
     }
 
     @Override

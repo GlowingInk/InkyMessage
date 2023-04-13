@@ -3,7 +3,7 @@ Adventure API component serializer inspired by [MineDown](https://github.com/Pho
 An early attempt to make legacy-friendly serializer with modern features.
 
 ## TODO
-- Fix colors
 - Gradient stuff
-- Placeholders (for keys, translations, selectors(?))
+- Placeholders (for keys, translations, selectors)
+- Escaping
 - Actually implement serializer (as all we have now is deserializer lol)

@@ -8,7 +8,12 @@ import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.function.Predicate;
+import java.util.regex.Pattern;
+
 public class AdventureUtils {
+    private static final Predicate<String> HEX = Pattern.compile("#[0-9a-f]{1,6}").asMatchPredicate();
+
     public static @Nullable Style mergeLegacyStyle(char ch, @NotNull Style current) {
         return switch (ch) {
             case '0' -> Style.style(NamedTextColor.BLACK);
@@ -39,5 +44,9 @@ public class AdventureUtils {
 
     public static @NotNull String plain(@NotNull Component component) {
         return PlainTextComponentSerializer.plainText().serialize(component);
+    }
+
+    public static boolean isHexColor(@NotNull String text) {
+        return HEX.test(text);
     }
 }
