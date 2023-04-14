@@ -3,6 +3,7 @@ package ink.glowing.text;
 import ink.glowing.text.modifier.Modifier;
 import ink.glowing.text.utils.Utils;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.format.Style;
 import net.kyori.adventure.text.format.TextColor;
 import org.jetbrains.annotations.NotNull;
@@ -15,8 +16,8 @@ import static net.kyori.adventure.text.Component.text;
 public class RichText {
     public static final RichText EMPTY = new RichText("", List.of()) {
         @Override
-        public @NotNull RichText.Included render(List<RichText> richTexts) {
-            return new Included(Component.empty(), Style.empty());
+        public @NotNull Style render(TextComponent.Builder globalBuilder, Style lastStyle, List<RichText> richTexts) {
+            return lastStyle;
         }
     };
 
@@ -30,53 +31,51 @@ public class RichText {
         this.modifiers = modifiers;
     }
 
-    public @NotNull RichText.Included render(List<RichText> richTexts) {
-        Style lastStyle = Style.empty();
-        Component result = Component.empty();
+    public @NotNull Style render(TextComponent.Builder globalBuilder, Style lastStyle, List<RichText> richTexts) {
+        var builder = Component.text();
         int lastAppend = 0;
-        for (int i = 0; i < text.length(); i++) {
-            char ch = text.charAt(i);
+        for (int index = 0; index < text.length(); index++) {
+            char ch = text.charAt(index);
             if (ch == SECTION_CHAR) {
-                result = result.append(text(text.substring(lastAppend, i)).style(lastStyle));
-                int start = i + 1;
+                builder.append(text(text.substring(lastAppend, index)).style(lastStyle));
+                int start = index + 1;
                 //noinspection StatementWithEmptyBody
-                while (text.charAt(++i) != SECTION_CHAR);
-                Included included = richTexts.get(Integer.parseInt(text.substring(start, i))).render(richTexts);
-                result = result.append(included.component());
-                if (!included.lastStyle().isEmpty()) lastStyle = included.lastStyle();
-                lastAppend = i + 1;
+                while (text.charAt(++index) != SECTION_CHAR);
+                lastStyle = richTexts.get(Integer.parseInt(text.substring(start, index))).render(builder, lastStyle, richTexts);
+                lastAppend = index + 1;
             } else if (ch == '&') {
-                if (i + 1 == text.length() || Utils.isEscaped(text, i)) continue;
-                char styleChar = text.charAt(i + 1);
-                if (styleChar == '#' && i + 8 < text.length()) {
-                    String colorStr = text.substring(i + 1, i + 8);
+                if (index + 1 == text.length() || Utils.isEscaped(text, index)) continue;
+                char styleChar = text.charAt(index + 1);
+                if (styleChar == '#') {
+                    if (index + 8 >= text.length()) continue;
+                    String colorStr = text.substring(index + 1, index + 8);
                     if (!Utils.isHexColor(colorStr)) continue;
-                    result = makeComponent(result, lastAppend, i, lastStyle);
+                    if (lastAppend != index) appendPart(builder, lastAppend, index, lastStyle);
                     lastStyle = lastStyle.color(TextColor.fromHexString(colorStr));
-                    lastAppend = (i += 7) + 1;
+                    lastAppend = (index += 7) + 1;
                 } else {
                     Style newStyle = Utils.mergeLegacyStyle(styleChar, lastStyle);
                     if (newStyle == null) continue;
-                    result = makeComponent(result, lastAppend, i, lastStyle);
+                    if (lastAppend != index) appendPart(builder, lastAppend, index, lastStyle);
                     lastStyle = newStyle;
-                    lastAppend = (++i) + 1;
+                    lastAppend = (++index) + 1;
                 }
             }
         }
         if (lastAppend < text.length()) {
-            result = makeComponent(result, lastAppend, text.length(), lastStyle);
+            appendPart(builder, lastAppend, text.length(), lastStyle);
         }
+        Component result = builder.build();
         for (var rawMod : modifiers) {
             result = rawMod.modify(result, richTexts);
         }
-        return new Included(result, lastStyle);
+        globalBuilder.append(result);
+        return lastStyle;
     }
 
-    private @NotNull Component makeComponent(Component comp, int start, int end, Style style) {
+    private void appendPart(@NotNull TextComponent.Builder builder, int start, int end, @NotNull Style style) {
         String substring = text.substring(start, end);
         if (hasSlashes) substring = InkyMessage.unescapeAll(substring);
-        return comp.append(text(substring).style(style));
+        builder.append(text(substring).style(style));
     }
-
-    public record Included(@NotNull Component component, @NotNull Style lastStyle) {}
 }

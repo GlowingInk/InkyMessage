@@ -1,10 +1,12 @@
 package ink.glowing.text;
 
-import ink.glowing.text.modifier.ClickModifier;
-import ink.glowing.text.modifier.ColorModifier;
-import ink.glowing.text.modifier.FontModifier;
-import ink.glowing.text.modifier.HoverModifier;
 import ink.glowing.text.modifier.ModifiersResolver;
+import ink.glowing.text.modifier.impl.ClickModifier;
+import ink.glowing.text.modifier.impl.ColorModifier;
+import ink.glowing.text.modifier.impl.DecorModifier;
+import ink.glowing.text.modifier.impl.FontModifier;
+import ink.glowing.text.modifier.impl.HoverModifier;
+import ink.glowing.text.utils.InstanceProvider;
 import ink.glowing.text.utils.Utils;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.ComponentIteratorType;
@@ -13,29 +15,37 @@ import net.kyori.adventure.text.ScoreComponent;
 import net.kyori.adventure.text.SelectorComponent;
 import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.TranslatableComponent;
+import net.kyori.adventure.text.format.Style;
 import net.kyori.adventure.text.serializer.ComponentSerializer;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import static ink.glowing.text.utils.Utils.SECTION;
 
-public enum InkyMessage implements ComponentSerializer<Component, Component, String> {
-    INSTANCE;
-
+public class InkyMessage implements ComponentSerializer<Component, Component, String> {
     private static final Pattern ESCAPE_PATTERN = Pattern.compile("[&\\]()]");
-    private static final Pattern UNESCAPE_PATTERN = Pattern.compile("\\\\([&\\]()])");
+    private static final Pattern UNESCAPE_PATTERN = Pattern.compile("\\\\([&\\]()\\\\])");
 
     private static final ModifiersResolver DEFAULT_MODIFIERS = new ModifiersResolver(
-            ColorModifier.INSTANCE,
-            HoverModifier.INSTANCE,
-            ClickModifier.INSTANCE,
-            FontModifier.INSTANCE
+            ColorModifier.colorModifier(),
+            HoverModifier.hoverModifier(),
+            ClickModifier.clickModifier(),
+            FontModifier.fontModifier(),
+            DecorModifier.decorModifier()
     );
 
+    public static @NotNull InkyMessage inkyMessage() {
+        return Provider.PROVIDER.instance();
+    }
+
+    private InkyMessage() {}
+
     public @NotNull Component deserialize(@NotNull String input, @NotNull ModifiersResolver modsResolver) {
+        if (input.indexOf('&') == -1) return Component.text(input);
         List<RichText> richTexts = new ArrayList<>();
         String oldText = input;
         String newText = parseRich(input, richTexts, modsResolver);
@@ -43,7 +53,9 @@ public enum InkyMessage implements ComponentSerializer<Component, Component, Str
             oldText = newText;
             newText = parseRich(oldText, richTexts, modsResolver);
         }
-        return new RichText(newText, List.of()).render(richTexts).component().compact();
+        var builder = Component.text();
+        new RichText(newText, List.of()).render(builder, Style.empty(), richTexts);
+        return builder.build().compact();
     }
 
     private static @NotNull String parseRich(@NotNull String input, @NotNull List<RichText> richTexts, @NotNull ModifiersResolver modsResolver) {
@@ -65,6 +77,7 @@ public enum InkyMessage implements ComponentSerializer<Component, Component, Str
             if (ch == ')' && !Utils.isEscaped(input, index)) {
                 if (index + 1 == input.length() || input.charAt(index + 1) != '(') {
                     modEnd = index;
+                    break;
                 }
             }
         }
@@ -81,26 +94,13 @@ public enum InkyMessage implements ComponentSerializer<Component, Component, Str
     }
 
     public static @NotNull String unescapeAll(@NotNull String text) {
-        return UNESCAPE_PATTERN.matcher(text).replaceAll(result -> result.group(1));
-    }
-
-    public static @NotNull String escapeSingularSlash(@NotNull String text) {
         StringBuilder builder = new StringBuilder(text.length());
-        boolean escaped = false;
-        for (int i = 0; i < text.length(); i++) {
-            char ch = text.charAt(i);
-            if (escaped) {
-                escaped = false;
-                if ("&]()\\".indexOf(ch) == -1) {
-                    builder.append("\\");
-                }
-            } else if (ch == '\\') {
-                escaped = true;
-            }
-            builder.append(ch);
+        Matcher matcher = UNESCAPE_PATTERN.matcher(text);
+        while (matcher.find()) {
+            matcher.appendReplacement(builder, "");
+            builder.append(matcher.group(1));
         }
-        if (escaped) builder.append('\\');
-        return builder.toString();
+        return matcher.appendTail(builder).toString();
     }
 
     @Override
@@ -130,6 +130,16 @@ public enum InkyMessage implements ComponentSerializer<Component, Component, Str
             builder.append(selector.pattern());
         } else {
             builder.append('?');
+        }
+    }
+
+    private enum Provider implements InstanceProvider<InkyMessage> {
+        PROVIDER;
+        private final InkyMessage inkyMessage = new InkyMessage();
+
+        @Override
+        public @NotNull InkyMessage instance() {
+            return inkyMessage;
         }
     }
 }

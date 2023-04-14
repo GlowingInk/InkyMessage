@@ -2,14 +2,14 @@ package ink.glowing.text;
 
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.event.ClickEvent;
-import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
-import static net.kyori.adventure.text.Component.empty;
+import static ink.glowing.text.InkyMessage.inkyMessage;
 import static net.kyori.adventure.text.Component.text;
 import static net.kyori.adventure.text.format.NamedTextColor.*;
 import static net.kyori.adventure.text.format.TextDecoration.BOLD;
+import static net.kyori.adventure.text.minimessage.MiniMessage.miniMessage;
 import static org.testng.Assert.assertEquals;
 
 public class InkyMessageTest {
@@ -17,42 +17,33 @@ public class InkyMessageTest {
     public Object[][] deserializeData() {
         return new Object[][] {
                 {
-                        "&aGreen!\\",
-                        text("Green!\\").color(GREEN)
+                        "&aGreen &cand red!\\",
+                        text().append(text("Green ").color(GREEN)).append(text("and red!\\").color(RED)).build()
                 },
                 {
-                        "&c&lRed and bold",
-                        empty() .append(text("Red and bold").color(RED).decorate(BOLD))
+                        "&c&lRed and\\\\ bold",
+                        text("Red and\\ bold").color(RED).decorate(BOLD)
                 },
                 {
                         "&lBold &cthen not",
-                        empty()
-                                .append(text("Bold ").decorate(BOLD))
-                                .append(text("then not").color(RED))
+                        text().append(text("Bold ").decorate(BOLD)).append(text("then not").color(RED)).build()
                 },
                 {
-                        "&aFirst green &6then gold",
-                        empty()
-                                .append(text("First green ").color(GREEN))
-                                .append(text("then gold").color(GOLD))
+                        "&a&lFirst bold green &rthen&6 gold",
+                        text().append(text("First bold green ").color(GREEN).decorate(BOLD)).append(text("then")).append(text(" gold").color(GOLD)).build()
                 },
                 {
-                        "&[Fully clickable](click:run /helloworld)",
-                        text("Fully clickable").clickEvent(ClickEvent.runCommand("/helloworld"))
+                        "&[Fully clickable\\]](click:run /helloworld)",
+                        text("Fully clickable]").clickEvent(ClickEvent.runCommand("/helloworld"))
                 },
                 {
-                        "&aGreen, &[some red](color:red), green again",
-                        empty()
+                        "&aGreen, &[clickable&c red](click:url http://glowing.ink/), red again",
+                        text()
                                 .append(text("Green, ").color(GREEN))
-                                .append(text("some red").color(RED))
-                                .append(text(", green again").color(GREEN))
-                },
-                {
-                        "&aGreen, &[clickable&c red](click:url https://glowing.ink/), red again",
-                        empty()
-                                .append(text("Green, ").color(GREEN))
-                                .append(text("clickable").append(text(" red").color(RED)).clickEvent(ClickEvent.openUrl("https://glowing.ink/")))
-                                .append(text(", red again").color(RED))
+                                .append(text().clickEvent(ClickEvent.openUrl("http://glowing.ink/"))
+                                        .append(text("clickable").color(GREEN))
+                                        .append(text(" red").color(RED)))
+                                .append(text(", red again").color(RED)).build()
                 },
                 {
                         "\\&aRegular \\&[text](color:gold), and some&b \\aqua",
@@ -64,31 +55,12 @@ public class InkyMessageTest {
 
     @Test(dataProvider = "deserializeData")
     public void deserializeTest(String text, Component expected) {
-        try {
-            assertEquals(
-                    InkyMessage.INSTANCE.deserialize(text),
-                    expected
-            );
-        } catch (Throwable throwable) {
-            System.out.println(MiniMessage.miniMessage().serialize(InkyMessage.INSTANCE.deserialize(text)));
-            System.out.println(MiniMessage.miniMessage().serialize(expected));
-            throw throwable;
-        }
-    }
-
-    @DataProvider
-    public Object[][] escapeSingularSlashData() {
-        return new Object[][] {
-                {"\\", "\\\\"},
-                {"\\\\", "\\\\"},
-                {"\\a", "\\\\a"},
-                {"\\&Abc", "\\&Abc"}
-        };
-    }
-
-    @Test(dataProvider = "escapeSingularSlashData")
-    public void escapeSingularSlashTest(String text, String expected) {
-        assertEquals(InkyMessage.escapeSingularSlash(text), expected);
+        System.out.println("Inky: " + miniMessage().serialize(inkyMessage().deserialize(text)));
+        System.out.println("Mini: " + miniMessage().serialize(expected));
+        assertEquals(
+                inkyMessage().deserialize(text),
+                expected
+        );
     }
 
     @DataProvider
@@ -111,5 +83,45 @@ public class InkyMessageTest {
                 InkyMessage.unescapeAll(escaped),
                 unescaped
         );
+    }
+
+    @DataProvider
+    public Object[][] performanceData() {
+        return new Object[][] {
+                {
+                    "<red>This text is red! <hover:show_text:Cool hover text><click:run_command:test_command><red>Pressing this will <gold>run a command.</click></hover><bold><gold> It's bold yellow",
+                    "&cThis text is red! &[Pressing this will &6run a command.](click:run test_command)(hover:text Cool hover text)(color:green)&l It's bold yellow"
+                }
+        };
+    }
+
+    @Test(
+            dataProvider = "performanceData",
+            description = "The \"test\" exists purely for getting the idea of deserializer performance vs MiniMessage",
+            enabled = false
+    )
+    public void performanceTest(String mini, String inky) {
+        var inkyMessage = inkyMessage();
+        for (int i = 0; i < 100000; i++) {
+            inkyMessage.deserialize(inky);
+        }
+        var miniMessage = miniMessage();
+        for (int i = 0; i < 100000; i++) {
+            miniMessage.deserialize(mini);
+        }
+
+        long start = System.currentTimeMillis();
+        for (int i = 0; i < 100000; i++) {
+            inkyMessage.deserialize(inky);
+        }
+        long end = System.currentTimeMillis();
+        System.out.println(end - start);
+
+        start = System.currentTimeMillis();
+        for (int i = 0; i < 100000; i++) {
+            miniMessage.deserialize(mini);
+        }
+        end = System.currentTimeMillis();
+        System.out.println(end - start);
     }
 }

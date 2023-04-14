@@ -1,12 +1,19 @@
-package ink.glowing.text.modifier;
+package ink.glowing.text.modifier.impl;
 
+import ink.glowing.text.modifier.Modifier;
+import ink.glowing.text.utils.InstanceProvider;
 import ink.glowing.text.utils.Utils;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.event.ClickEvent;
 import org.jetbrains.annotations.NotNull;
 
-public enum ClickModifier implements Modifier {
-    INSTANCE;
+public class ClickModifier implements Modifier {
+
+    public static @NotNull ClickModifier clickModifier() {
+        return Provider.PROVIDER.instance();
+    }
+
+    private ClickModifier() {}
 
     @Override
     public @NotNull Component modify(@NotNull Component text, @NotNull String param, @NotNull Component value) {
@@ -26,5 +33,15 @@ public enum ClickModifier implements Modifier {
     @Override
     public @NotNull String namespace() {
         return "click";
+    }
+
+    private enum Provider implements InstanceProvider<ClickModifier> {
+        PROVIDER;
+        private final ClickModifier instance = new ClickModifier();
+
+        @Override
+        public @NotNull ClickModifier instance() {
+            return instance;
+        }
     }
 }

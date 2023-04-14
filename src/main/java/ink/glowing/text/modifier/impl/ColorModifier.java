@@ -1,5 +1,7 @@
-package ink.glowing.text.modifier;
+package ink.glowing.text.modifier.impl;
 
+import ink.glowing.text.modifier.Modifier;
+import ink.glowing.text.utils.InstanceProvider;
 import ink.glowing.text.utils.Utils;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -8,12 +10,15 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.Map;
 
-public enum ColorModifier implements Modifier {
-    INSTANCE;
+public class ColorModifier implements Modifier {
+
+    public static @NotNull ColorModifier colorModifier() {
+        return Provider.PROVIDER.instance();
+    }
 
     private final Map<String, NamedTextColor> namedColors;
 
-    ColorModifier() {
+    private ColorModifier() {
         namedColors = NamedTextColor.NAMES.keyToValue();
     }
 
@@ -25,6 +30,8 @@ public enum ColorModifier implements Modifier {
             NamedTextColor namedColor = namedColors.get(param);
             if (namedColor != null) {
                 return text.color(namedColor);
+            } else if (param.equals("null")) {
+                return text.color(null);
             }
         }
         return text;
@@ -33,5 +40,15 @@ public enum ColorModifier implements Modifier {
     @Override
     public @NotNull String namespace() {
         return "color";
+    }
+
+    private enum Provider implements InstanceProvider<ColorModifier> {
+        PROVIDER;
+        private final ColorModifier instance = new ColorModifier();
+
+        @Override
+        public @NotNull ColorModifier instance() {
+            return instance;
+        }
     }
 }
