@@ -5,12 +5,11 @@ and MiniMessage projects. An attempt to make legacy-friendly serializer with mod
 ## TODO
 - Gradient stuff
 - Placeholders (for keys, translations, selectors)
-- Escaping
 - Actually implement serializer (as all we have now is deserializer lol)
 - Closing colors(?)
 
 ## Get it
-Right now everything is handled using [JitPack](https://jitpack.io/#GlowingInk/InkyMessage/master-SNAPSHOT)
+Right now everything is handled using [JitPack](https://jitpack.io/#GlowingInk/InkyMessage)
 
 ### Maven
 Add to repositories
@@ -25,7 +24,7 @@ Add to dependencies
 <dependency>
     <groupId>com.github.GlowingInk</groupId>
     <artifactId>InkyMessage</artifactId>
-    <version>master-SNAPSHOT</version>
+    <version>0.3</version> <!-- Or master-SNAPSHOT -->
 </dependency>
 ```
 ### Others

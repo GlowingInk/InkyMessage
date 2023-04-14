@@ -1,4 +1,4 @@
-package ink.glowing.adventure.modifier;
+package ink.glowing.text.modifier;
 
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.event.HoverEvent;

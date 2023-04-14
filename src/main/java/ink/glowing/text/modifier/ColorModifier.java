@@ -1,6 +1,6 @@
-package ink.glowing.adventure.modifier;
+package ink.glowing.text.modifier;
 
-import ink.glowing.adventure.utils.AdventureUtils;
+import ink.glowing.text.utils.Utils;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextColor;
@@ -19,7 +19,7 @@ public enum ColorModifier implements Modifier {
 
     @Override
     public @NotNull Component modify(@NotNull Component text, @NotNull String param, @NotNull Component value) {
-        if (param.startsWith("#") && AdventureUtils.isHexColor(param)) {
+        if (param.startsWith("#") && Utils.isHexColor(param)) {
             return text.color(TextColor.fromHexString(param));
         } else {
             NamedTextColor namedColor = namedColors.get(param);

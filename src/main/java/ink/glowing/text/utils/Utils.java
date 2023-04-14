@@ -1,4 +1,4 @@
-package ink.glowing.adventure.utils;
+package ink.glowing.text.utils;
 
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.flattener.ComponentFlattener;
@@ -11,9 +11,9 @@ import org.jetbrains.annotations.Nullable;
 import java.util.function.Predicate;
 import java.util.regex.Pattern;
 
-public class AdventureUtils {
-    public static final char SPECIAL_CHAR = '§';
-    public static final String SPECIAL = String.valueOf(SPECIAL_CHAR);
+public class Utils {
+    public static final char SECTION_CHAR = '§';
+    public static final String SECTION = String.valueOf(SECTION_CHAR);
 
     private static final Predicate<String> HEX = Pattern.compile("#[0-9a-f]{1,6}").asMatchPredicate();
 
@@ -53,5 +53,11 @@ public class AdventureUtils {
 
     public static boolean isHexColor(@NotNull String text) {
         return HEX.test(text);
+    }
+
+    public static boolean isEscaped(@NotNull String input, int index) {
+        boolean escaped = false;
+        while (--index > -1 && input.charAt(index) == '\\') escaped = !escaped;
+        return escaped;
     }
 }

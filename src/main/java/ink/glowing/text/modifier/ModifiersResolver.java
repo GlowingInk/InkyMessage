@@ -1,6 +1,6 @@
-package ink.glowing.adventure.modifier;
+package ink.glowing.text.modifier;
 
-import ink.glowing.adventure.text.RichText;
+import ink.glowing.text.RichText;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 

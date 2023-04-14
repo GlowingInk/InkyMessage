@@ -1,6 +1,6 @@
-package ink.glowing.adventure.modifier;
+package ink.glowing.text.modifier;
 
-import ink.glowing.adventure.text.RichText;
+import ink.glowing.text.RichText;
 import net.kyori.adventure.key.Namespaced;
 import net.kyori.adventure.text.Component;
 import org.jetbrains.annotations.NotNull;
