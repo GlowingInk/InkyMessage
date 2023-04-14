@@ -8,6 +8,12 @@ import ink.glowing.adventure.modifier.Modifier;
 import ink.glowing.adventure.modifier.ModifiersResolver;
 import ink.glowing.adventure.text.RichText;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.ComponentIteratorType;
+import net.kyori.adventure.text.KeybindComponent;
+import net.kyori.adventure.text.ScoreComponent;
+import net.kyori.adventure.text.SelectorComponent;
+import net.kyori.adventure.text.TextComponent;
+import net.kyori.adventure.text.TranslatableComponent;
 import net.kyori.adventure.text.serializer.ComponentSerializer;
 import org.jetbrains.annotations.NotNull;
 
@@ -64,6 +70,26 @@ public enum InkyMessage implements ComponentSerializer<Component, Component, Str
 
     @Override
     public @NotNull String serialize(@NotNull Component component) {
-        throw new UnsupportedOperationException("Not implemented yet");
+        StringBuilder builder = new StringBuilder();
+        for (var child : component.iterable(ComponentIteratorType.BREADTH_FIRST)) {
+            serialize(builder, child);
+        }
+        return builder.toString();
+    }
+
+    private void serialize(@NotNull StringBuilder builder, @NotNull Component component) {
+        if (component instanceof TextComponent text) {
+            builder.append(text.content());
+        } else if (component instanceof TranslatableComponent translatable) {
+            builder.append(translatable.key());
+        } else if (component instanceof KeybindComponent keybind) {
+            builder.append(keybind.keybind());
+        } else if (component instanceof ScoreComponent score) {
+            builder.append(score.objective());
+        } else if (component instanceof SelectorComponent selector) {
+            builder.append(selector.pattern());
+        } else {
+            builder.append('?');
+        }
     }
 }

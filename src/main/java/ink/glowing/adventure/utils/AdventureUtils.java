@@ -1,10 +1,10 @@
 package ink.glowing.adventure.utils;
 
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.flattener.ComponentFlattener;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.Style;
 import net.kyori.adventure.text.format.TextDecoration;
-import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -46,7 +46,9 @@ public class AdventureUtils {
     }
 
     public static @NotNull String plain(@NotNull Component component) {
-        return PlainTextComponentSerializer.plainText().serialize(component);
+        StringBuilder builder = new StringBuilder();
+        ComponentFlattener.basic().flatten(component, builder::append);
+        return builder.toString();
     }
 
     public static boolean isHexColor(@NotNull String text) {
