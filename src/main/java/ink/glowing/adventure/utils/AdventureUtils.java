@@ -12,6 +12,9 @@ import java.util.function.Predicate;
 import java.util.regex.Pattern;
 
 public class AdventureUtils {
+    public static final char SPECIAL_CHAR = '§';
+    public static final String SPECIAL = String.valueOf(SPECIAL_CHAR);
+
     private static final Predicate<String> HEX = Pattern.compile("#[0-9a-f]{1,6}").asMatchPredicate();
 
     public static @Nullable Style mergeLegacyStyle(char ch, @NotNull Style current) {

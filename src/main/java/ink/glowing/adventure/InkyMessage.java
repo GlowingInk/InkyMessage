@@ -2,6 +2,7 @@ package ink.glowing.adventure;
 
 import ink.glowing.adventure.modifier.ClickModifier;
 import ink.glowing.adventure.modifier.ColorModifier;
+import ink.glowing.adventure.modifier.FontModifier;
 import ink.glowing.adventure.modifier.HoverModifier;
 import ink.glowing.adventure.modifier.Modifier;
 import ink.glowing.adventure.modifier.ModifiersResolver;
@@ -15,28 +16,33 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class InkyMessage implements ComponentSerializer<Component, Component, String> {
-    private static final Pattern RICH_PATTERN = Pattern.compile("""
-                    (?x)
-                    &\\[(
-                      (?:(?!&\\[).)+?
-                    )](
-                      (?!\\()|((?:\\(
-                        (?:(?!&\\[)[^)])+
-                      \\))+)
-                    )
-                    """);
+import static ink.glowing.adventure.utils.AdventureUtils.SPECIAL;
+import static ink.glowing.adventure.utils.AdventureUtils.SPECIAL_CHAR;
+
+public enum InkyMessage implements ComponentSerializer<Component, Component, String> {
+    INSTANCE;
+
+    private static final Pattern RICH_PATTERN = Pattern.compile(
+            """
+            (?x)
+            &\\[(
+              (?:[^]](?!&\\[))+
+            )](
+              (?!\\()|((?:\\(
+                (?:[^)](?!&\\[))+
+              \\))+)
+            )
+            """
+    );
     private static final ModifiersResolver DEFAULT_MODIFIERS = new ModifiersResolver(
             ColorModifier.INSTANCE,
             HoverModifier.INSTANCE,
-            ClickModifier.INSTANCE
+            ClickModifier.INSTANCE,
+            FontModifier.INSTANCE
     );
 
-    public static final char SPECIAL_CHAR = '§';
-    public static final String SPECIAL = String.valueOf(SPECIAL_CHAR);
-
     public @NotNull Component deserialize(@NotNull String text, @NotNull ModifiersResolver modsResolver) {
-        text = text.replace('§', '&');
+        text = text.replace(SPECIAL_CHAR, '&');
         List<RichText> richTexts = new ArrayList<>();
         for (Matcher matcher = RICH_PATTERN.matcher(text); matcher.find(); matcher = RICH_PATTERN.matcher(text)) {
             text = matcher.replaceAll((result) -> {

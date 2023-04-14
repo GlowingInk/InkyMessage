@@ -7,3 +7,4 @@ An early attempt to make legacy-friendly serializer with modern features.
 - Placeholders (for keys, translations, selectors)
 - Escaping
 - Actually implement serializer (as all we have now is deserializer lol)
+- Closing colors(?)

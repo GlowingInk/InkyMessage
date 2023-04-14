@@ -14,7 +14,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class ModifiersResolver {
-    private static final Pattern MODIFIERS_PATTERN = Pattern.compile("\\((\\w+):(\\w+)?(?: ([^)]+))?\\)");
+    private static final Pattern MODIFIERS_PATTERN = Pattern.compile("\\((\\w+):([\\w:]+)(?: ([^)]+))?\\)");
 
     private final Map<String, Modifier> modifiers;
 
