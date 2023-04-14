@@ -55,9 +55,9 @@ public class InkyMessageTest {
                                 .append(text(", red again").color(RED))
                 },
                 {
-                        "\\&aRegular \\&[text](color:gold), and some&b aqua",
+                        "\\&aRegular \\&[text](color:gold), and some&b \\aqua",
                         text("&aRegular &[text](color:gold), and some")
-                                .append(text(" aqua").color(AQUA))
+                                .append(text(" \\aqua").color(AQUA))
                 }
         };
     }

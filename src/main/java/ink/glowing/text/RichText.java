@@ -78,5 +78,5 @@ public class RichText {
         return comp.append(text(substring).style(style));
     }
 
-    private record Included(@NotNull Component component, @NotNull Style lastStyle) {}
+    public record Included(@NotNull Component component, @NotNull Style lastStyle) {}
 }
