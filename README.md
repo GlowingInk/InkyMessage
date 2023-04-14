@@ -24,7 +24,7 @@ Add to dependencies
 <dependency>
     <groupId>com.github.GlowingInk</groupId>
     <artifactId>InkyMessage</artifactId>
-    <version>0.3</version> <!-- Or master-SNAPSHOT -->
+    <version>0.3.1</version> <!-- Or master-SNAPSHOT -->
 </dependency>
 ```
 ### Others
