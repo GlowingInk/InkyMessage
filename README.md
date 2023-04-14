@@ -8,24 +8,32 @@ and MiniMessage projects. An attempt to make legacy-friendly serializer with mod
 - Actually implement serializer (as all we have now is deserializer lol)
 - Closing colors(?)
 
-## Get it ![Version](https://jitpack.io/v/GlowingInk/InkyMessage.svg)
-Right now everything is handled using [JitPack](https://jitpack.io/#GlowingInk/InkyMessage)
-
+## Get it ![Version](https://img.shields.io/github/v/release/GlowingInk/InkyMessage?logo=github)
 ### Maven
 Add to repositories
 ```xml
 <repository>
-    <id>jitpack.io</id>
-    <url>https://jitpack.io</url>
+    <id>glowing-ink</id>
+    <url>http://repo.glowing.ink/</url>
 </repository>
 ```
 Add to dependencies
 ```xml
 <dependency>
-    <groupId>com.github.GlowingInk</groupId>
-    <artifactId>InkyMessage</artifactId>
-    <version><!-- See the version above --></version>
+    <groupId>ink.glowing</groupId>
+    <artifactId>inkymessage</artifactId>
+    <version>0.4.0</version> <!-- Check the version above -->
 </dependency>
 ```
-### Others
-Check the JitPack page.
+### Gradle
+```kotlin
+repositories {
+    maven {
+        url = uri("http://repo.glowing.ink/releases")
+    }
+}
+
+dependencies {
+    implementation("ink.glowing:inkymessage:0.4.0") // Check the version above
+}
+```
