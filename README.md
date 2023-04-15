@@ -2,6 +2,19 @@
 Adventure API component serializer inspired by [MineDown](https://github.com/Phoenix616/MineDown/tree/kyori-adventure) 
 and MiniMessage projects. An attempt to make legacy-friendly serializer with modern features.
 
+Inky Message supports legacy format codes, e.g. `&l`, `&6`, `&a`, etc.
+Besides that, we also have a special format for the modern features like interactable chat components. It's very simple
+to follow: `&[my special text](key:value parameters)`. Those are its possible combinations:
+## Simple formatting
+| Key     | Values                                                                                                                               | Parameters               | Effect                                    | Example                                                             |
+|---------|--------------------------------------------------------------------------------------------------------------------------------------|--------------------------|-------------------------------------------|---------------------------------------------------------------------|
+| `hover` | Only `text` ATM                                                                                                                      | Hover text               | Add hover effect to chat component        | `Stop. &[hover time](hover:text What a meme)!`                      |
+| `click` | `url`, `run`, `suggest`, `copy`, `insert`                                                                                            | Action parameters        | Add click functionality to chat component | `&[Click to get 100 robux](click:url https://youtu.be/dQw4w9WgXcQ)` |
+| `decor` | `bold`, `obfuscated`, `strikethrough`, `underlined`, `italic`                                                                        | `true`, `unset`, `false` | Force decorator on the text               | `&cThat's a &[bold](decor:bold) move!`                              |
+| `font`  | Namespaced key of a font                                                                                                             | None                     | Change fonts of a text                    | `Wow, &[almost HD fonts](font:minecraft:uniform)!`                  |
+| `color` | [Named color](https://jd.advntr.dev/api/4.13.1/net/kyori/adventure/text/format/NamedTextColor.html) (lower case) and hex (`#123456`) | None ATM                 | Colorize "empty" text                     | `&[This text is green](color:green)`                                |
+
+
 ## TODO
 - Gradient stuff
 - Placeholders (for keys, translations, selectors)
@@ -14,7 +27,7 @@ Add to repositories
 ```xml
 <repository>
     <id>glowing-ink</id>
-    <url>http://repo.glowing.ink/</url>
+    <url>http://repo.glowing.ink/releases</url>
 </repository>
 ```
 Add to dependencies
