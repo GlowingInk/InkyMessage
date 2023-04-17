@@ -54,17 +54,18 @@ public class InkyMessage implements ComponentSerializer<Component, Component, St
     public @NotNull Component deserialize(@NotNull String input, @NotNull StyleResolver styleResolver) {
         if (input.indexOf('&') == -1) return Component.text(input);
         List<RichText> richTexts = new ArrayList<>();
+        BuildContext context = new BuildContext(richTexts, styleResolver);
         String oldText = input;
-        String newText = parseRich(input, richTexts, styleResolver);
+        String newText = parseRich(input, 0, context);
         while (!newText.equals(oldText)) {
             oldText = newText;
-            newText = parseRich(oldText, richTexts, styleResolver);
+            newText = parseRich(oldText, 0, context);
         }
         return richText(newText, List.of()).render(new BuildContext(richTexts, styleResolver)).compact();
     }
 
-    private static @NotNull String parseRich(@NotNull String input, @NotNull List<RichText> richTexts, @NotNull StyleResolver modsResolver) {
-        int closeIndex = input.indexOf("](");
+    private static @NotNull String parseRich(@NotNull String input, int fromIndex, @NotNull BuildContext context) {
+        int closeIndex = input.indexOf("](", fromIndex);
         while (Utils.isEscaped(input, closeIndex)) closeIndex = input.indexOf("](", closeIndex + 1);
         if (closeIndex == -1) return input;
         int startIndex = -1;
@@ -84,14 +85,16 @@ public class InkyMessage implements ComponentSerializer<Component, Component, St
                     modEnd = index;
                     break;
                 }
+            } else if (ch == '&' && index + 1 < input.length() && input.charAt(index + 1) == '[' && !Utils.isEscaped(input, index)) {
+                input = parseRich(input, index, context);
             }
         }
         ++modEnd;
-        richTexts.add(richText(
+        context.innerTextAdd(richText(
                 input.substring(startIndex + 2, closeIndex),
-                modsResolver.parseModifiers(input.substring(modStart, modEnd))
+                context.styleResolver().parseModifiers(input.substring(modStart, modEnd))
         ));
-        return input.substring(0, startIndex) + SECTION + (richTexts.size() - 1) + SECTION + input.substring(modEnd);
+        return input.substring(0, startIndex) + SECTION + (context.innerTextsCount() - 1) + SECTION + input.substring(modEnd);
     }
 
     public static @NotNull String escapeAll(@NotNull String text) {
