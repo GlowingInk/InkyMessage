@@ -1,11 +1,14 @@
 package ink.glowing.text;
 
-import ink.glowing.text.modifier.ModifiersResolver;
+import ink.glowing.text.modifier.CharacterStyle;
+import ink.glowing.text.modifier.StyleResolver;
 import ink.glowing.text.modifier.impl.ClickModifier;
 import ink.glowing.text.modifier.impl.ColorModifier;
 import ink.glowing.text.modifier.impl.DecorModifier;
 import ink.glowing.text.modifier.impl.FontModifier;
 import ink.glowing.text.modifier.impl.HoverModifier;
+import ink.glowing.text.rich.GlobalContext;
+import ink.glowing.text.rich.RichText;
 import ink.glowing.text.utils.InstanceProvider;
 import ink.glowing.text.utils.Utils;
 import net.kyori.adventure.text.Component;
@@ -15,28 +18,32 @@ import net.kyori.adventure.text.ScoreComponent;
 import net.kyori.adventure.text.SelectorComponent;
 import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.TranslatableComponent;
-import net.kyori.adventure.text.format.Style;
 import net.kyori.adventure.text.serializer.ComponentSerializer;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import static ink.glowing.text.rich.RichText.richText;
 import static ink.glowing.text.utils.Utils.SECTION;
 
 public class InkyMessage implements ComponentSerializer<Component, Component, String> {
     private static final Pattern ESCAPE_PATTERN = Pattern.compile("[&\\]()]");
     private static final Pattern UNESCAPE_PATTERN = Pattern.compile("\\\\([&\\]()\\\\])");
 
-    private static final ModifiersResolver DEFAULT_MODIFIERS = new ModifiersResolver(
-            ColorModifier.colorModifier(),
-            HoverModifier.hoverModifier(),
-            ClickModifier.clickModifier(),
-            FontModifier.fontModifier(),
-            DecorModifier.decorModifier()
-    );
+    private static final StyleResolver DEFAULT_RESOLVER = StyleResolver.styleResolver()
+            .modifiers(Arrays.asList(
+                    ColorModifier.colorModifier(),
+                    HoverModifier.hoverModifier(),
+                    ClickModifier.clickModifier(),
+                    FontModifier.fontModifier(),
+                    DecorModifier.decorModifier()))
+            .addCharacterStyles(CharacterStyle.legacyColors())
+            .addCharacterStyles(CharacterStyle.legacyDecorations())
+            .build();
 
     public static @NotNull InkyMessage inkyMessage() {
         return Provider.PROVIDER.instance();
@@ -44,21 +51,19 @@ public class InkyMessage implements ComponentSerializer<Component, Component, St
 
     private InkyMessage() {}
 
-    public @NotNull Component deserialize(@NotNull String input, @NotNull ModifiersResolver modsResolver) {
+    public @NotNull Component deserialize(@NotNull String input, @NotNull StyleResolver styleResolver) {
         if (input.indexOf('&') == -1) return Component.text(input);
         List<RichText> richTexts = new ArrayList<>();
         String oldText = input;
-        String newText = parseRich(input, richTexts, modsResolver);
+        String newText = parseRich(input, richTexts, styleResolver);
         while (!newText.equals(oldText)) {
             oldText = newText;
-            newText = parseRich(oldText, richTexts, modsResolver);
+            newText = parseRich(oldText, richTexts, styleResolver);
         }
-        var builder = Component.text();
-        new RichText(newText, List.of()).render(builder, Style.empty(), richTexts);
-        return builder.build().compact();
+        return richText(newText, List.of()).render(new GlobalContext(richTexts, styleResolver)).compact();
     }
 
-    private static @NotNull String parseRich(@NotNull String input, @NotNull List<RichText> richTexts, @NotNull ModifiersResolver modsResolver) {
+    private static @NotNull String parseRich(@NotNull String input, @NotNull List<RichText> richTexts, @NotNull StyleResolver modsResolver) {
         int closeIndex = input.indexOf("](");
         while (Utils.isEscaped(input, closeIndex)) closeIndex = input.indexOf("](", closeIndex + 1);
         if (closeIndex == -1) return input;
@@ -82,7 +87,7 @@ public class InkyMessage implements ComponentSerializer<Component, Component, St
             }
         }
         ++modEnd;
-        richTexts.add(new RichText(
+        richTexts.add(richText(
                 input.substring(startIndex + 2, closeIndex),
                 modsResolver.parseModifiers(input.substring(modStart, modEnd))
         ));
@@ -105,7 +110,7 @@ public class InkyMessage implements ComponentSerializer<Component, Component, St
 
     @Override
     public @NotNull Component deserialize(@NotNull String text) {
-        return deserialize(text, DEFAULT_MODIFIERS);
+        return deserialize(text, DEFAULT_RESOLVER);
     }
 
     @Override

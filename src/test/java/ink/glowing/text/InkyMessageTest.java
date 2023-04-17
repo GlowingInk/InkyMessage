@@ -49,18 +49,26 @@ public class InkyMessageTest {
                         "\\&aRegular \\&[text](color:gold), and some&b \\aqua",
                         text("&aRegular &[text](color:gold), and some")
                                 .append(text(" \\aqua").color(AQUA))
+                },
+                {
+                        "&x&1&2&3&4&5&6Hex colors are cool",
+                        inkyMessage().deserialize("&#123456Hex colors are cool")
                 }
         };
     }
 
     @Test(dataProvider = "deserializeData")
     public void deserializeTest(String text, Component expected) {
-        System.out.println("Inky: " + miniMessage().serialize(inkyMessage().deserialize(text)));
-        System.out.println("Mini: " + miniMessage().serialize(expected));
-        assertEquals(
-                inkyMessage().deserialize(text),
-                expected
-        );
+        try {
+            assertEquals(
+                    inkyMessage().deserialize(text),
+                    expected
+            );
+        } catch (Throwable throwable) {
+            System.out.println("Inky: " + miniMessage().serialize(inkyMessage().deserialize(text)));
+            System.out.println("Mini: " + miniMessage().serialize(expected));
+            throw throwable;
+        }
     }
 
     @DataProvider
