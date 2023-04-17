@@ -1,7 +1,7 @@
 package ink.glowing.text.rich.impl;
 
-import ink.glowing.text.rich.GlobalContext;
 import ink.glowing.text.rich.RichText;
+import ink.glowing.text.rich.TextContext;
 import ink.glowing.text.utils.InstanceProvider;
 import net.kyori.adventure.text.Component;
 import org.jetbrains.annotations.NotNull;
@@ -14,7 +14,7 @@ public class EmptyRichText implements RichText {
     }
 
     @Override
-    public @NotNull Component render(@NotNull GlobalContext context, @NotNull Consumer<Component> output) {
+    public @NotNull Component render(@NotNull TextContext context, @NotNull Consumer<Resulting> output) {
         return Component.empty();
     }
 

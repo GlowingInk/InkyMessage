@@ -1,6 +1,7 @@
 package ink.glowing.text.modifier.impl;
 
 import ink.glowing.text.modifier.Modifier;
+import ink.glowing.text.rich.RichText;
 import ink.glowing.text.utils.InstanceProvider;
 import ink.glowing.text.utils.Utils;
 import net.kyori.adventure.text.Component;
@@ -8,7 +9,6 @@ import net.kyori.adventure.text.event.ClickEvent;
 import org.jetbrains.annotations.NotNull;
 
 public class ClickModifier implements Modifier {
-
     public static @NotNull ClickModifier clickModifier() {
         return Provider.PROVIDER.instance();
     }
@@ -16,7 +16,8 @@ public class ClickModifier implements Modifier {
     private ClickModifier() {}
 
     @Override
-    public @NotNull Component modify(@NotNull Component text, @NotNull String param, @NotNull Component value) {
+    public @NotNull Component modify(@NotNull RichText.Resulting resulting, @NotNull String param, @NotNull Component value) {
+        Component text = resulting.asComponent();
         String plainValue = Utils.plain(value);
         return switch (param) {
             case "url", "link" -> text.clickEvent(ClickEvent.openUrl(plainValue));

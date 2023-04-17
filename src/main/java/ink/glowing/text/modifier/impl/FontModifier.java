@@ -1,6 +1,7 @@
 package ink.glowing.text.modifier.impl;
 
 import ink.glowing.text.modifier.Modifier;
+import ink.glowing.text.rich.RichText;
 import ink.glowing.text.utils.InstanceProvider;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.Component;
@@ -14,7 +15,8 @@ public class FontModifier implements Modifier {
     private FontModifier() {}
 
     @Override
-    public @NotNull Component modify(@NotNull Component text, @NotNull String param, @NotNull Component value) {
+    public @NotNull Component modify(@NotNull RichText.Resulting resulting, @NotNull String param, @NotNull Component value) {
+        Component text = resulting.asComponent();
         //noinspection PatternValidation
         return Key.parseable(param) ? text.font(Key.key(param)) : text;
     }

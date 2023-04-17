@@ -1,6 +1,7 @@
 package ink.glowing.text.modifier.impl;
 
 import ink.glowing.text.modifier.Modifier;
+import ink.glowing.text.rich.RichText;
 import ink.glowing.text.utils.InstanceProvider;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.event.HoverEvent;
@@ -14,7 +15,8 @@ public class HoverModifier implements Modifier {
     private HoverModifier() {}
 
     @Override
-    public @NotNull Component modify(@NotNull Component text, @NotNull String param, @NotNull Component value) {
+    public @NotNull Component modify(@NotNull RichText.Resulting resulting, @NotNull String param, @NotNull Component value) {
+        Component text = resulting.asComponent();
         return text.hoverEvent(HoverEvent.showText(value)); // TODO Others
     }
 

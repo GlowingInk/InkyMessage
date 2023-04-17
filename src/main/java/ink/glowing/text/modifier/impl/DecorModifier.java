@@ -1,6 +1,7 @@
 package ink.glowing.text.modifier.impl;
 
 import ink.glowing.text.modifier.Modifier;
+import ink.glowing.text.rich.RichText;
 import ink.glowing.text.utils.InstanceProvider;
 import ink.glowing.text.utils.Utils;
 import net.kyori.adventure.text.Component;
@@ -20,7 +21,8 @@ public class DecorModifier implements Modifier {
     }
 
     @Override
-    public @NotNull Component modify(@NotNull Component text, @NotNull String param, @NotNull Component value) {
+    public @NotNull Component modify(@NotNull RichText.Resulting resulting, @NotNull String param, @NotNull Component value) {
+        Component text = resulting.asComponent();
         TextDecoration decoration = decorations.get(param);
         if (decoration == null) return text;
         return switch (Utils.plain(value)) {

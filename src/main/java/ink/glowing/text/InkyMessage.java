@@ -7,8 +7,8 @@ import ink.glowing.text.modifier.impl.ColorModifier;
 import ink.glowing.text.modifier.impl.DecorModifier;
 import ink.glowing.text.modifier.impl.FontModifier;
 import ink.glowing.text.modifier.impl.HoverModifier;
-import ink.glowing.text.rich.GlobalContext;
 import ink.glowing.text.rich.RichText;
+import ink.glowing.text.rich.TextContext;
 import ink.glowing.text.utils.InstanceProvider;
 import ink.glowing.text.utils.Utils;
 import net.kyori.adventure.text.Component;
@@ -60,7 +60,7 @@ public class InkyMessage implements ComponentSerializer<Component, Component, St
             oldText = newText;
             newText = parseRich(oldText, richTexts, styleResolver);
         }
-        return richText(newText, List.of()).render(new GlobalContext(richTexts, styleResolver)).compact();
+        return richText(newText, List.of()).render(new TextContext(richTexts, styleResolver)).compact();
     }
 
     private static @NotNull String parseRich(@NotNull String input, @NotNull List<RichText> richTexts, @NotNull StyleResolver modsResolver) {

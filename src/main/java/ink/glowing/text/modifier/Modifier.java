@@ -1,17 +1,17 @@
 package ink.glowing.text.modifier;
 
-import ink.glowing.text.rich.GlobalContext;
 import ink.glowing.text.rich.RichText;
+import ink.glowing.text.rich.TextContext;
 import ink.glowing.text.rich.impl.EmptyRichText;
 import net.kyori.adventure.key.Namespaced;
 import net.kyori.adventure.text.Component;
 import org.jetbrains.annotations.NotNull;
 
 public interface Modifier extends Namespaced {
-    @NotNull Component modify(@NotNull Component text, @NotNull String param, @NotNull Component value);
+    @NotNull Component modify(@NotNull RichText.Resulting text, @NotNull String param, @NotNull Component value);
 
     record Prepared(@NotNull Modifier modifier, @NotNull String param, @NotNull RichText value) {
-        public @NotNull Component modify(@NotNull Component text, @NotNull GlobalContext context) {
+        public @NotNull Component modify(@NotNull RichText.Resulting text, @NotNull TextContext context) {
             if (value instanceof EmptyRichText) {
                 return modifier.modify(text, param, Component.empty());
             } else {
