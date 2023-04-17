@@ -2,8 +2,8 @@ package ink.glowing.text.rich.impl;
 
 import ink.glowing.text.InkyMessage;
 import ink.glowing.text.modifier.Modifier;
+import ink.glowing.text.rich.BuildContext;
 import ink.glowing.text.rich.RichText;
-import ink.glowing.text.rich.TextContext;
 import ink.glowing.text.utils.Utils;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
@@ -18,40 +18,40 @@ import static ink.glowing.text.utils.Utils.SECTION_CHAR;
 import static net.kyori.adventure.text.Component.text;
 
 public class ComplexRichText implements RichText {
-    private final String text;
+    private final String textStr;
     private final boolean hasSlashes;
     private final List<Modifier.Prepared> modifiers;
 
-    public ComplexRichText(@NotNull String text, @NotNull List<Modifier.Prepared> modifiers) {
-        this.text = text;
-        this.hasSlashes = text.indexOf('\\') != -1;
+    public ComplexRichText(@NotNull String textStr, @NotNull List<Modifier.Prepared> modifiers) {
+        this.textStr = textStr;
+        this.hasSlashes = textStr.indexOf('\\') != -1;
         this.modifiers = modifiers;
     }
 
     @Override
-    public @NotNull Component render(@NotNull TextContext context, @NotNull Consumer<Resulting> output) {
+    public @NotNull Component render(@NotNull BuildContext context, @NotNull Consumer<Resulting> output) {
         TextComponent.Builder builder = Component.text();
         int[] totalLength = {0};
         int lastAppend = 0;
-        for (int index = 0; index < text.length(); index++) {
-            char ch = text.charAt(index);
+        for (int index = 0; index < textStr.length(); index++) {
+            char ch = textStr.charAt(index);
             if (ch == SECTION_CHAR) {
-                builder.append(text(text.substring(lastAppend, index)).style(context.lastStyle()));
+                if (lastAppend != index) appendPart(builder, lastAppend, index, context.lastStyle(), totalLength);
                 int start = index + 1;
                 //noinspection StatementWithEmptyBody
-                while (text.charAt(++index) != SECTION_CHAR);
-                context.innerText(Integer.parseInt(text.substring(start, index))).render(context, rt -> {
+                while (textStr.charAt(++index) != SECTION_CHAR);
+                context.innerText(Integer.parseInt(textStr.substring(start, index))).render(context, rt -> {
                     builder.append(rt);
                     totalLength[0] += rt.length();
                 });
                 lastAppend = index + 1;
             } else if (ch == '&') {
-                if (index + 1 == text.length() || Utils.isEscaped(text, index)) continue;
-                char styleCh = text.charAt(index + 1);
+                if (index + 1 == textStr.length() || Utils.isEscaped(textStr, index)) continue;
+                char styleCh = textStr.charAt(index + 1);
                 switch (styleCh) {
                     case '#' -> {
-                        if (index + 8 >= text.length()) continue;
-                        String colorStr = text.substring(index + 1, index + 8);
+                        if (index + 8 >= textStr.length()) continue;
+                        String colorStr = textStr.substring(index + 1, index + 8);
                         TextColor color = Utils.getHexColor(colorStr, false);
                         if (color == null) continue;
                         if (lastAppend != index) appendPart(builder, lastAppend, index, context.lastStyle(), totalLength);
@@ -59,8 +59,8 @@ public class ComplexRichText implements RichText {
                         lastAppend = (index += 7) + 1;
                     }
                     case 'x' -> {
-                        if (index + 14 >= text.length()) continue;
-                        String colorStr = text.substring(index, index + 14);
+                        if (index + 14 >= textStr.length()) continue;
+                        String colorStr = textStr.substring(index, index + 14);
                         TextColor color = Utils.getHexColor(colorStr, true);
                         if (color == null) continue;
                         if (lastAppend != index) appendPart(builder, lastAppend, index, context.lastStyle(), totalLength);
@@ -77,8 +77,8 @@ public class ComplexRichText implements RichText {
                 }
             }
         }
-        if (lastAppend < text.length()) {
-            appendPart(builder, lastAppend, text.length(), context.lastStyle(), totalLength);
+        if (lastAppend < textStr.length()) {
+            appendPart(builder, lastAppend, textStr.length(), context.lastStyle(), totalLength);
         }
         Resulting resulting = new Resulting(builder.build(), totalLength[0]);
         for (var rawMod : modifiers) {
@@ -89,7 +89,7 @@ public class ComplexRichText implements RichText {
     }
 
     private void appendPart(@NotNull TextComponent.Builder builder, int start, int end, @NotNull Style style, int[] totalLength) {
-        String substring = text.substring(start, end);
+        String substring = textStr.substring(start, end);
         if (hasSlashes) substring = InkyMessage.unescapeAll(substring);
         totalLength[0] += substring.length();
         builder.append(text(substring).style(style));

@@ -11,11 +11,11 @@ import java.util.List;
 import java.util.function.Consumer;
 
 public interface RichText {
-    default @NotNull Component render(@NotNull TextContext context) {
+    default @NotNull Component render(@NotNull BuildContext context) {
         return render(context, (rt) -> {});
     }
 
-    @NotNull Component render(@NotNull TextContext context, @NotNull Consumer<Resulting> output);
+    @NotNull Component render(@NotNull BuildContext context, @NotNull Consumer<Resulting> output);
 
     static @NotNull RichText empty() {
         return EmptyRichText.emptyRichText();

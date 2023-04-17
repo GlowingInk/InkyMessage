@@ -5,6 +5,7 @@ import ink.glowing.text.rich.RichText;
 import ink.glowing.text.utils.InstanceProvider;
 import ink.glowing.text.utils.Utils;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextColor;
 import org.jetbrains.annotations.NotNull;
@@ -19,6 +20,7 @@ import static net.kyori.adventure.text.format.TextColor.color;
 
 public class ColorModifier implements Modifier {
     private static final Pattern PER_SYMBOL = Pattern.compile(".");
+    private static final Map<String, NamedTextColor> NAMED_COLORS = NamedTextColor.NAMES.keyToValue();
     private static final List<TextColor> RAINBOW = List.of(
             color(0xff, 0x00, 0x00),
             color(0xff, 0x7f, 0x00),
@@ -33,11 +35,7 @@ public class ColorModifier implements Modifier {
         return Provider.PROVIDER.instance();
     }
 
-    private final Map<String, NamedTextColor> namedColors;
-
-    private ColorModifier() {
-        namedColors = NamedTextColor.NAMES.keyToValue();
-    }
+    private ColorModifier() {}
 
     @Override
     public @NotNull Component modify(@NotNull RichText.Resulting resulting, @NotNull String param, @NotNull Component value) {
@@ -54,28 +52,29 @@ public class ColorModifier implements Modifier {
         return text;
     }
 
-    private @NotNull Component propagateGradient(@NotNull Component text, int length, @NotNull List<TextColor> colors) {
+    private static @NotNull Component propagateGradient(@NotNull Component text, int length, @NotNull List<TextColor> colors) {
         if (colors.isEmpty()) return text;
         if (colors.size() == 1) return text.colorIfAbsent(colors.get(0));
         if (length <= 1) return text.colorIfAbsent(averageColor(colors));
         float[] step = {0};
         int indexedLength = length - 1;
-        if (colors.size() == 2) {
-            TextColor colorStart = colors.get(0);
-            TextColor colorEnd = colors.get(1);
-            return text.replaceText((replaceConfig) -> replaceConfig
-                    .match(PER_SYMBOL)
-                    .replacement((match, builder) ->
-                            builder.colorIfAbsent(TextColor.lerp(step[0]++ / indexedLength, colorStart, colorEnd))
-                    ));
-        } else {
-            return text.replaceText((replaceConfig) -> {
-                replaceConfig.match(PER_SYMBOL).replacement((match, builder) -> {
+        TextComponent.Builder builder = Component.text();
+        for (Component child : text.children()) {
+            if (child.color() != null) {
+                //noinspection ResultOfMethodCallIgnored
+                child.replaceText((replaceConfig) -> replaceConfig.match(PER_SYMBOL).replacement((match, bld) -> {
+                    step[0]++;
+                    return bld;
+                }));
+                builder.append(child);
+            } else {
+                builder.append(child.replaceText((replaceConfig) -> replaceConfig.match(PER_SYMBOL).replacement((match, bld) -> {
                     TextColor color = lerpColors(step[0]++ / indexedLength, colors);
-                    return builder.colorIfAbsent(color);
-                });
-            });
+                    return bld.colorIfAbsent(color);
+                })));
+            }
         }
+        return builder.build();
     }
 
     private static @NotNull TextColor averageColor(@NotNull List<TextColor> colors) {
@@ -94,6 +93,7 @@ public class ColorModifier implements Modifier {
     }
 
     private static @NotNull TextColor lerpColors(float step, @NotNull List<TextColor> colors) {
+        if (colors.size() == 2) return TextColor.lerp(step, colors.get(0), colors.get(1));
         int indexedSize = colors.size() - 1;
         int firstColor = (int) (step * indexedSize);
         if (firstColor == indexedSize) {
@@ -105,7 +105,7 @@ public class ColorModifier implements Modifier {
         return TextColor.lerp(localStep, colors.get(firstColor), colors.get(firstColor + 1));
     }
 
-    private @NotNull List<TextColor> getColors(@NotNull String param) {
+    private static @NotNull List<TextColor> getColors(@NotNull String param) {
         if (param.equals("rainbow")) return RAINBOW;
         String[] split = param.split("-");
         List<TextColor> colors = new ArrayList<>(split.length);
@@ -116,11 +116,11 @@ public class ColorModifier implements Modifier {
         return colors;
     }
 
-    private @Nullable TextColor getColor(@NotNull String param) {
+    private static @Nullable TextColor getColor(@NotNull String param) {
         if (param.startsWith("#") && Utils.isHexColor(param)) {
             return TextColor.fromCSSHexString(param);
         } else {
-            return namedColors.get(param);
+            return NAMED_COLORS.get(param);
         }
     }
 
