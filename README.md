@@ -16,12 +16,13 @@ to follow: `&[My special text](key:value parameters)`. Those are its possible co
 | `color` (gradient) | `gradient`                                                                                                                           | `rainbow`, `color1-color2-colorN` (look `colors`) | Colorize empty text with gradient         | `&aLook!&r &[Fancy!](color:gradient rainbow)(decor:bold)`           |
 
 
-## TODO
-- Placeholders (for keys, translations, selectors)
+## TODO (until full release)
+- Placeholders (for keybinds, translations, selectors)
 - Actually implement serializer (as all we have now is deserializer lol)
-- Closing colors
+- Custom regex formatted replacers
+- Closing colors(?)
 
-## Get it ![Version](https://img.shields.io/github/v/release/GlowingInk/InkyMessage?logo=github)
+## Get it ![Version](https://img.shields.io/github/v/tag/GlowingInk/InkyMessage?sort=semver)
 ### Maven
 Add to repositories
 ```xml
@@ -35,7 +36,7 @@ Add to dependencies
 <dependency>
     <groupId>ink.glowing</groupId>
     <artifactId>inkymessage</artifactId>
-    <version>0.4.0</version> <!-- Check the version above -->
+    <version>0.6.3</version> <!-- Check the version above -->
 </dependency>
 ```
 ### Gradle
@@ -47,6 +48,6 @@ repositories {
 }
 
 dependencies {
-    implementation("ink.glowing:inkymessage:0.4.0") // Check the version above
+    implementation("ink.glowing:inkymessage:0.6.3") // Check the version above
 }
 ```

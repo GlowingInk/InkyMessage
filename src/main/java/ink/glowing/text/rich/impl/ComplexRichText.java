@@ -46,7 +46,7 @@ public class ComplexRichText implements RichText {
                 });
                 lastAppend = index + 1;
             } else if (ch == '&') {
-                if (index + 1 == textStr.length() || Utils.isEscaped(textStr, index)) continue;
+                if (index + 1 == textStr.length() || InkyMessage.isEscaped(textStr, index)) continue;
                 char styleCh = textStr.charAt(index + 1);
                 switch (styleCh) {
                     case '#' -> {
@@ -90,7 +90,7 @@ public class ComplexRichText implements RichText {
 
     private void appendPart(@NotNull TextComponent.Builder builder, int start, int end, @NotNull Style style, int[] totalLength) {
         String substring = textStr.substring(start, end);
-        if (hasSlashes) substring = InkyMessage.unescapeAll(substring);
+        if (hasSlashes) substring = InkyMessage.unescape(substring);
         totalLength[0] += substring.length();
         builder.append(text(substring).style(style));
     }

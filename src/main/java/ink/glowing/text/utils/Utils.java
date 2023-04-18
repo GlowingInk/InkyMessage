@@ -6,6 +6,7 @@ import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.Style;
 import net.kyori.adventure.text.format.TextColor;
 import net.kyori.adventure.text.format.TextDecoration;
+import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -16,6 +17,7 @@ import java.util.function.Predicate;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+@ApiStatus.Internal
 public class Utils {
     public static final char SECTION_CHAR = '§';
     public static final String SECTION = String.valueOf(SECTION_CHAR);
@@ -71,12 +73,6 @@ public class Utils {
             return TextColor.fromCSSHexString(text);
         }
         return null;
-    }
-
-    public static boolean isEscaped(@NotNull String input, int index) {
-        boolean escaped = false;
-        while (--index > -1 && input.charAt(index) == '\\') escaped = !escaped;
-        return escaped;
     }
 
     @SafeVarargs

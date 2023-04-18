@@ -84,11 +84,11 @@ public class InkyMessageTest {
     @Test(dataProvider = "escapeData")
     public void escapeTest(String unescaped, String escaped) {
         assertEquals(
-                InkyMessage.escapeAll(unescaped),
+                InkyMessage.escape(unescaped),
                 escaped
         );
         assertEquals(
-                InkyMessage.unescapeAll(escaped),
+                InkyMessage.unescape(escaped),
                 unescaped
         );
     }

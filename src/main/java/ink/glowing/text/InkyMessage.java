@@ -10,7 +10,6 @@ import ink.glowing.text.modifier.impl.HoverModifier;
 import ink.glowing.text.rich.BuildContext;
 import ink.glowing.text.rich.RichText;
 import ink.glowing.text.utils.InstanceProvider;
-import ink.glowing.text.utils.Utils;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.ComponentIteratorType;
 import net.kyori.adventure.text.KeybindComponent;
@@ -52,25 +51,26 @@ public class InkyMessage implements ComponentSerializer<Component, Component, St
     private InkyMessage() {}
 
     public @NotNull Component deserialize(@NotNull String input, @NotNull StyleResolver styleResolver) {
-        if (input.indexOf('&') == -1) return Component.text(input);
+        int minimalIndex = input.indexOf('&');
+        if (minimalIndex == -1) return Component.text(input);
         List<RichText> richTexts = new ArrayList<>();
         BuildContext context = new BuildContext(richTexts, styleResolver);
         String oldText = input;
-        String newText = parseRich(input, 0, context);
+        String newText = parseRich(input, minimalIndex, context);
         while (!newText.equals(oldText)) {
             oldText = newText;
-            newText = parseRich(oldText, 0, context);
+            newText = parseRich(oldText, minimalIndex, context);
         }
         return richText(newText, List.of()).render(new BuildContext(richTexts, styleResolver)).compact();
     }
 
     private static @NotNull String parseRich(@NotNull String input, int fromIndex, @NotNull BuildContext context) {
         int closeIndex = input.indexOf("](", fromIndex);
-        while (Utils.isEscaped(input, closeIndex)) closeIndex = input.indexOf("](", closeIndex + 1);
+        while (isEscaped(input, closeIndex)) closeIndex = input.indexOf("](", closeIndex + 1);
         if (closeIndex == -1) return input;
         int startIndex = -1;
         for (int index = closeIndex - 1; index > 0; index--) {
-            if (input.charAt(index) == '[' && input.charAt(index - 1) == '&' && !Utils.isEscaped(input, index - 1)) {
+            if (input.charAt(index) == '[' && input.charAt(index - 1) == '&' && !isEscaped(input, index - 1)) {
                 startIndex = index - 1;
                 break;
             }
@@ -80,28 +80,37 @@ public class InkyMessage implements ComponentSerializer<Component, Component, St
         int modEnd = -1;
         for (int index = modStart + 1; index < input.length(); index++) {
             char ch = input.charAt(index);
-            if (ch == ')' && !Utils.isEscaped(input, index)) {
+            if (ch == ')' && !isEscaped(input, index)) {
                 if (index + 1 == input.length() || input.charAt(index + 1) != '(') {
                     modEnd = index;
                     break;
                 }
-            } else if (ch == '&' && index + 1 < input.length() && input.charAt(index + 1) == '[' && !Utils.isEscaped(input, index)) {
+            } else if (ch == '&' && index + 1 < input.length() && input.charAt(index + 1) == '[' && !isEscaped(input, index)) {
                 input = parseRich(input, index, context);
             }
         }
         ++modEnd;
-        context.innerTextAdd(richText(
-                input.substring(startIndex + 2, closeIndex),
-                context.styleResolver().parseModifiers(input.substring(modStart, modEnd))
-        ));
-        return input.substring(0, startIndex) + SECTION + (context.innerTextsCount() - 1) + SECTION + input.substring(modEnd);
+        return input.substring(0, startIndex) +
+                SECTION +
+                context.innerTextAdd(richText(
+                        input.substring(startIndex + 2, closeIndex),
+                        context.styleResolver().parseModifiers(input.substring(modStart, modEnd))
+                )) +
+                SECTION +
+                input.substring(modEnd);
     }
 
-    public static @NotNull String escapeAll(@NotNull String text) {
-        return ESCAPE_PATTERN.matcher(text).replaceAll(result -> "\\\\" + result.group());
+    public static @NotNull String escape(@NotNull String text) {
+        StringBuilder builder = new StringBuilder(text.length());
+        Matcher matcher = ESCAPE_PATTERN.matcher(text);
+        while (matcher.find()) {
+            matcher.appendReplacement(builder, "");
+            builder.append('\\').append(matcher.group());
+        }
+        return matcher.appendTail(builder).toString();
     }
 
-    public static @NotNull String unescapeAll(@NotNull String text) {
+    public static @NotNull String unescape(@NotNull String text) {
         StringBuilder builder = new StringBuilder(text.length());
         Matcher matcher = UNESCAPE_PATTERN.matcher(text);
         while (matcher.find()) {
@@ -109,6 +118,12 @@ public class InkyMessage implements ComponentSerializer<Component, Component, St
             builder.append(matcher.group(1));
         }
         return matcher.appendTail(builder).toString();
+    }
+
+    public static boolean isEscaped(@NotNull String input, int index) {
+        boolean escaped = false;
+        while (--index > -1 && input.charAt(index) == '\\') escaped = !escaped;
+        return escaped;
     }
 
     @Override
