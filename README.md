@@ -32,6 +32,13 @@ Add to repositories
     <url>http://repo.glowing.ink/releases</url>
 </repository>
 ```
+Or for latest snapshots
+```xml
+<repository>
+    <id>glowing-ink</id>
+    <url>http://repo.glowing.ink/snapshots</url>
+</repository>
+```
 Add to dependencies
 ```xml
 <dependency>
