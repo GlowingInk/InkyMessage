@@ -1,14 +1,14 @@
 package ink.glowing.text;
 
-import ink.glowing.text.modifier.CharacterStyle;
-import ink.glowing.text.modifier.StyleResolver;
-import ink.glowing.text.modifier.impl.ClickModifier;
-import ink.glowing.text.modifier.impl.ColorModifier;
-import ink.glowing.text.modifier.impl.DecorModifier;
-import ink.glowing.text.modifier.impl.FontModifier;
-import ink.glowing.text.modifier.impl.HoverModifier;
 import ink.glowing.text.rich.BuildContext;
-import ink.glowing.text.rich.RichText;
+import ink.glowing.text.rich.RichNode;
+import ink.glowing.text.style.StyleModifier;
+import ink.glowing.text.style.StyleResolver;
+import ink.glowing.text.style.tag.ClickTag;
+import ink.glowing.text.style.tag.ColorTag;
+import ink.glowing.text.style.tag.DecorTag;
+import ink.glowing.text.style.tag.FontTag;
+import ink.glowing.text.style.tag.HoverTag;
 import ink.glowing.text.utils.InstanceProvider;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.ComponentIteratorType;
@@ -26,7 +26,7 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import static ink.glowing.text.rich.RichText.richText;
+import static ink.glowing.text.rich.RichNode.richText;
 import static ink.glowing.text.utils.Utils.SECTION;
 
 public class InkyMessage implements ComponentSerializer<Component, Component, String> {
@@ -34,14 +34,14 @@ public class InkyMessage implements ComponentSerializer<Component, Component, St
     private static final Pattern UNESCAPE_PATTERN = Pattern.compile("\\\\([&\\]()\\\\])");
 
     private static final StyleResolver DEFAULT_RESOLVER = StyleResolver.styleResolver()
-            .modifiers(Arrays.asList(
-                    ColorModifier.colorModifier(),
-                    HoverModifier.hoverModifier(),
-                    ClickModifier.clickModifier(),
-                    FontModifier.fontModifier(),
-                    DecorModifier.decorModifier()))
-            .addCharacterStyles(CharacterStyle.legacyColors())
-            .addCharacterStyles(CharacterStyle.legacyDecorations())
+            .tags(Arrays.asList(
+                    ColorTag.colorTag(),
+                    HoverTag.hoverTag(),
+                    ClickTag.clickTag(),
+                    FontTag.fontTag(),
+                    DecorTag.decorTag()))
+            .addSymbolic(StyleModifier.Symbolic.legacyColors())
+            .addSymbolic(StyleModifier.Symbolic.legacyDecorations())
             .build();
 
     public static @NotNull InkyMessage inkyMessage() {
@@ -53,15 +53,15 @@ public class InkyMessage implements ComponentSerializer<Component, Component, St
     public @NotNull Component deserialize(@NotNull String input, @NotNull StyleResolver styleResolver) {
         int minimalIndex = input.indexOf('&');
         if (minimalIndex == -1) return Component.text(input);
-        List<RichText> richTexts = new ArrayList<>();
-        BuildContext context = new BuildContext(richTexts, styleResolver);
+        List<RichNode> richNodes = new ArrayList<>();
+        BuildContext context = new BuildContext(richNodes, styleResolver);
         String oldText = input;
         String newText = parseRich(input, minimalIndex, context);
         while (!newText.equals(oldText)) {
             oldText = newText;
             newText = parseRich(oldText, minimalIndex, context);
         }
-        return richText(newText, List.of()).render(new BuildContext(richTexts, styleResolver)).compact();
+        return richText(newText, List.of()).render(new BuildContext(richNodes, styleResolver)).compact();
     }
 
     private static @NotNull String parseRich(@NotNull String input, int fromIndex, @NotNull BuildContext context) {
@@ -94,7 +94,7 @@ public class InkyMessage implements ComponentSerializer<Component, Component, St
                 SECTION +
                 context.innerTextAdd(richText(
                         input.substring(startIndex + 2, closeIndex),
-                        context.styleResolver().parseModifiers(input.substring(modStart, modEnd))
+                        context.styleResolver().parseTags(input.substring(modStart, modEnd))
                 )) +
                 SECTION +
                 input.substring(modEnd);

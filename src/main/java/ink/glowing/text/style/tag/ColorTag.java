@@ -1,7 +1,5 @@
-package ink.glowing.text.modifier.impl;
+package ink.glowing.text.style.tag;
 
-import ink.glowing.text.modifier.Modifier;
-import ink.glowing.text.rich.RichText;
 import ink.glowing.text.utils.InstanceProvider;
 import ink.glowing.text.utils.Utils;
 import net.kyori.adventure.text.Component;
@@ -18,7 +16,7 @@ import java.util.regex.Pattern;
 
 import static net.kyori.adventure.text.format.TextColor.color;
 
-public class ColorModifier implements Modifier {
+public class ColorTag implements StyleTag {
     private static final Pattern PER_SYMBOL = Pattern.compile(".");
     private static final Map<String, NamedTextColor> NAMED_COLORS = NamedTextColor.NAMES.keyToValue();
     private static final List<TextColor> RAINBOW = List.of(
@@ -31,15 +29,14 @@ public class ColorModifier implements Modifier {
             color(0x94, 0x00, 0xd3)
     );
 
-    public static @NotNull ColorModifier colorModifier() {
+    public static @NotNull ColorTag colorTag() {
         return Provider.PROVIDER.instance();
     }
 
-    private ColorModifier() {}
+    private ColorTag() {}
 
     @Override
-    public @NotNull Component modify(@NotNull RichText.Resulting resulting, @NotNull String param, @NotNull Component value) {
-        Component text = resulting.asComponent();
+    public @NotNull Component modify(@NotNull Component text, @NotNull String param, @NotNull Component value) {
         TextColor color = getColor(param);
         if (color != null) {
             return text.color(color);
@@ -47,26 +44,28 @@ public class ColorModifier implements Modifier {
             return text.color(null);
         }
         if (param.equals("gradient")) {
-            return propagateGradient(text, resulting.length(), getColors(Utils.plain(value)));
+            return propagateGradient(text, getColors(Utils.plain(value)));
         }
         return text;
     }
 
-    private static @NotNull Component propagateGradient(@NotNull Component text, int length, @NotNull List<TextColor> colors) {
+    // TODO That's really not how this should be done
+    private static @NotNull Component propagateGradient(@NotNull Component text, @NotNull List<TextColor> colors) {
         if (colors.isEmpty()) return text;
         if (colors.size() == 1) return text.colorIfAbsent(colors.get(0));
+        int length = length(text);
         if (length <= 1) return text.colorIfAbsent(averageColor(colors));
         float[] step = {0};
         int indexedLength = length - 1;
         TextComponent.Builder builder = Component.text();
         for (Component child : text.children()) {
             if (child.color() != null) {
+                builder.append(child);
                 //noinspection ResultOfMethodCallIgnored
                 child.replaceText((replaceConfig) -> replaceConfig.match(PER_SYMBOL).replacement((match, bld) -> {
                     step[0]++;
                     return bld;
                 }));
-                builder.append(child);
             } else {
                 builder.append(child.replaceText((replaceConfig) -> replaceConfig.match(PER_SYMBOL).replacement((match, bld) -> {
                     TextColor color = lerpColors(step[0]++ / indexedLength, colors);
@@ -75,6 +74,16 @@ public class ColorModifier implements Modifier {
             }
         }
         return builder.build();
+    }
+
+    private static int length(@NotNull Component text) {
+        int[] length = {0};
+        //noinspection ResultOfMethodCallIgnored
+        text.replaceText((replaceConfig) -> replaceConfig.match(PER_SYMBOL).replacement(((match, builder) -> {
+            length[0]++;
+            return builder;
+        })));
+        return length[0];
     }
 
     private static @NotNull TextColor averageColor(@NotNull List<TextColor> colors) {
@@ -125,16 +134,16 @@ public class ColorModifier implements Modifier {
     }
 
     @Override
-    public @NotNull String namespace() {
+    public @NotNull String prefix() {
         return "color";
     }
 
-    private enum Provider implements InstanceProvider<ColorModifier> {
+    private enum Provider implements InstanceProvider<ColorTag> {
         PROVIDER;
-        private final ColorModifier instance = new ColorModifier();
+        private final ColorTag instance = new ColorTag();
 
         @Override
-        public @NotNull ColorModifier instance() {
+        public @NotNull ColorTag instance() {
             return instance;
         }
     }

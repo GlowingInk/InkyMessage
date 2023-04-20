@@ -1,23 +1,20 @@
-package ink.glowing.text.modifier.impl;
+package ink.glowing.text.style.tag;
 
-import ink.glowing.text.modifier.Modifier;
-import ink.glowing.text.rich.RichText;
 import ink.glowing.text.utils.InstanceProvider;
 import ink.glowing.text.utils.Utils;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.event.ClickEvent;
 import org.jetbrains.annotations.NotNull;
 
-public class ClickModifier implements Modifier {
-    public static @NotNull ClickModifier clickModifier() {
+public class ClickTag implements StyleTag {
+    public static @NotNull ClickTag clickTag() {
         return Provider.PROVIDER.instance();
     }
 
-    private ClickModifier() {}
+    private ClickTag() {}
 
     @Override
-    public @NotNull Component modify(@NotNull RichText.Resulting resulting, @NotNull String param, @NotNull Component value) {
-        Component text = resulting.asComponent();
+    public @NotNull Component modify(@NotNull Component text, @NotNull String param, @NotNull Component value) {
         String plainValue = Utils.plain(value);
         return switch (param) {
             case "url", "link" -> text.clickEvent(ClickEvent.openUrl(plainValue));
@@ -32,16 +29,16 @@ public class ClickModifier implements Modifier {
     }
 
     @Override
-    public @NotNull String namespace() {
+    public @NotNull String prefix() {
         return "click";
     }
 
-    private enum Provider implements InstanceProvider<ClickModifier> {
+    private enum Provider implements InstanceProvider<ClickTag> {
         PROVIDER;
-        private final ClickModifier instance = new ClickModifier();
+        private final ClickTag instance = new ClickTag();
 
         @Override
-        public @NotNull ClickModifier instance() {
+        public @NotNull ClickTag instance() {
             return instance;
         }
     }

@@ -5,7 +5,7 @@ and MiniMessage projects. An attempt to make legacy-friendly serializer with mod
 Inky Message supports legacy format codes, e.g. `&l`, `&6`, `&a`, etc.
 Besides that, we also have a special format for the modern features like interactable chat components. It's very simple
 to follow: `&[My special text](key:value parameters)`. Those are its possible combinations:
-## Simple formatting
+## Tag formatting
 | Key                | Values                                                                                                                               | Parameters                                        | Effect                                    | Example                                                             |
 |--------------------|--------------------------------------------------------------------------------------------------------------------------------------|---------------------------------------------------|-------------------------------------------|---------------------------------------------------------------------|
 | `hover`            | Only `text` ATM                                                                                                                      | Hover text                                        | Add hover effect to chat component        | `Stop. &[hover time](hover:text What a meme)!`                      |
@@ -20,6 +20,7 @@ to follow: `&[My special text](key:value parameters)`. Those are its possible co
 - Placeholders (for keybinds, translations, selectors)
 - Actually implement serializer (as all we have now is deserializer lol)
 - Custom regex formatted replacers
+- Simplified MineDown-like style tags (e.g. `&[GitHub Link](https://github.com/)`)
 - Closing colors(?)
 
 ## Get it ![Version](https://img.shields.io/github/v/tag/GlowingInk/InkyMessage?sort=semver)
