@@ -1,20 +1,23 @@
 package ink.glowing.text.style.tag;
 
+import ink.glowing.text.rich.BuildContext;
 import ink.glowing.text.utils.InstanceProvider;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.event.HoverEvent;
 import org.jetbrains.annotations.NotNull;
 
+import static ink.glowing.text.rich.RichNode.node;
+
 public class HoverTag implements StyleTag {
     public static @NotNull HoverTag hoverTag() {
-        return Provider.PROVIDER.instance();
+        return Provider.PROVIDER.get();
     }
 
     private HoverTag() {}
 
     @Override
-    public @NotNull Component modify(@NotNull Component text, @NotNull String param, @NotNull Component value) {
-        return text.hoverEvent(HoverEvent.showText(value)); // TODO Others
+    public @NotNull Component modify(@NotNull BuildContext context, @NotNull Component text, @NotNull String param, @NotNull String value) {
+        return text.hoverEvent(HoverEvent.showText(node(value).render(context.colorlessCopy()))); // TODO Others
     }
 
     @Override
@@ -27,7 +30,7 @@ public class HoverTag implements StyleTag {
         private final HoverTag instance = new HoverTag();
 
         @Override
-        public @NotNull HoverTag instance() {
+        public @NotNull HoverTag get() {
             return instance;
         }
     }

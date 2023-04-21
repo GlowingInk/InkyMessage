@@ -29,51 +29,52 @@ public class ComplexRichNode implements RichNode {
 
     @Override
     public @NotNull Component render(@NotNull BuildContext context) {
+        String input = context.inkyResolver().applyReplacers(this.textStr, context.innerTexts());
         TextComponent.Builder builder = Component.text();
         int lastAppend = 0;
-        for (int index = 0; index < textStr.length(); index++) {
-            char ch = textStr.charAt(index);
+        for (int index = 0; index < input.length(); index++) {
+            char ch = input.charAt(index);
             if (ch == SECTION_CHAR) {
-                if (lastAppend != index) appendPart(builder, lastAppend, index, context.lastStyle());
+                if (lastAppend != index) appendPart(input, builder, lastAppend, index, context.lastStyle());
                 int start = index + 1;
                 //noinspection StatementWithEmptyBody
-                while (textStr.charAt(++index) != SECTION_CHAR);
-                builder.append(context.innerText(Integer.parseInt(textStr.substring(start, index))).render(context));
+                while (input.charAt(++index) != SECTION_CHAR);
+                builder.append(context.innerText(Integer.parseInt(input.substring(start, index))).render(context));
                 lastAppend = index + 1;
             } else if (ch == '&') {
-                if (index + 1 == textStr.length() || InkyMessage.isEscaped(textStr, index)) continue;
-                char styleCh = textStr.charAt(index + 1);
+                if (index + 1 == input.length() || InkyMessage.isEscaped(input, index)) continue;
+                char styleCh = input.charAt(index + 1);
                 switch (styleCh) {
                     case '#' -> {
-                        if (index + 8 >= textStr.length()) continue;
-                        String colorStr = textStr.substring(index + 1, index + 8);
+                        if (index + 8 >= input.length()) continue;
+                        String colorStr = input.substring(index + 1, index + 8);
                         TextColor color = Utils.getHexColor(colorStr, false);
                         if (color == null) continue;
-                        if (lastAppend != index) appendPart(builder, lastAppend, index, context.lastStyle());
+                        if (lastAppend != index) appendPart(input, builder, lastAppend, index, context.lastStyle());
                         context.lastStyle(context.lastStyle().color(color));
                         lastAppend = (index += 7) + 1;
                     }
                     case 'x' -> {
-                        if (index + 14 >= textStr.length()) continue;
-                        String colorStr = textStr.substring(index, index + 14);
+                        if (index + 14 >= input.length()) continue;
+                        String colorStr = input.substring(index, index + 14);
                         TextColor color = Utils.getHexColor(colorStr, true);
                         if (color == null) continue;
-                        if (lastAppend != index) appendPart(builder, lastAppend, index, context.lastStyle());
+                        if (lastAppend != index) appendPart(input, builder, lastAppend, index, context.lastStyle());
                         context.lastStyle(context.lastStyle().color(color));
                         lastAppend = (index += 13) + 1;
                     }
                     default -> {
-                        Style newStyle = context.styleResolver().mergeSymbolicStyle(styleCh, context.lastStyle());
+                        Style newStyle = context.inkyResolver().mergeSymbolicStyle(styleCh, context.lastStyle());
                         if (newStyle == null) continue;
-                        if (lastAppend != index) appendPart(builder, lastAppend, index, context.lastStyle());
+                        if (lastAppend != index) appendPart(input, builder, lastAppend, index, context.lastStyle());
                         context.lastStyle(newStyle);
                         lastAppend = (++index) + 1;
                     }
                 }
             }
         }
-        if (lastAppend < textStr.length()) {
-            appendPart(builder, lastAppend, textStr.length(), context.lastStyle());
+        if (lastAppend < input.length()) {
+            appendPart(input, builder, lastAppend, input.length(), context.lastStyle());
         }
         Component result = builder.build();
         for (var preparedTag : tags) {
@@ -82,8 +83,8 @@ public class ComplexRichNode implements RichNode {
         return result;
     }
 
-    private void appendPart(@NotNull TextComponent.Builder builder, int start, int end, @NotNull Style style) {
-        String substring = textStr.substring(start, end);
+    private void appendPart(@NotNull String input, @NotNull TextComponent.Builder builder, int start, int end, @NotNull Style style) {
+        String substring = input.substring(start, end);
         if (hasSlashes) substring = InkyMessage.unescape(substring);
         builder.append(text(substring).style(style));
     }

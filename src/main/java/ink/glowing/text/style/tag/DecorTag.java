@@ -1,7 +1,7 @@
 package ink.glowing.text.style.tag;
 
+import ink.glowing.text.rich.BuildContext;
 import ink.glowing.text.utils.InstanceProvider;
-import ink.glowing.text.utils.Utils;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextDecoration;
 import org.jetbrains.annotations.NotNull;
@@ -10,7 +10,7 @@ import java.util.Map;
 
 public class DecorTag implements StyleTag {
     public static @NotNull DecorTag decorTag() {
-        return Provider.PROVIDER.instance();
+        return Provider.PROVIDER.get();
     }
     private final Map<String, TextDecoration> decorations;
 
@@ -19,10 +19,10 @@ public class DecorTag implements StyleTag {
     }
 
     @Override
-    public @NotNull Component modify(@NotNull Component text, @NotNull String param, @NotNull Component value) {
+    public @NotNull Component modify(@NotNull BuildContext context, @NotNull Component text, @NotNull String param, @NotNull String value) {
         TextDecoration decoration = decorations.get(param);
         if (decoration == null) return text;
-        return switch (Utils.plain(value)) {
+        return switch (value) {
             case "unset", "not_set" -> text.decoration(decoration, TextDecoration.State.NOT_SET);
             case "false", "removed" -> text.decoration(decoration, TextDecoration.State.FALSE);
             default -> text.decoration(decoration, TextDecoration.State.TRUE);
@@ -39,7 +39,7 @@ public class DecorTag implements StyleTag {
         private final DecorTag instance = new DecorTag();
 
         @Override
-        public @NotNull DecorTag instance() {
+        public @NotNull DecorTag get() {
             return instance;
         }
     }

@@ -1,5 +1,6 @@
 package ink.glowing.text.style.tag;
 
+import ink.glowing.text.rich.BuildContext;
 import ink.glowing.text.utils.InstanceProvider;
 import ink.glowing.text.utils.Utils;
 import net.kyori.adventure.text.Component;
@@ -18,6 +19,7 @@ import static net.kyori.adventure.text.format.TextColor.color;
 
 public class ColorTag implements StyleTag {
     private static final Pattern PER_SYMBOL = Pattern.compile(".");
+    private static final Pattern EVERYTHING = Pattern.compile(".*");
     private static final Map<String, NamedTextColor> NAMED_COLORS = NamedTextColor.NAMES.keyToValue();
     private static final List<TextColor> RAINBOW = List.of(
             color(0xff, 0x00, 0x00),
@@ -30,13 +32,13 @@ public class ColorTag implements StyleTag {
     );
 
     public static @NotNull ColorTag colorTag() {
-        return Provider.PROVIDER.instance();
+        return Provider.PROVIDER.get();
     }
 
     private ColorTag() {}
 
     @Override
-    public @NotNull Component modify(@NotNull Component text, @NotNull String param, @NotNull Component value) {
+    public @NotNull Component modify(@NotNull BuildContext context, @NotNull Component text, @NotNull String param, @NotNull String value) {
         TextColor color = getColor(param);
         if (color != null) {
             return text.color(color);
@@ -44,7 +46,7 @@ public class ColorTag implements StyleTag {
             return text.color(null);
         }
         if (param.equals("gradient")) {
-            return propagateGradient(text, getColors(Utils.plain(value)));
+            return propagateGradient(text, getColors(value));
         }
         return text;
     }
@@ -62,15 +64,14 @@ public class ColorTag implements StyleTag {
             if (child.color() != null) {
                 builder.append(child);
                 //noinspection ResultOfMethodCallIgnored
-                child.replaceText((replaceConfig) -> replaceConfig.match(PER_SYMBOL).replacement((match, bld) -> {
-                    step[0]++;
+                child.replaceText((replaceConfig) -> replaceConfig.match(EVERYTHING).replacement((match, bld) -> {
+                    step[0] += match.group().length();
                     return bld;
                 }));
             } else {
-                builder.append(child.replaceText((replaceConfig) -> replaceConfig.match(PER_SYMBOL).replacement((match, bld) -> {
-                    TextColor color = lerpColors(step[0]++ / indexedLength, colors);
-                    return bld.colorIfAbsent(color);
-                })));
+                builder.append(child.replaceText((replaceConfig) -> replaceConfig
+                        .match(PER_SYMBOL)
+                        .replacement((match, bld) -> bld.color(lerpColors(step[0]++ / indexedLength, colors)))));
             }
         }
         return builder.build();
@@ -79,8 +80,8 @@ public class ColorTag implements StyleTag {
     private static int length(@NotNull Component text) {
         int[] length = {0};
         //noinspection ResultOfMethodCallIgnored
-        text.replaceText((replaceConfig) -> replaceConfig.match(PER_SYMBOL).replacement(((match, builder) -> {
-            length[0]++;
+        text.replaceText((replaceConfig) -> replaceConfig.match(EVERYTHING).replacement(((match, builder) -> {
+            length[0] += match.group().length();
             return builder;
         })));
         return length[0];
@@ -143,7 +144,7 @@ public class ColorTag implements StyleTag {
         private final ColorTag instance = new ColorTag();
 
         @Override
-        public @NotNull ColorTag instance() {
+        public @NotNull ColorTag get() {
             return instance;
         }
     }

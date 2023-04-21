@@ -14,6 +14,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.function.Predicate;
+import java.util.function.Supplier;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -80,5 +81,22 @@ public class Utils {
         List<T> list = new ArrayList<>();
         for (var col : collections) list.addAll(col);
         return list;
+    }
+
+    public static @NotNull String replaceEach(@NotNull String input, @NotNull String search, @NotNull Supplier<String> replaceSupplier) {
+        int lastAppend = 0;
+        StringBuilder builder = new StringBuilder();
+        for (int index = input.indexOf(search, lastAppend); index != -1; index = input.indexOf(search, lastAppend)) {
+            builder.append(search, lastAppend, index).append(replaceSupplier.get());
+            lastAppend = index + search.length();
+        }
+        if (lastAppend != input.length()) {
+            builder.append(input, lastAppend, input.length());
+        }
+        return builder.toString();
+    }
+
+    public static @NotNull String nodeId(int i) {
+        return SECTION + i + SECTION;
     }
 }

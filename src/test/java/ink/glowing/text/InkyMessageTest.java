@@ -15,6 +15,7 @@ import static net.kyori.adventure.text.minimessage.MiniMessage.miniMessage;
 import static org.testng.Assert.assertEquals;
 
 public class InkyMessageTest {
+    @SuppressWarnings("FieldCanBeLocal")
     private final boolean debug = false;
 
     @DataProvider
@@ -57,6 +58,12 @@ public class InkyMessageTest {
                 {
                         "&x&1&2&3&4&5&6Hex colors are cool",
                         inkyMessage().deserialize("&#123456Hex colors are cool")
+                },
+                {
+                        "Hello https://github.com/GlowingInk.",
+                        text("Hello ")
+                                .append(text("https://github.com/GlowingInk").clickEvent(ClickEvent.openUrl("https://github.com/GlowingInk")))
+                                .append(text("."))
                 }
         };
     }
@@ -122,7 +129,7 @@ public class InkyMessageTest {
     @Test(
             dataProvider = "performanceData",
             description = "The \"test\" exists purely for getting the idea of deserializer performance vs MiniMessage",
-            enabled = debug
+            enabled = false
     )
     public void performanceTest(String mini, String inky, String down) {
         int warmup = 100000;

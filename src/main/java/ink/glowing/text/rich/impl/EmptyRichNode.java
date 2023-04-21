@@ -7,8 +7,8 @@ import net.kyori.adventure.text.Component;
 import org.jetbrains.annotations.NotNull;
 
 public class EmptyRichNode implements RichNode {
-    public static @NotNull EmptyRichNode emptyRichText() {
-        return Provider.PROVIDER.instance();
+    public static @NotNull EmptyRichNode emptyRichNode() {
+        return Provider.PROVIDER.get();
     }
 
     @Override
@@ -21,7 +21,7 @@ public class EmptyRichNode implements RichNode {
         private final EmptyRichNode instance = new EmptyRichNode();
 
         @Override
-        public @NotNull EmptyRichNode instance() {
+        public @NotNull EmptyRichNode get() {
             return instance;
         }
     }

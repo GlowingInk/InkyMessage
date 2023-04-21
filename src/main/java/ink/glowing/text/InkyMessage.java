@@ -2,13 +2,6 @@ package ink.glowing.text;
 
 import ink.glowing.text.rich.BuildContext;
 import ink.glowing.text.rich.RichNode;
-import ink.glowing.text.style.StyleModifier;
-import ink.glowing.text.style.StyleResolver;
-import ink.glowing.text.style.tag.ClickTag;
-import ink.glowing.text.style.tag.ColorTag;
-import ink.glowing.text.style.tag.DecorTag;
-import ink.glowing.text.style.tag.FontTag;
-import ink.glowing.text.style.tag.HoverTag;
 import ink.glowing.text.utils.InstanceProvider;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.ComponentIteratorType;
@@ -21,47 +14,36 @@ import net.kyori.adventure.text.serializer.ComponentSerializer;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import static ink.glowing.text.rich.RichNode.richText;
-import static ink.glowing.text.utils.Utils.SECTION;
+import static ink.glowing.text.InkyMessageResolver.standardInkyResolver;
+import static ink.glowing.text.rich.RichNode.node;
+import static ink.glowing.text.utils.Utils.nodeId;
 
 public class InkyMessage implements ComponentSerializer<Component, Component, String> {
     private static final Pattern ESCAPE_PATTERN = Pattern.compile("[&\\]()]");
     private static final Pattern UNESCAPE_PATTERN = Pattern.compile("\\\\([&\\]()\\\\])");
 
-    private static final StyleResolver DEFAULT_RESOLVER = StyleResolver.styleResolver()
-            .tags(Arrays.asList(
-                    ColorTag.colorTag(),
-                    HoverTag.hoverTag(),
-                    ClickTag.clickTag(),
-                    FontTag.fontTag(),
-                    DecorTag.decorTag()))
-            .addSymbolic(StyleModifier.Symbolic.legacyColors())
-            .addSymbolic(StyleModifier.Symbolic.legacyDecorations())
-            .build();
-
     public static @NotNull InkyMessage inkyMessage() {
-        return Provider.PROVIDER.instance();
+        return Provider.PROVIDER.get();
     }
 
     private InkyMessage() {}
 
-    public @NotNull Component deserialize(@NotNull String input, @NotNull StyleResolver styleResolver) {
-        int minimalIndex = input.indexOf('&');
-        if (minimalIndex == -1) return Component.text(input);
+    public @NotNull Component deserialize(@NotNull String input, @NotNull InkyMessageResolver inkyResolver) {
         List<RichNode> richNodes = new ArrayList<>();
-        BuildContext context = new BuildContext(richNodes, styleResolver);
+        BuildContext context = new BuildContext(richNodes, inkyResolver);
+
         String oldText = input;
-        String newText = parseRich(input, minimalIndex, context);
+        int minimalIndex = input.indexOf("](");
+        String newText = parseRich(oldText, minimalIndex, context);
         while (!newText.equals(oldText)) {
             oldText = newText;
             newText = parseRich(oldText, minimalIndex, context);
         }
-        return richText(newText, List.of()).render(new BuildContext(richNodes, styleResolver)).compact();
+        return node(newText).render(new BuildContext(richNodes, inkyResolver)).compact();
     }
 
     private static @NotNull String parseRich(@NotNull String input, int fromIndex, @NotNull BuildContext context) {
@@ -89,14 +71,14 @@ public class InkyMessage implements ComponentSerializer<Component, Component, St
                 input = parseRich(input, index, context);
             }
         }
-        ++modEnd;
+        if (++modEnd == 0) {
+            modEnd = input.length();
+        }
         return input.substring(0, startIndex) +
-                SECTION +
-                context.innerTextAdd(richText(
+                nodeId(context.innerTextAdd(node(
                         input.substring(startIndex + 2, closeIndex),
-                        context.styleResolver().parseTags(input.substring(modStart, modEnd))
-                )) +
-                SECTION +
+                        context.inkyResolver().parseTags(input.substring(modStart, modEnd))
+                ))) +
                 input.substring(modEnd);
     }
 
@@ -128,7 +110,7 @@ public class InkyMessage implements ComponentSerializer<Component, Component, St
 
     @Override
     public @NotNull Component deserialize(@NotNull String text) {
-        return deserialize(text, DEFAULT_RESOLVER);
+        return deserialize(text, standardInkyResolver());
     }
 
     @Override
@@ -161,7 +143,7 @@ public class InkyMessage implements ComponentSerializer<Component, Component, St
         private final InkyMessage inkyMessage = new InkyMessage();
 
         @Override
-        public @NotNull InkyMessage instance() {
+        public @NotNull InkyMessage get() {
             return inkyMessage;
         }
     }
