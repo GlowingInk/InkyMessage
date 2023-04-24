@@ -4,7 +4,7 @@ import ink.glowing.text.InkyMessage;
 import ink.glowing.text.rich.BuildContext;
 import ink.glowing.text.rich.RichNode;
 import ink.glowing.text.style.tag.StyleTag;
-import ink.glowing.text.utils.Utils;
+import ink.glowing.text.utils.AdventureUtils;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.format.Style;
@@ -14,7 +14,6 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 
-import static ink.glowing.text.utils.Utils.SECTION_CHAR;
 import static net.kyori.adventure.text.Component.text;
 
 @ApiStatus.Internal
@@ -50,7 +49,7 @@ public class ComplexRichNode implements RichNode {
                     case '#' -> {
                         if (index + 8 >= input.length()) continue;
                         String colorStr = input.substring(index + 1, index + 8);
-                        TextColor color = Utils.getHexColor(colorStr, false);
+                        TextColor color = AdventureUtils.parseHexColor(colorStr, false);
                         if (color == null) continue;
                         if (lastAppend != index) appendPart(input, builder, lastAppend, index, context.lastStyle());
                         context.lastStyle(context.lastStyle().color(color));
@@ -59,7 +58,7 @@ public class ComplexRichNode implements RichNode {
                     case 'x' -> {
                         if (index + 14 >= input.length()) continue;
                         String colorStr = input.substring(index, index + 14);
-                        TextColor color = Utils.getHexColor(colorStr, true);
+                        TextColor color = AdventureUtils.parseHexColor(colorStr, true);
                         if (color == null) continue;
                         if (lastAppend != index) appendPart(input, builder, lastAppend, index, context.lastStyle());
                         context.lastStyle(context.lastStyle().color(color));

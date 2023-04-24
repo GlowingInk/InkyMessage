@@ -10,7 +10,7 @@ import ink.glowing.text.style.tag.DecorTag;
 import ink.glowing.text.style.tag.FontTag;
 import ink.glowing.text.style.tag.HoverTag;
 import ink.glowing.text.style.tag.StyleTag;
-import ink.glowing.text.utils.Utils;
+import ink.glowing.text.utils.GeneralUtils;
 import net.kyori.adventure.builder.AbstractBuilder;
 import net.kyori.adventure.text.format.Style;
 import org.jetbrains.annotations.Contract;
@@ -29,19 +29,18 @@ import java.util.function.UnaryOperator;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import static ink.glowing.text.rich.RichNode.nodeId;
 import static ink.glowing.text.style.SymbolicStyle.symbolicStyle;
-import static ink.glowing.text.utils.Utils.nodeId;
 
 public final class InkyMessageResolver {
     private static final Pattern TAGS_PATTERN = Pattern.compile("\\(([^:\\s]+)(?::(\\S+))?(?: ([^)]*))?\\)");
 
     private static final InkyMessageResolver STANDARD_RESOLVER = inkyResolver()
-            .tags(Arrays.asList(
-                    ColorTag.colorTag(),
+            .addTags(ColorTag.colorTag(),
                     HoverTag.hoverTag(),
                     ClickTag.clickTag(),
                     FontTag.fontTag(),
-                    DecorTag.decorTag()))
+                    DecorTag.decorTag())
             .addSymbolics(SymbolicStyle.legacyColors())
             .addSymbolics(SymbolicStyle.legacyDecorations())
             .addReplacer(UrlReplacer.urlReplacer())
@@ -74,7 +73,7 @@ public final class InkyMessageResolver {
             @NotNull List<Replacer.Literal> literalReplacers,
             @NotNull List<Replacer.Regex> regexReplacers
     ) {
-        this.tags = toMap(tags, StyleTag::prefix, UnaryOperator.identity());
+        this.tags = toMap(tags, StyleTag::namespace, UnaryOperator.identity());
         this.symbolics = toMap(symbolics, SymbolicStyle::symbol, SymbolicStyle::mergerFunction);
         this.literalReplacers = literalReplacers;
         this.regexReplacers = regexReplacers;
@@ -126,6 +125,7 @@ public final class InkyMessageResolver {
      * @param nodes list of nodes to fill
      * @return string with replacers applied
      */
+    @SuppressWarnings("UnstableApiUsage")
     @Contract(mutates = "param2")
     public @NotNull String applyReplacers(@NotNull String input, @NotNull List<RichNode> nodes) {
         String result = input;
@@ -138,7 +138,7 @@ public final class InkyMessageResolver {
             });
         }
         for (var replacer : literalReplacers) {
-            result = Utils.replaceEach(result, replacer.search(), () -> {
+            result = GeneralUtils.replaceEach(result, replacer.search(), () -> {
                 RichNode node = replacer.replace(replacer.search());
                 if (node == null) return replacer.search();
                 nodes.add(node);

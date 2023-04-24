@@ -3,7 +3,6 @@ package ink.glowing.text.style.tag;
 import ink.glowing.text.rich.BuildContext;
 import ink.glowing.text.utils.FloatFunction;
 import ink.glowing.text.utils.InstanceProvider;
-import ink.glowing.text.utils.Utils;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -23,13 +22,13 @@ public class ColorTag implements StyleTag {
     private static final Pattern EVERYTHING = Pattern.compile(".*");
     private static final Map<String, NamedTextColor> NAMED_COLORS = NamedTextColor.NAMES.keyToValue();
     private static final List<TextColor> RAINBOW = List.of(
-            color(0xff0000),
-            color(0xff7f00),
-            color(0xffff00),
-            color(0x00ff00),
-            color(0x00ffff),
-            color(0x0000ff),
-            color(0x7f00ff)
+            color(0xFF0000),
+            color(0xFF7F00),
+            color(0xFFFF00),
+            color(0x00FF00),
+            color(0x00FFFF),
+            color(0x0000FF),
+            color(0x7F00FF)
     );
 
     public static @NotNull ColorTag colorTag() {
@@ -138,7 +137,7 @@ public class ColorTag implements StyleTag {
     }
 
     private static @Nullable TextColor getColor(@NotNull String param) {
-        if (param.startsWith("#") && Utils.isHexColor(param)) {
+        if (param.startsWith("#")) {
             return TextColor.fromCSSHexString(param);
         } else {
             return NAMED_COLORS.get(param);
@@ -146,7 +145,7 @@ public class ColorTag implements StyleTag {
     }
 
     @Override
-    public @NotNull String prefix() {
+    public @NotNull String namespace() {
         return "color";
     }
 

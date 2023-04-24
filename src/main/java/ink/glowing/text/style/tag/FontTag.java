@@ -20,7 +20,7 @@ public class FontTag implements StyleTag {
     }
 
     @Override
-    public @NotNull String prefix() {
+    public @NotNull String namespace() {
         return "font";
     }
 

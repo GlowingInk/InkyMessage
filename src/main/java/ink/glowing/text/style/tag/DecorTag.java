@@ -26,7 +26,7 @@ public class DecorTag implements StyleTag {
     }
 
     @Override
-    public @NotNull String prefix() {
+    public @NotNull String namespace() {
         return "decor";
     }
 

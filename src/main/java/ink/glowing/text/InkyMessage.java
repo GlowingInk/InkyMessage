@@ -20,7 +20,7 @@ import java.util.regex.Pattern;
 
 import static ink.glowing.text.InkyMessageResolver.standardInkyResolver;
 import static ink.glowing.text.rich.RichNode.node;
-import static ink.glowing.text.utils.Utils.nodeId;
+import static ink.glowing.text.rich.RichNode.nodeId;
 
 public class InkyMessage implements ComponentSerializer<Component, Component, String> {
     private static final Pattern ESCAPE_PATTERN = Pattern.compile("[&\\]()]");

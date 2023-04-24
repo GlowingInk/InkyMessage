@@ -29,7 +29,7 @@ public class ClickTag implements StyleTag {
     }
 
     @Override
-    public @NotNull String prefix() {
+    public @NotNull String namespace() {
         return "click";
     }
 

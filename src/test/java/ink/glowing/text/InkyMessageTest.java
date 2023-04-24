@@ -111,6 +111,25 @@ public class InkyMessageTest {
     }
 
     @DataProvider
+    public Object[][] isEscapedData() {
+        return new Object[][] {
+                {"\\&[test]", 1, true},
+                {"\\\\&[test]", 1, true},
+                {"\\\\&[test]", 2, false},
+                {"\\\\\\&[test]", 3, true},
+                {"\\\\\\&[test]", 4, false}
+        };
+    }
+
+    @Test(dataProvider = "isEscapedData")
+    public void isEscapedTest(String input, int index, boolean expected) {
+        assertEquals(
+                InkyMessage.isEscaped(input, index),
+                expected
+        );
+    }
+
+    @DataProvider
     public Object[][] performanceData() {
         return new Object[][] {
                 {

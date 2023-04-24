@@ -3,7 +3,6 @@ package ink.glowing.text.rich.impl;
 import ink.glowing.text.rich.BuildContext;
 import ink.glowing.text.rich.RichNode;
 import ink.glowing.text.style.tag.StyleTag;
-import ink.glowing.text.utils.Utils;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
 import org.jetbrains.annotations.ApiStatus;
@@ -17,7 +16,7 @@ import static net.kyori.adventure.text.Component.text;
 
 @ApiStatus.Internal
 public class LiteralRichNode implements RichNode {
-    private static final Pattern CHILD_NODE_PATTERN = Pattern.compile(Utils.SECTION + "(\\d+)" + Utils.SECTION);
+    private static final Pattern CHILD_NODE_PATTERN = Pattern.compile(RichNode.SECTION + "(\\d+)" + RichNode.SECTION);
     private final String text;
     private final List<StyleTag.Prepared> tags;
 
