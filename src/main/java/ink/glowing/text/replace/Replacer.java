@@ -2,6 +2,7 @@ package ink.glowing.text.replace;
 
 import ink.glowing.text.rich.RichNode;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 import java.util.regex.Pattern;
@@ -11,21 +12,21 @@ import static ink.glowing.text.rich.RichNode.node;
 public sealed interface Replacer<T> permits Replacer.Literal, Replacer.Regex {
     @NotNull T search();
 
-    @NotNull RichNode replace(@NotNull String found);
+    @Nullable RichNode replace(@NotNull String found);
 
-    static @NotNull Replacer.Literal literal(@NotNull String search, @NotNull String replacement) {
+    static @NotNull Replacer.Literal literalReplacer(@NotNull String search, @NotNull String replacement) {
         return new Literal.Simple(search, replacement);
     }
 
-    static @NotNull Replacer.Literal literal(@NotNull String search, @NotNull RichNode replacement) {
+    static @NotNull Replacer.Literal literalReplacer(@NotNull String search, @NotNull RichNode replacement) {
         return new Literal.Simple(search, replacement);
     }
 
-    static @NotNull Replacer.Regex regex(@NotNull Pattern search, @NotNull String replacement) {
+    static @NotNull Replacer.Regex regexReplacer(@NotNull Pattern search, @NotNull String replacement) {
         return new Regex.Simple(search, replacement);
     }
 
-    static @NotNull Replacer.Regex regex(@NotNull Pattern search, @NotNull RichNode replacement) {
+    static @NotNull Replacer.Regex regexReplacer(@NotNull Pattern search, @NotNull RichNode replacement) {
         return new Regex.Simple(search, replacement);
     }
 

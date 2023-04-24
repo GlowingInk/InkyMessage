@@ -32,7 +32,7 @@ import java.util.regex.Pattern;
 import static ink.glowing.text.style.SymbolicStyle.symbolicStyle;
 import static ink.glowing.text.utils.Utils.nodeId;
 
-public class InkyMessageResolver {
+public final class InkyMessageResolver {
     private static final Pattern TAGS_PATTERN = Pattern.compile("\\(([^:\\s]+)(?::(\\S+))?(?: ([^)]*))?\\)");
 
     private static final InkyMessageResolver STANDARD_RESOLVER = inkyResolver()
@@ -52,10 +52,18 @@ public class InkyMessageResolver {
     private final List<Replacer.Literal> literalReplacers;
     private final List<Replacer.Regex> regexReplacers;
 
+    /**
+     * Contains recommended options for a resolver.
+     * @return a standard resolver
+     */
     public static @NotNull InkyMessageResolver standardInkyResolver() {
         return STANDARD_RESOLVER;
     }
 
+    /**
+     * Creates a new resolver builder
+     * @return a builder
+     */
     public static @NotNull InkyMessageResolver.Builder inkyResolver() {
         return new Builder();
     }
@@ -80,15 +88,16 @@ public class InkyMessageResolver {
         return map.isEmpty() ? Collections.emptyMap() : Collections.unmodifiableMap(map);
     }
 
-    public @Nullable StyleTag getTag(@NotNull String name) {
-        return tags.get(name);
-    }
-
+    /**
+     * Parses tags from a string using the format {@code (tag1)(tag2:value)(tag3:value parameters)(tagN...)}
+     * @param tagsStr line of tags
+     * @return list of parsed tags
+     */
     public @NotNull List<StyleTag.Prepared> parseTags(@NotNull String tagsStr) {
         List<StyleTag.Prepared> preparedTags = new ArrayList<>();
         Matcher matcher = TAGS_PATTERN.matcher(tagsStr);
         while (matcher.find()) {
-            StyleTag tag = getTag(matcher.group(1));
+            StyleTag tag = tags.get(matcher.group(1));
             if (tag == null) continue;
             preparedTags.add(new StyleTag.Prepared(
                     tag,
@@ -99,23 +108,40 @@ public class InkyMessageResolver {
         return preparedTags;
     }
 
-    public @Nullable Style mergeSymbolicStyle(char ch, @NotNull Style currentStyle) {
-        UnaryOperator<Style> symbolic = symbolics.get(ch);
+    /**
+     * Applies symbolic style to the provided one
+     * @param symbol style symbol
+     * @param currentStyle style to be applied onto
+     * @return provided style with applied symbolic style, of null if no styles were found with such symbol
+     */
+    public @Nullable Style applySymbolicStyle(char symbol, @NotNull Style currentStyle) {
+        UnaryOperator<Style> symbolic = symbolics.get(symbol);
         if (symbolic == null) return null;
         return symbolic.apply(currentStyle);
     }
 
+    /**
+     * Applies replacer onto a string and adds replacements into provided list of nodes
+     * @param input string to replace in
+     * @param nodes list of nodes to fill
+     * @return string with replacers applied
+     */
+    @Contract(mutates = "param2")
     public @NotNull String applyReplacers(@NotNull String input, @NotNull List<RichNode> nodes) {
         String result = input;
         for (var replacer : regexReplacers) {
             result = replacer.search().matcher(result).replaceAll(match -> {
-                nodes.add(replacer.replace(match.group()));
+                RichNode node = replacer.replace(match.group());
+                if (node == null) return Matcher.quoteReplacement(match.group());
+                nodes.add(node);
                 return nodeId(nodes.size() - 1);
             });
         }
         for (var replacer : literalReplacers) {
             result = Utils.replaceEach(result, replacer.search(), () -> {
-                nodes.add(replacer.replace(replacer.search()));
+                RichNode node = replacer.replace(replacer.search());
+                if (node == null) return replacer.search();
+                nodes.add(node);
                 return nodeId(nodes.size() - 1);
             });
         }
@@ -241,6 +267,7 @@ public class InkyMessageResolver {
         }
 
         @Override
+        @Contract("-> new")
         public @NotNull InkyMessageResolver build() {
             return new InkyMessageResolver(tags, symbolics, literalReplacers, regexReplacers);
         }

@@ -9,6 +9,7 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.format.Style;
 import net.kyori.adventure.text.format.TextColor;
+import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
@@ -16,6 +17,7 @@ import java.util.List;
 import static ink.glowing.text.utils.Utils.SECTION_CHAR;
 import static net.kyori.adventure.text.Component.text;
 
+@ApiStatus.Internal
 public class ComplexRichNode implements RichNode {
     private final String textStr;
     private final boolean hasSlashes;
@@ -64,7 +66,7 @@ public class ComplexRichNode implements RichNode {
                         lastAppend = (index += 13) + 1;
                     }
                     default -> {
-                        Style newStyle = context.inkyResolver().mergeSymbolicStyle(styleCh, context.lastStyle());
+                        Style newStyle = context.inkyResolver().applySymbolicStyle(styleCh, context.lastStyle());
                         if (newStyle == null) continue;
                         if (lastAppend != index) appendPart(input, builder, lastAppend, index, context.lastStyle());
                         context.lastStyle(newStyle);

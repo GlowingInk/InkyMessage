@@ -13,7 +13,7 @@ public interface RichNode {
     @NotNull Component render(@NotNull BuildContext context);
 
     static @NotNull RichNode emptyNode() {
-        return EmptyRichNode.emptyRichNode();
+        return EmptyRichNode.instance();
     }
 
     static @NotNull RichNode literalNode(@NotNull String text) {

@@ -4,10 +4,12 @@ import ink.glowing.text.rich.BuildContext;
 import ink.glowing.text.rich.RichNode;
 import ink.glowing.text.utils.InstanceProvider;
 import net.kyori.adventure.text.Component;
+import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 
+@ApiStatus.Internal
 public class EmptyRichNode implements RichNode {
-    public static @NotNull EmptyRichNode emptyRichNode() {
+    public static @NotNull EmptyRichNode instance() {
         return Provider.PROVIDER.get();
     }
 

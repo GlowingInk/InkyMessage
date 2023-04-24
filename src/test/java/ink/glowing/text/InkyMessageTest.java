@@ -122,13 +122,18 @@ public class InkyMessageTest {
                         "<gradient:white:black:yellow:red>qwertyuiopasdfghjkl;'zxcvbnm,.</gradient>",
                         "&[qwertyuiopasdfghjkl;'zxcvbnm,.](color:gradient white-black-yellow-red)",
                         "&white-black-yellow-red&qwertyuiopasdfghjkl;'zxcvbnm,."
+                },
+                {
+                        "<rainbow>qwertyuiopasdfghjkl;'zxcvbnm,.</rainbow>",
+                        "&[qwertyuiopasdfghjkl;'zxcvbnm,.](color:gradient rainbow)",
+                        "&rainbow&qwertyuiopasdfghjkl;'zxcvbnm,."
                 }
         };
     }
 
     @Test(
             dataProvider = "performanceData",
-            description = "The \"test\" exists purely for getting the idea of deserializer performance vs MiniMessage",
+            description = "The \"test\" exists purely for getting a rough idea of deserializer performance vs MiniMessage vs MineDown",
             enabled = false
     )
     public void performanceTest(String mini, String inky, String down) {
@@ -167,5 +172,9 @@ public class InkyMessageTest {
         }
         end = System.currentTimeMillis();
         System.out.println(end - start);
+
+        System.out.println(miniMessage.serialize(miniMessage.deserialize(mini)));
+        System.out.println(miniMessage.serialize(inkyMessage.deserialize(inky)));
+        System.out.println(miniMessage.serialize(MineDown.parse(down)));
     }
 }

@@ -1,6 +1,7 @@
 package ink.glowing.text.style.tag;
 
 import ink.glowing.text.rich.BuildContext;
+import ink.glowing.text.utils.FloatFunction;
 import ink.glowing.text.utils.InstanceProvider;
 import ink.glowing.text.utils.Utils;
 import net.kyori.adventure.text.Component;
@@ -22,13 +23,13 @@ public class ColorTag implements StyleTag {
     private static final Pattern EVERYTHING = Pattern.compile(".*");
     private static final Map<String, NamedTextColor> NAMED_COLORS = NamedTextColor.NAMES.keyToValue();
     private static final List<TextColor> RAINBOW = List.of(
-            color(0xff, 0x00, 0x00),
-            color(0xff, 0x7f, 0x00),
-            color(0xff, 0xff, 0x00),
-            color(0x00, 0xff, 0x00),
-            color(0x00, 0x00, 0xff),
-            color(0x4b, 0x00, 0x82),
-            color(0x94, 0x00, 0xd3)
+            color(0xff0000),
+            color(0xff7f00),
+            color(0xffff00),
+            color(0x00ff00),
+            color(0x00ffff),
+            color(0x0000ff),
+            color(0x7f00ff)
     );
 
     public static @NotNull ColorTag colorTag() {
@@ -54,24 +55,25 @@ public class ColorTag implements StyleTag {
     // TODO That's really not how this should be done
     private static @NotNull Component propagateGradient(@NotNull Component text, @NotNull List<TextColor> colors) {
         if (colors.isEmpty()) return text;
-        if (colors.size() == 1) return text.colorIfAbsent(colors.get(0));
+        if (colors.size() == 1) return text.color(colors.get(0));
         int length = length(text);
-        if (length <= 1) return text.colorIfAbsent(averageColor(colors));
+        if (length <= 1) return text.color(averageColor(colors));
         float[] step = {0};
         int indexedLength = length - 1;
+        var colorGetter = colorGetter(colors);
         TextComponent.Builder builder = Component.text();
         for (Component child : text.children()) {
-            if (child.color() != null) {
+            if (child.color() == null) {
+                builder.append(child.replaceText((replaceConfig) -> replaceConfig
+                        .match(PER_SYMBOL)
+                        .replacement((match, bld) -> bld.color(colorGetter.apply(step[0]++ / indexedLength)))));
+            } else {
                 builder.append(child);
                 //noinspection ResultOfMethodCallIgnored
                 child.replaceText((replaceConfig) -> replaceConfig.match(EVERYTHING).replacement((match, bld) -> {
                     step[0] += match.group().length();
                     return bld;
                 }));
-            } else {
-                builder.append(child.replaceText((replaceConfig) -> replaceConfig
-                        .match(PER_SYMBOL)
-                        .replacement((match, bld) -> bld.color(lerpColors(step[0]++ / indexedLength, colors)))));
             }
         }
         return builder.build();
@@ -102,8 +104,17 @@ public class ColorTag implements StyleTag {
         return TextColor.color(red, green, blue);
     }
 
+    private static @NotNull FloatFunction<TextColor> colorGetter(@NotNull List<TextColor> colors) {
+        if (colors.size() == 2) {
+            TextColor start = colors.get(0);
+            TextColor end = colors.get(1);
+            return step -> TextColor.lerp(step, start, end);
+        } else {
+            return step -> lerpColors(step, colors);
+        }
+    }
+
     private static @NotNull TextColor lerpColors(float step, @NotNull List<TextColor> colors) {
-        if (colors.size() == 2) return TextColor.lerp(step, colors.get(0), colors.get(1));
         int indexedSize = colors.size() - 1;
         int firstColor = (int) (step * indexedSize);
         if (firstColor == indexedSize) {
