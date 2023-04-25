@@ -1,15 +1,15 @@
 package ink.glowing.text;
 
 import ink.glowing.text.replace.Replacer;
-import ink.glowing.text.replace.impl.UrlReplacer;
+import ink.glowing.text.replace.standard.UrlReplacer;
 import ink.glowing.text.rich.RichNode;
 import ink.glowing.text.style.symbolic.SymbolicStyle;
 import ink.glowing.text.style.tag.StyleTag;
-import ink.glowing.text.style.tag.impl.ClickTag;
-import ink.glowing.text.style.tag.impl.ColorTag;
-import ink.glowing.text.style.tag.impl.DecorTag;
-import ink.glowing.text.style.tag.impl.FontTag;
-import ink.glowing.text.style.tag.impl.HoverTag;
+import ink.glowing.text.style.tag.standard.ClickTag;
+import ink.glowing.text.style.tag.standard.ColorTag;
+import ink.glowing.text.style.tag.standard.DecorTag;
+import ink.glowing.text.style.tag.standard.FontTag;
+import ink.glowing.text.style.tag.standard.HoverTag;
 import ink.glowing.text.utils.GeneralUtils;
 import net.kyori.adventure.builder.AbstractBuilder;
 import net.kyori.adventure.text.format.Style;

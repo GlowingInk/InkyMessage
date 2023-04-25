@@ -1,9 +1,9 @@
-package ink.glowing.text.replace.impl;
+package ink.glowing.text.replace.standard;
 
 import ink.glowing.text.replace.Replacer;
 import ink.glowing.text.rich.RichNode;
 import ink.glowing.text.style.tag.StyleTag;
-import ink.glowing.text.style.tag.impl.ClickTag;
+import ink.glowing.text.style.tag.standard.ClickTag;
 import ink.glowing.text.utils.function.InstanceProvider;
 import org.jetbrains.annotations.NotNull;
 

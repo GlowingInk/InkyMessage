@@ -1,4 +1,4 @@
-package ink.glowing.text.style.tag.impl;
+package ink.glowing.text.style.tag.standard;
 
 import ink.glowing.text.InkyMessage;
 import ink.glowing.text.InkyMessageResolver;
