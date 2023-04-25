@@ -44,7 +44,7 @@ Add to dependencies
 <dependency>
     <groupId>ink.glowing</groupId>
     <artifactId>inkymessage</artifactId>
-    <version>0.6.3</version> <!-- Check the version above -->
+    <version>0.7.0</version> <!-- Check the version above -->
 </dependency>
 ```
 ### Gradle
@@ -56,6 +56,6 @@ repositories {
 }
 
 dependencies {
-    implementation("ink.glowing:inkymessage:0.6.3") // Check the version above
+    implementation("ink.glowing:inkymessage:0.7.0") // Check the version above
 }
 ```

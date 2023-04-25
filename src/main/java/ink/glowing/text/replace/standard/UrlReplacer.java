@@ -3,7 +3,6 @@ package ink.glowing.text.replace.standard;
 import ink.glowing.text.replace.Replacer;
 import ink.glowing.text.rich.RichNode;
 import ink.glowing.text.style.tag.StyleTag;
-import ink.glowing.text.style.tag.standard.ClickTag;
 import ink.glowing.text.utils.function.InstanceProvider;
 import org.jetbrains.annotations.NotNull;
 
@@ -11,6 +10,7 @@ import java.util.List;
 import java.util.regex.Pattern;
 
 import static ink.glowing.text.rich.RichNode.literalNode;
+import static ink.glowing.text.style.tag.standard.ClickTag.clickTag;
 
 public final class UrlReplacer implements Replacer.Regex {
     private static final Pattern SIMPLE_URL = Pattern.compile("[hH][tT]{2}[pP][sS]?://\\S+?\\.\\S+?(?:(?=[\\s)(\\]\\[.,!?])|\\S$)");
@@ -28,7 +28,7 @@ public final class UrlReplacer implements Replacer.Regex {
     public @NotNull RichNode replace(@NotNull String found) {
         return literalNode(
                 found,
-                List.of(new StyleTag.Prepared(ClickTag.clickTag(), "url", found))
+                List.of(new StyleTag.Prepared(clickTag(), "url", found))
         );
     }
 
