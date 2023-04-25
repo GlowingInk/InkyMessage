@@ -1,15 +1,15 @@
 package ink.glowing.text;
 
 import ink.glowing.text.replace.Replacer;
-import ink.glowing.text.replace.UrlReplacer;
+import ink.glowing.text.replace.impl.UrlReplacer;
 import ink.glowing.text.rich.RichNode;
 import ink.glowing.text.style.symbolic.SymbolicStyle;
-import ink.glowing.text.style.tag.ClickTag;
-import ink.glowing.text.style.tag.ColorTag;
-import ink.glowing.text.style.tag.DecorTag;
-import ink.glowing.text.style.tag.FontTag;
-import ink.glowing.text.style.tag.HoverTag;
 import ink.glowing.text.style.tag.StyleTag;
+import ink.glowing.text.style.tag.impl.ClickTag;
+import ink.glowing.text.style.tag.impl.ColorTag;
+import ink.glowing.text.style.tag.impl.DecorTag;
+import ink.glowing.text.style.tag.impl.FontTag;
+import ink.glowing.text.style.tag.impl.HoverTag;
 import ink.glowing.text.utils.GeneralUtils;
 import net.kyori.adventure.builder.AbstractBuilder;
 import net.kyori.adventure.text.format.Style;
@@ -30,9 +30,9 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import static ink.glowing.text.rich.RichNode.nodeId;
-import static ink.glowing.text.style.symbolic.StandardSymbolicColor.notchianColors;
-import static ink.glowing.text.style.symbolic.StandardSymbolicDecoration.notchianDecorations;
-import static ink.glowing.text.style.symbolic.StandardSymbolicReset.notchianReset;
+import static ink.glowing.text.style.symbolic.impl.ChainedSymbolicDecoration.notchianDecorations;
+import static ink.glowing.text.style.symbolic.impl.ResettingSymbolicColor.notchianColors;
+import static ink.glowing.text.style.symbolic.impl.SymbolicReset.notchianReset;
 
 public final class InkyMessageResolver {
     private static final Pattern TAGS_PATTERN = Pattern.compile("\\(([^:\\s]+)(?::(\\S+))?(?: ([^)]*))?\\)");
@@ -118,8 +118,7 @@ public final class InkyMessageResolver {
      */
     public @Nullable Style applySymbolicStyle(char symbol, @NotNull Style currentStyle) {
         SymbolicStyle symbolic = symbolics.get(symbol);
-        if (symbolic == null) return null;
-        return symbolic.apply(currentStyle);
+        return symbolic == null ? null : symbolic.apply(currentStyle);
     }
 
     /**

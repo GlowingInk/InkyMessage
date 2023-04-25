@@ -1,12 +1,13 @@
-package ink.glowing.text.style.symbolic;
+package ink.glowing.text.style.symbolic.impl;
 
+import ink.glowing.text.style.symbolic.SymbolicStyle;
 import net.kyori.adventure.text.format.Style;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Objects;
 
-public record StandardSymbolicReset(char symbol) implements SymbolicStyle {
-    private static final StandardSymbolicReset NOTCHIAN_RESET = new StandardSymbolicReset('r');
+public record SymbolicReset(char symbol) implements SymbolicStyle {
+    private static final SymbolicReset NOTCHIAN_RESET = new SymbolicReset('r');
 
     public static @NotNull SymbolicStyle notchianReset() {
         return NOTCHIAN_RESET;
@@ -29,7 +30,7 @@ public record StandardSymbolicReset(char symbol) implements SymbolicStyle {
 
     @Override
     public boolean equals(Object obj) {
-        return obj instanceof StandardSymbolicReset ssr && ssr.symbol == symbol;
+        return obj instanceof SymbolicReset ssr && ssr.symbol == symbol;
     }
 
     @Override

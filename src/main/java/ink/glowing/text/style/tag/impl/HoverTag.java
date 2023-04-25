@@ -1,8 +1,9 @@
-package ink.glowing.text.style.tag;
+package ink.glowing.text.style.tag.impl;
 
 import ink.glowing.text.InkyMessage;
 import ink.glowing.text.InkyMessageResolver;
 import ink.glowing.text.rich.BuildContext;
+import ink.glowing.text.style.tag.StyleTag;
 import ink.glowing.text.utils.function.InstanceProvider;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.event.HoverEvent;
