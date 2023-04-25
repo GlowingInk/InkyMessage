@@ -30,8 +30,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import static ink.glowing.text.rich.RichNode.nodeId;
+import static ink.glowing.text.style.symbolic.impl.BreakingSymbolicColor.notchianColors;
 import static ink.glowing.text.style.symbolic.impl.ChainedSymbolicDecoration.notchianDecorations;
-import static ink.glowing.text.style.symbolic.impl.ResettingSymbolicColor.notchianColors;
 import static ink.glowing.text.style.symbolic.impl.SymbolicReset.notchianReset;
 
 public final class InkyMessageResolver {

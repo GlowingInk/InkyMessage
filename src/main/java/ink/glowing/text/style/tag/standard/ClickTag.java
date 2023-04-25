@@ -6,6 +6,7 @@ import ink.glowing.text.style.tag.StyleTag;
 import ink.glowing.text.utils.function.InstanceProvider;
 import net.kyori.adventure.text.Component;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Unmodifiable;
 
 import java.util.List;
 
@@ -34,7 +35,7 @@ public final class ClickTag implements StyleTag {
 
     @SuppressWarnings("ConstantConditions")
     @Override
-    public @NotNull List<Prepared> read(@NotNull InkyMessageResolver resolver, @NotNull Component text) {
+    public @NotNull @Unmodifiable List<Prepared> read(@NotNull InkyMessageResolver resolver, @NotNull Component text) {
         if (text.clickEvent() != null) {
             if (text.insertion() != null) {
                 return List.of(

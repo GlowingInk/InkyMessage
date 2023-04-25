@@ -13,7 +13,7 @@ import java.util.Objects;
 import static net.kyori.adventure.text.format.NamedTextColor.*;
 import static net.kyori.adventure.text.format.TextColor.color;
 
-public final class ResettingSymbolicColor implements SymbolicStyle {
+public final class BreakingSymbolicColor implements SymbolicStyle {
     private static final List<SymbolicStyle> NOTCHIAN_COLORS = List.of(
             breakingColor('0', BLACK),
             breakingColor('1', DARK_BLUE),
@@ -54,14 +54,14 @@ public final class ResettingSymbolicColor implements SymbolicStyle {
     private final TextColor color;
     private final Style cleanStyle;
 
-    private ResettingSymbolicColor(char symbol, @NotNull TextColor color) {
+    private BreakingSymbolicColor(char symbol, @NotNull TextColor color) {
         this.symbol = symbol;
         this.color = color;
         this.cleanStyle = Style.style(color);
     }
 
-    public static @NotNull ResettingSymbolicColor breakingColor(char symbol, @NotNull TextColor color) {
-        return new ResettingSymbolicColor(symbol, color);
+    public static @NotNull BreakingSymbolicColor breakingColor(char symbol, @NotNull TextColor color) {
+        return new BreakingSymbolicColor(symbol, color);
     }
 
     public static @NotNull @Unmodifiable List<SymbolicStyle> notchianColors() {
@@ -95,7 +95,7 @@ public final class ResettingSymbolicColor implements SymbolicStyle {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof ResettingSymbolicColor that)) return false;
+        if (!(o instanceof BreakingSymbolicColor that)) return false;
         return symbol == that.symbol && color.equals(that.color);
     }
 

@@ -13,11 +13,11 @@ import static net.kyori.adventure.text.format.TextDecoration.*;
 
 public final class ChainedSymbolicDecoration implements SymbolicStyle {
     private static final List<SymbolicStyle> NOTCHIAN_DECORATIONS = List.of(
-            standardDecoration('k', OBFUSCATED),
-            standardDecoration('l', BOLD),
-            standardDecoration('m', STRIKETHROUGH),
-            standardDecoration('n', UNDERLINED),
-            standardDecoration('o', ITALIC)
+            chainedDecoration('k', OBFUSCATED),
+            chainedDecoration('l', BOLD),
+            chainedDecoration('m', STRIKETHROUGH),
+            chainedDecoration('n', UNDERLINED),
+            chainedDecoration('o', ITALIC)
     );
 
     private final char symbol;
@@ -28,7 +28,7 @@ public final class ChainedSymbolicDecoration implements SymbolicStyle {
         this.decoration = decoration;
     }
 
-    public static @NotNull ChainedSymbolicDecoration standardDecoration(char symbol, @NotNull TextDecoration decoration) {
+    public static @NotNull ChainedSymbolicDecoration chainedDecoration(char symbol, @NotNull TextDecoration decoration) {
         return new ChainedSymbolicDecoration(symbol, decoration);
     }
 

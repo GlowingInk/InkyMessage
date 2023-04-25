@@ -8,6 +8,7 @@ import ink.glowing.text.utils.function.InstanceProvider;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.event.HoverEvent;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Unmodifiable;
 
 import java.util.List;
 
@@ -27,7 +28,7 @@ public final class HoverTag implements StyleTag {
     }
 
     @Override
-    public @NotNull List<Prepared> read(@NotNull InkyMessageResolver resolver, @NotNull Component text) {
+    public @NotNull @Unmodifiable List<Prepared> read(@NotNull InkyMessageResolver resolver, @NotNull Component text) {
         return text.hoverEvent() == null || text.hoverEvent().action() != HoverEvent.Action.SHOW_TEXT
                 ? List.of()
                 : List.of(new Prepared(this, "text", InkyMessage.inkyMessage().serialize((Component) text.hoverEvent().value(), resolver)));
