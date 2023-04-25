@@ -17,7 +17,7 @@ import java.util.List;
 import static net.kyori.adventure.text.Component.text;
 
 @ApiStatus.Internal
-public class ComplexRichNode implements RichNode {
+public final class ComplexRichNode implements RichNode {
     private final String textStr;
     private final boolean hasSlashes;
     private final List<StyleTag.Prepared> tags;
@@ -30,7 +30,7 @@ public class ComplexRichNode implements RichNode {
 
     @Override
     public @NotNull Component render(@NotNull BuildContext context) {
-        String input = context.inkyResolver().applyReplacers(this.textStr, context.innerTexts());
+        String input = context.inkyResolver().applyReplacers(this.textStr, context.innerNode());
         TextComponent.Builder builder = Component.text();
         int lastAppend = 0;
         for (int index = 0; index < input.length(); index++) {
@@ -40,7 +40,7 @@ public class ComplexRichNode implements RichNode {
                 int start = index + 1;
                 //noinspection StatementWithEmptyBody
                 while (input.charAt(++index) != SECTION_CHAR);
-                builder.append(context.innerText(Integer.parseInt(input.substring(start, index))).render(context));
+                builder.append(context.innerNode(Integer.parseInt(input.substring(start, index))).render(context));
                 lastAppend = index + 1;
             } else if (ch == '&') {
                 if (index + 1 == input.length() || InkyMessage.isEscaped(input, index)) continue;

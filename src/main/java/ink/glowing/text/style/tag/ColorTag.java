@@ -1,8 +1,9 @@
 package ink.glowing.text.style.tag;
 
+import ink.glowing.text.InkyMessageResolver;
 import ink.glowing.text.rich.BuildContext;
-import ink.glowing.text.utils.FloatFunction;
-import ink.glowing.text.utils.InstanceProvider;
+import ink.glowing.text.utils.function.FloatFunction;
+import ink.glowing.text.utils.function.InstanceProvider;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -17,7 +18,7 @@ import java.util.regex.Pattern;
 
 import static net.kyori.adventure.text.format.TextColor.color;
 
-public class ColorTag implements StyleTag {
+public final class ColorTag implements StyleTag {
     private static final Pattern PER_SYMBOL = Pattern.compile(".");
     private static final Pattern EVERYTHING = Pattern.compile(".*");
     private static final Map<String, NamedTextColor> NAMED_COLORS = NamedTextColor.NAMES.keyToValue();
@@ -49,6 +50,11 @@ public class ColorTag implements StyleTag {
             return propagateGradient(text, getColors(value));
         }
         return text;
+    }
+
+    @Override
+    public @NotNull List<Prepared> read(@NotNull InkyMessageResolver resolver, @NotNull Component text) {
+        return List.of(); // Colors are handled by &
     }
 
     // TODO That's really not how this should be done

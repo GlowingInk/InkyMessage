@@ -6,7 +6,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 
-public class BuildContext {
+public final class BuildContext {
     private final List<RichNode> innerTexts;
     private final InkyMessageResolver inkyResolver;
     private Style lastStyle;
@@ -29,19 +29,19 @@ public class BuildContext {
         this.lastStyle = lastStyle;
     }
 
-    public @NotNull RichNode innerText(int index) {
+    public @NotNull RichNode innerNode(int index) {
         return innerTexts.get(index);
     }
 
-    public @NotNull List<RichNode> innerTexts() {
+    public @NotNull List<RichNode> innerNode() {
         return innerTexts;
     }
 
-    public int innerTextsCount() {
+    public int innerNodesCount() {
         return innerTexts.size();
     }
 
-    public int innerTextAdd(@NotNull RichNode richNode) {
+    public int innerNodeAdd(@NotNull RichNode richNode) {
         innerTexts.add(richNode);
         return innerTexts.size() - 1;
     }

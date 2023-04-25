@@ -1,4 +1,4 @@
-package ink.glowing.text.utils;
+package ink.glowing.text.utils.function;
 
 @FunctionalInterface
 public interface FloatFunction<R> {

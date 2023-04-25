@@ -7,6 +7,9 @@ import net.kyori.adventure.text.event.ClickEvent;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
+import java.util.concurrent.ThreadLocalRandom;
+import java.util.random.RandomGenerator;
+
 import static ink.glowing.text.InkyMessage.inkyMessage;
 import static net.kyori.adventure.text.Component.text;
 import static net.kyori.adventure.text.format.NamedTextColor.*;
@@ -60,8 +63,8 @@ public class InkyMessageTest {
                         inkyMessage().deserialize("&#123456Hex colors are cool")
                 },
                 {
-                        "Hello https://github.com/GlowingInk.",
-                        text("Hello ")
+                        "Goto https://github.com/GlowingInk.",
+                        text("Goto ")
                                 .append(text("https://github.com/GlowingInk").clickEvent(ClickEvent.openUrl("https://github.com/GlowingInk")))
                                 .append(text("."))
                 }
@@ -86,6 +89,20 @@ public class InkyMessageTest {
         System.out.println("Inky: " + miniMessage().serialize(inkyMessage().deserialize(text)));
         System.out.println("Mini: " + miniMessage().serialize(comp));
         System.out.println("Down: " + new MineDownStringifier().stringify(comp));
+    }
+
+    private static final String SYMBOLS = "abcde&[]()\\:";
+
+    @Test(description = "Basically hoping that we'll get no exceptions while creating a hot stinky mess")
+    public void randomTest() {
+        RandomGenerator rng = ThreadLocalRandom.current();
+        for (int i = 0; i < 2048; i++) {
+            StringBuilder builder = new StringBuilder(128);
+            for (int j = 0; j < 128; j++) {
+                builder.append(SYMBOLS.charAt(rng.nextInt(SYMBOLS.length())));
+            }
+            inkyMessage().deserialize(builder.toString());
+        }
     }
 
     @DataProvider

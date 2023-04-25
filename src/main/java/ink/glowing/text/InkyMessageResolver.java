@@ -3,7 +3,7 @@ package ink.glowing.text;
 import ink.glowing.text.replace.Replacer;
 import ink.glowing.text.replace.UrlReplacer;
 import ink.glowing.text.rich.RichNode;
-import ink.glowing.text.style.SymbolicStyle;
+import ink.glowing.text.style.symbolic.SymbolicStyle;
 import ink.glowing.text.style.tag.ClickTag;
 import ink.glowing.text.style.tag.ColorTag;
 import ink.glowing.text.style.tag.DecorTag;
@@ -30,7 +30,9 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import static ink.glowing.text.rich.RichNode.nodeId;
-import static ink.glowing.text.style.SymbolicStyle.symbolicStyle;
+import static ink.glowing.text.style.symbolic.StandardSymbolicColor.notchianColors;
+import static ink.glowing.text.style.symbolic.StandardSymbolicDecoration.notchianDecorations;
+import static ink.glowing.text.style.symbolic.StandardSymbolicReset.notchianReset;
 
 public final class InkyMessageResolver {
     private static final Pattern TAGS_PATTERN = Pattern.compile("\\(([^:\\s]+)(?::(\\S+))?(?: ([^)]*))?\\)");
@@ -41,13 +43,14 @@ public final class InkyMessageResolver {
                     ClickTag.clickTag(),
                     FontTag.fontTag(),
                     DecorTag.decorTag())
-            .addSymbolics(SymbolicStyle.legacyColors())
-            .addSymbolics(SymbolicStyle.legacyDecorations())
+            .addSymbolics(notchianColors())
+            .addSymbolics(notchianDecorations())
+            .addSymbolic(notchianReset())
             .addReplacer(UrlReplacer.urlReplacer())
             .build();
 
     private final Map<String, StyleTag> tags;
-    private final Map<Character, UnaryOperator<Style>> symbolics;
+    private final Map<Character, SymbolicStyle> symbolics;
     private final List<Replacer.Literal> literalReplacers;
     private final List<Replacer.Regex> regexReplacers;
 
@@ -74,7 +77,7 @@ public final class InkyMessageResolver {
             @NotNull List<Replacer.Regex> regexReplacers
     ) {
         this.tags = toMap(tags, StyleTag::namespace, UnaryOperator.identity());
-        this.symbolics = toMap(symbolics, SymbolicStyle::symbol, SymbolicStyle::mergerFunction);
+        this.symbolics = toMap(symbolics, SymbolicStyle::symbol, UnaryOperator.identity());
         this.literalReplacers = literalReplacers;
         this.regexReplacers = regexReplacers;
     }
@@ -88,7 +91,7 @@ public final class InkyMessageResolver {
     }
 
     /**
-     * Parses tags from a string using the format {@code (tag1)(tag2:value)(tag3:value parameters)(tagN...)}
+     * Parses tags from a string using the color {@code (tag1)(tag2:value)(tag3:value parameters)(tagN...)}
      * @param tagsStr line of tags
      * @return list of parsed tags
      */
@@ -111,10 +114,10 @@ public final class InkyMessageResolver {
      * Applies symbolic style to the provided one
      * @param symbol style symbol
      * @param currentStyle style to be applied onto
-     * @return provided style with applied symbolic style, of null if no styles were found with such symbol
+     * @return provided style with applied symbolic style, or null if no styles were found with such symbol
      */
     public @Nullable Style applySymbolicStyle(char symbol, @NotNull Style currentStyle) {
-        UnaryOperator<Style> symbolic = symbolics.get(symbol);
+        SymbolicStyle symbolic = symbolics.get(symbol);
         if (symbolic == null) return null;
         return symbolic.apply(currentStyle);
     }
@@ -151,7 +154,7 @@ public final class InkyMessageResolver {
     public @NotNull InkyMessageResolver.Builder toBuilder() {
         return new Builder()
                 .tags(tags.values())
-                .symbolics(symbolics.entrySet().stream().map((entry) -> symbolicStyle(entry.getKey(), entry.getValue())).toList());
+                .symbolics(symbolics.values());
     }
 
     public static class Builder implements AbstractBuilder<InkyMessageResolver> {

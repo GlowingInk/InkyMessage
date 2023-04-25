@@ -2,7 +2,7 @@ package ink.glowing.text;
 
 import ink.glowing.text.rich.BuildContext;
 import ink.glowing.text.rich.RichNode;
-import ink.glowing.text.utils.InstanceProvider;
+import ink.glowing.text.utils.function.InstanceProvider;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.ComponentIteratorType;
 import net.kyori.adventure.text.KeybindComponent;
@@ -75,7 +75,7 @@ public class InkyMessage implements ComponentSerializer<Component, Component, St
             modEnd = input.length();
         }
         return input.substring(0, startIndex) +
-                nodeId(context.innerTextAdd(node(
+                nodeId(context.innerNodeAdd(node(
                         input.substring(startIndex + 2, closeIndex),
                         context.inkyResolver().parseTags(input.substring(modStart, modEnd))
                 ))) +
@@ -115,6 +115,9 @@ public class InkyMessage implements ComponentSerializer<Component, Component, St
 
     @Override
     public @NotNull String serialize(@NotNull Component component) {
+        return serialize(component, standardInkyResolver());
+    }
+    public @NotNull String serialize(@NotNull Component component, @NotNull InkyMessageResolver resolver) {
         StringBuilder builder = new StringBuilder();
         for (var child : component.iterable(ComponentIteratorType.BREADTH_FIRST)) {
             serialize(builder, child);

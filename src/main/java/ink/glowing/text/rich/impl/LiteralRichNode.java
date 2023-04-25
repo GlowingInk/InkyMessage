@@ -15,7 +15,7 @@ import java.util.regex.Pattern;
 import static net.kyori.adventure.text.Component.text;
 
 @ApiStatus.Internal
-public class LiteralRichNode implements RichNode {
+public final class LiteralRichNode implements RichNode {
     private static final Pattern CHILD_NODE_PATTERN = Pattern.compile(RichNode.SECTION + "(\\d+)" + RichNode.SECTION);
     private final String text;
     private final List<StyleTag.Prepared> tags;
@@ -32,7 +32,7 @@ public class LiteralRichNode implements RichNode {
         int lastAppend = 0;
         while (matcher.find()) {
             builder.append(text(text.substring(lastAppend, matcher.start())));
-            builder.append(context.innerText(Integer.parseInt(matcher.group(1))).render(context));
+            builder.append(context.innerNode(Integer.parseInt(matcher.group(1))).render(context));
             lastAppend = matcher.end();
         }
         if (lastAppend != text.length()) {

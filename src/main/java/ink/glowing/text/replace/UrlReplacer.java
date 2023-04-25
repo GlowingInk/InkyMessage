@@ -3,7 +3,7 @@ package ink.glowing.text.replace;
 import ink.glowing.text.rich.RichNode;
 import ink.glowing.text.style.tag.ClickTag;
 import ink.glowing.text.style.tag.StyleTag;
-import ink.glowing.text.utils.InstanceProvider;
+import ink.glowing.text.utils.function.InstanceProvider;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
@@ -11,7 +11,7 @@ import java.util.regex.Pattern;
 
 import static ink.glowing.text.rich.RichNode.literalNode;
 
-public class UrlReplacer implements Replacer.Regex {
+public final class UrlReplacer implements Replacer.Regex {
     private static final Pattern SIMPLE_URL = Pattern.compile("[hH][tT]{2}[pP][sS]?://\\S+?\\.\\S+?(?:(?=[\\s)(\\]\\[.,!?])|\\S$)");
 
     public static @NotNull UrlReplacer urlReplacer() {

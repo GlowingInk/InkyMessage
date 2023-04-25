@@ -1,13 +1,16 @@
 package ink.glowing.text.style.tag;
 
+import ink.glowing.text.InkyMessageResolver;
 import ink.glowing.text.rich.BuildContext;
-import ink.glowing.text.utils.InstanceProvider;
+import ink.glowing.text.utils.function.InstanceProvider;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextDecoration;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-public class DecorTag implements StyleTag {
+import java.util.List;
+
+public final class DecorTag implements StyleTag {
     public static @NotNull DecorTag decorTag() {
         return Provider.PROVIDER.get();
     }
@@ -23,6 +26,11 @@ public class DecorTag implements StyleTag {
             case "false", "removed" -> text.decoration(decoration, TextDecoration.State.FALSE);
             default -> text.decoration(decoration, TextDecoration.State.TRUE);
         };
+    }
+
+    @Override
+    public @NotNull List<Prepared> read(@NotNull InkyMessageResolver resolver, @NotNull Component text) {
+        return List.of(); // Decorators are handled by &
     }
 
     @Override
