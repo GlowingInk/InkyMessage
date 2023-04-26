@@ -57,6 +57,6 @@ repositories {
 }
 
 dependencies {
-    implementation("ink.glowing:inkymessage:0.7.1") // Check the version above
+    implementation("ink.glowing:inkymessage:0.7.2") // Check the version above
 }
 ```
