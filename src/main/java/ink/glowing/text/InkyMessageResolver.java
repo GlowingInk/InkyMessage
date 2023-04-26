@@ -30,9 +30,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import static ink.glowing.text.rich.RichNode.nodeId;
-import static ink.glowing.text.style.symbolic.impl.BreakingSymbolicColor.notchianColors;
-import static ink.glowing.text.style.symbolic.impl.ChainedSymbolicDecoration.notchianDecorations;
-import static ink.glowing.text.style.symbolic.impl.SymbolicReset.notchianReset;
+import static ink.glowing.text.style.symbolic.SymbolicStyle.*;
 
 public final class InkyMessageResolver {
     private static final Pattern TAGS_PATTERN = Pattern.compile("\\(([^:\\s]+)(?::(\\S+))?(?: ([^)]*))?\\)");
@@ -55,7 +53,8 @@ public final class InkyMessageResolver {
     private final List<Replacer.Regex> regexReplacers;
 
     /**
-     * Contains recommended options for a resolver.
+     * Contains recommended options for a resolver
+     * Using standard style tags, replacers, and Notchian symbolic styles
      * @return a standard resolver
      */
     public static @NotNull InkyMessageResolver standardInkyResolver() {

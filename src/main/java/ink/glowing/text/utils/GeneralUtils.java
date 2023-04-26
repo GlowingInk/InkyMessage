@@ -1,9 +1,11 @@
 package ink.glowing.text.utils;
 
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Unmodifiable;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.function.Supplier;
 
@@ -15,6 +17,11 @@ public final class GeneralUtils {
         List<T> list = new ArrayList<>();
         for (var col : collections) list.addAll(col);
         return list;
+    }
+
+    @SafeVarargs
+    public static <T> @NotNull @Unmodifiable List<T> buildImmutableList(@NotNull Collection<T> @NotNull ... collections) {
+        return Collections.unmodifiableList(buildList(collections));
     }
 
     public static @NotNull String replaceEach(@NotNull String input, @NotNull String search, @NotNull Supplier<String> replaceSupplier) {

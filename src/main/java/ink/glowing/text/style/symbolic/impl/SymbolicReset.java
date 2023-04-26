@@ -7,14 +7,10 @@ import org.jetbrains.annotations.NotNull;
 import java.util.Objects;
 
 public record SymbolicReset(char symbol) implements SymbolicStyle {
-    private static final SymbolicReset NOTCHIAN_RESET = new SymbolicReset('r');
-
-    public static @NotNull SymbolicStyle notchianReset() {
-        return NOTCHIAN_RESET;
-    }
+    public static final SymbolicReset NOTCHIAN_RESET = new SymbolicReset('r');
 
     @Override
-    public boolean reset() {
+    public boolean resets() {
         return true;
     }
 
@@ -40,7 +36,7 @@ public record SymbolicReset(char symbol) implements SymbolicStyle {
 
     @Override
     public String toString() {
-        return "StandardSymbolicDecoration{" +
+        return "SymbolicReset{" +
                 "symbol=" + symbol +
                 ", decoration=reset" +
                 '}';

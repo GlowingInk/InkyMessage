@@ -5,7 +5,6 @@ import ink.glowing.text.utils.GeneralUtils;
 import net.kyori.adventure.text.format.Style;
 import net.kyori.adventure.text.format.TextColor;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Unmodifiable;
 
 import java.util.List;
 import java.util.Objects;
@@ -14,7 +13,7 @@ import static net.kyori.adventure.text.format.NamedTextColor.*;
 import static net.kyori.adventure.text.format.TextColor.color;
 
 public final class BreakingSymbolicColor implements SymbolicStyle {
-    private static final List<SymbolicStyle> NOTCHIAN_COLORS = List.of(
+    public static final List<SymbolicStyle> NOTCHIAN_COLORS = List.of(
             breakingColor('0', BLACK),
             breakingColor('1', DARK_BLUE),
             breakingColor('2', DARK_GREEN),
@@ -33,7 +32,7 @@ public final class BreakingSymbolicColor implements SymbolicStyle {
             breakingColor('f', WHITE)
     );
 
-    private static final List<SymbolicStyle> BEDROCK_COLORS = GeneralUtils.buildList(
+    public static final List<SymbolicStyle> BEDROCK_COLORS = GeneralUtils.buildImmutableList(
             NOTCHIAN_COLORS,
             List.of(
                     breakingColor('g', color(0xDDD605)),
@@ -64,21 +63,13 @@ public final class BreakingSymbolicColor implements SymbolicStyle {
         return new BreakingSymbolicColor(symbol, color);
     }
 
-    public static @NotNull @Unmodifiable List<SymbolicStyle> notchianColors() {
-        return NOTCHIAN_COLORS;
-    }
-
-    public static @NotNull @Unmodifiable List<SymbolicStyle> bedrockColors() {
-        return BEDROCK_COLORS;
-    }
-
     @Override
     public char symbol() {
         return symbol;
     }
 
     @Override
-    public boolean reset() {
+    public boolean resets() {
         return true;
     }
 

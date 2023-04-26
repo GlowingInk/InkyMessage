@@ -32,12 +32,29 @@ public class InkyMessage implements ComponentSerializer<Component, Component, St
 
     private InkyMessage() {}
 
-    public @NotNull Component deserialize(@NotNull String input, @NotNull InkyMessageResolver inkyResolver) {
+    /**
+     * Convert string into adventure text component using standard resolver
+     * @param inputText input string
+     * @return converted text component
+     * @see InkyMessageResolver#standardInkyResolver()
+     */
+    @Override
+    public @NotNull Component deserialize(@NotNull String inputText) {
+        return deserialize(inputText, standardInkyResolver());
+    }
+
+    /**
+     * Convert string into adventure text component
+     * @param inputText input string
+     * @param inkyResolver resolver to use
+     * @return converted text component
+     */
+    public @NotNull Component deserialize(@NotNull String inputText, @NotNull InkyMessageResolver inkyResolver) {
         List<RichNode> richNodes = new ArrayList<>();
         BuildContext context = new BuildContext(richNodes, inkyResolver);
 
-        String oldText = input;
-        int minimalIndex = input.indexOf("](");
+        String oldText = inputText;
+        int minimalIndex = inputText.indexOf("](");
         String newText = parseRich(oldText, minimalIndex, context);
         while (!newText.equals(oldText)) {
             oldText = newText;
@@ -82,37 +99,6 @@ public class InkyMessage implements ComponentSerializer<Component, Component, St
                 input.substring(modEnd);
     }
 
-    public static @NotNull String escape(@NotNull String text) {
-        StringBuilder builder = new StringBuilder(text.length());
-        Matcher matcher = ESCAPE_PATTERN.matcher(text);
-        while (matcher.find()) {
-            matcher.appendReplacement(builder, "");
-            builder.append('\\').append(matcher.group());
-        }
-        return matcher.appendTail(builder).toString();
-    }
-
-    public static @NotNull String unescape(@NotNull String text) {
-        StringBuilder builder = new StringBuilder(text.length());
-        Matcher matcher = UNESCAPE_PATTERN.matcher(text);
-        while (matcher.find()) {
-            matcher.appendReplacement(builder, "");
-            builder.append(matcher.group(1));
-        }
-        return matcher.appendTail(builder).toString();
-    }
-
-    public static boolean isEscaped(@NotNull String input, int index) {
-        boolean escaped = false;
-        while (--index > -1 && input.charAt(index) == '\\') escaped = !escaped;
-        return escaped;
-    }
-
-    @Override
-    public @NotNull Component deserialize(@NotNull String text) {
-        return deserialize(text, standardInkyResolver());
-    }
-
     @Override
     public @NotNull String serialize(@NotNull Component component) {
         return serialize(component, standardInkyResolver());
@@ -139,6 +125,32 @@ public class InkyMessage implements ComponentSerializer<Component, Component, St
         } else {
             builder.append('?');
         }
+    }
+
+    public static @NotNull String escape(@NotNull String text) {
+        StringBuilder builder = new StringBuilder(text.length());
+        Matcher matcher = ESCAPE_PATTERN.matcher(text);
+        while (matcher.find()) {
+            matcher.appendReplacement(builder, "");
+            builder.append('\\').append(matcher.group());
+        }
+        return matcher.appendTail(builder).toString();
+    }
+
+    public static @NotNull String unescape(@NotNull String text) {
+        StringBuilder builder = new StringBuilder(text.length());
+        Matcher matcher = UNESCAPE_PATTERN.matcher(text);
+        while (matcher.find()) {
+            matcher.appendReplacement(builder, "");
+            builder.append(matcher.group(1));
+        }
+        return matcher.appendTail(builder).toString();
+    }
+
+    public static boolean isEscaped(@NotNull String input, int index) {
+        boolean escaped = false;
+        while (--index > -1 && input.charAt(index) == '\\') escaped = !escaped;
+        return escaped;
     }
 
     private enum Provider implements InstanceProvider<InkyMessage> {

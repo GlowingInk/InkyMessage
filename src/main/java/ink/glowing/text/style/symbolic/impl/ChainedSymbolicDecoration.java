@@ -4,7 +4,6 @@ import ink.glowing.text.style.symbolic.SymbolicStyle;
 import net.kyori.adventure.text.format.Style;
 import net.kyori.adventure.text.format.TextDecoration;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Unmodifiable;
 
 import java.util.List;
 import java.util.Objects;
@@ -12,7 +11,7 @@ import java.util.Objects;
 import static net.kyori.adventure.text.format.TextDecoration.*;
 
 public final class ChainedSymbolicDecoration implements SymbolicStyle {
-    private static final List<SymbolicStyle> NOTCHIAN_DECORATIONS = List.of(
+    public static final List<SymbolicStyle> NOTCHIAN_DECORATIONS = List.of(
             chainedDecoration('k', OBFUSCATED),
             chainedDecoration('l', BOLD),
             chainedDecoration('m', STRIKETHROUGH),
@@ -32,17 +31,13 @@ public final class ChainedSymbolicDecoration implements SymbolicStyle {
         return new ChainedSymbolicDecoration(symbol, decoration);
     }
 
-    public static @NotNull @Unmodifiable List<SymbolicStyle> notchianDecorations() {
-        return NOTCHIAN_DECORATIONS;
-    }
-
     @Override
     public char symbol() {
         return symbol;
     }
 
     @Override
-    public boolean reset() {
+    public boolean resets() {
         return false;
     }
 
