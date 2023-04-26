@@ -163,12 +163,12 @@ public class InkyMessageTest {
                 },
                 {
                         "<gradient:white:black:yellow:red>qwertyuiopasdfghjkl;'zxcvbnm,.</gradient>",
-                        "&[qwertyuiopasdfghjkl;'zxcvbnm,.](color:gradient white-black-yellow-red)",
+                        "&[qwertyuiopasdfghjkl;'zxcvbnm,.](gradient:white-black-yellow-red)",
                         "&white-black-yellow-red&qwertyuiopasdfghjkl;'zxcvbnm,."
                 },
                 {
                         "<rainbow>qwertyuiopasdfghjkl;'zxcvbnm,.</rainbow>",
-                        "&[qwertyuiopasdfghjkl;'zxcvbnm,.](color:gradient rainbow)",
+                        "&[qwertyuiopasdfghjkl;'zxcvbnm,.](gradient:rainbow)",
                         "&rainbow&qwertyuiopasdfghjkl;'zxcvbnm,."
                 }
         };
@@ -195,11 +195,13 @@ public class InkyMessageTest {
             MineDown.parse(down);
         }
 
-        long start = System.currentTimeMillis();
+        long start, end;
+
+        start = System.currentTimeMillis();
         for (int i = 0; i < test; i++) {
             inkyMessage.deserialize(inky);
         }
-        long end = System.currentTimeMillis();
+        end = System.currentTimeMillis();
         System.out.println(end - start);
 
         start = System.currentTimeMillis();
@@ -216,8 +218,11 @@ public class InkyMessageTest {
         end = System.currentTimeMillis();
         System.out.println(end - start);
 
-        System.out.println(miniMessage.serialize(miniMessage.deserialize(mini)));
-        System.out.println(miniMessage.serialize(inkyMessage.deserialize(inky)));
-        System.out.println(miniMessage.serialize(MineDown.parse(down)));
+        System.out.println("Inky: " + miniMessage.serialize(inkyMessage.deserialize(inky)));
+        System.out.println("<reset>");
+        System.out.println("Mini: " + miniMessage.serialize(miniMessage.deserialize(mini)));
+        System.out.println("<reset>");
+        System.out.println("Down: " + miniMessage.serialize(MineDown.parse(down)));
+        System.out.println("<reset>");
     }
 }

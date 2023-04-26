@@ -9,6 +9,7 @@ import ink.glowing.text.style.tag.standard.ClickTag;
 import ink.glowing.text.style.tag.standard.ColorTag;
 import ink.glowing.text.style.tag.standard.DecorTag;
 import ink.glowing.text.style.tag.standard.FontTag;
+import ink.glowing.text.style.tag.standard.GradientTag;
 import ink.glowing.text.style.tag.standard.HoverTag;
 import ink.glowing.text.utils.GeneralUtils;
 import net.kyori.adventure.builder.AbstractBuilder;
@@ -39,6 +40,7 @@ public final class InkyMessageResolver {
             .addTags(ColorTag.colorTag(),
                     HoverTag.hoverTag(),
                     ClickTag.clickTag(),
+                    GradientTag.gradientTag(),
                     FontTag.fontTag(),
                     DecorTag.decorTag())
             .addSymbolics(notchianColors())
