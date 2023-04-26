@@ -14,6 +14,7 @@ import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Unmodifiable;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
@@ -62,15 +63,30 @@ public final class ColorTag implements StyleTag {
     // TODO That's really not how this should be done
     private static @NotNull Component propagateGradient(@NotNull Component text, @NotNull List<TextColor> colors) {
         if (colors.isEmpty()) return text;
-        if (colors.size() == 1) return text.color(colors.get(0));
+        if (colors.size() == 1) return text.colorIfAbsent(colors.get(0));
         int length = length(text);
-        if (length <= 1) return text.color(averageColor(colors));
+        if (length <= 1) return text.color() == null ? text.color(averageColor(colors)) : text;
         float[] step = {0};
         int indexedLength = length - 1;
         var colorGetter = colorGetter(colors);
         TextComponent.Builder builder = Component.text();
+        recursiveApply(builder, text, colorGetter, step, indexedLength);
+        return builder.build();
+    }
+
+    private static void recursiveApply(
+            TextComponent.Builder outerBuilder,
+            Component text,
+            FloatFunction<TextColor> colorGetter,
+            float[] step,
+            int indexedLength
+    ) {
+        TextComponent.Builder builder = Component.text().style(text.style());
         for (Component child : text.children()) {
-            if (child.color() == null) {
+            var childChildren = child.children();
+            if (!childChildren.isEmpty()) {
+                recursiveApply(builder, child, colorGetter, step, indexedLength);
+            } else if (child.color() == null) {
                 builder.append(child.replaceText((replaceConfig) -> replaceConfig
                         .match(PER_SYMBOL)
                         .replacement((match, bld) -> bld.color(colorGetter.apply(step[0]++ / indexedLength)))));
@@ -83,7 +99,7 @@ public final class ColorTag implements StyleTag {
                 }));
             }
         }
-        return builder.build();
+        outerBuilder.append(builder);
     }
 
     private static int length(@NotNull Component text) {
@@ -96,7 +112,7 @@ public final class ColorTag implements StyleTag {
         return length[0];
     }
 
-    private static @NotNull TextColor averageColor(@NotNull List<TextColor> colors) {
+    private static @NotNull TextColor averageColor(@NotNull Collection<TextColor> colors) {
         int red = 0;
         int green = 0;
         int blue = 0;

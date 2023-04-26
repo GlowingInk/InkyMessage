@@ -14,6 +14,7 @@ import static ink.glowing.text.InkyMessage.inkyMessage;
 import static net.kyori.adventure.text.Component.text;
 import static net.kyori.adventure.text.format.NamedTextColor.*;
 import static net.kyori.adventure.text.format.TextDecoration.BOLD;
+import static net.kyori.adventure.text.format.TextDecoration.ITALIC;
 import static net.kyori.adventure.text.minimessage.MiniMessage.miniMessage;
 import static org.testng.Assert.assertEquals;
 
@@ -67,6 +68,12 @@ public class InkyMessageTest {
                         text("Goto ")
                                 .append(text("https://github.com/GlowingInk").clickEvent(ClickEvent.openUrl("https://github.com/GlowingInk")))
                                 .append(text("."))
+                },
+                {
+                        "&[aaa&[bbb&[ccc](decor:bold)bbb](decor:italic)&faaa](color:red)",
+                        text("aaa").color(RED)
+                                .append(text("bbb").decorate(ITALIC).append(text("ccc").decorate(BOLD)).append(text("bbb")))
+                                .append(text("aaa").color(WHITE))
                 }
         };
     }

@@ -58,7 +58,7 @@ public class InkyMessage implements ComponentSerializer<Component, Component, St
         String newText = parseRich(oldText, minimalIndex, context);
         while (!newText.equals(oldText)) {
             oldText = newText;
-            newText = parseRich(oldText, minimalIndex, context);
+            newText = parseRich(oldText, 2, context);
         }
         return node(newText).render(new BuildContext(richNodes, inkyResolver)).compact();
     }
