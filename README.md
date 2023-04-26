@@ -1,12 +1,14 @@
-# Inky Message
+# InkyMessage
 Adventure API component serializer inspired by [MineDown](https://github.com/Phoenix616/MineDown/tree/kyori-adventure) 
-and MiniMessage projects. An attempt to make legacy-friendly serializer with modern features.
+and [MiniMessage](https://docs.advntr.dev/minimessage/index.html) projects. 
+An attempt to make legacy-friendly serializer with modern features.
 
-Inky Message supports legacy format codes, e.g. `&l`, `&6`, `&a`, etc.
-Besides that, we also have a special format for the modern features like interactable chat components. It's very simple
-to follow: `&[My special text](key:value parameters)`. Those are its possible combinations:
+InkyMessage supports legacy format codes, e.g. `&l`, `&6`, `&a`, etc.
+Besides that, we also have a special format for the modern features like interactable chat components. 
+It's very simple to follow: `&[My special text](key:value parameters)(otherkey:othervalue)`. 
+Those are its possible tags:
 ## Tag formatting
-| Key        | Values                                                                                                                              | Parameters               | Effect                                    | Example                                                             |
+| Key        | Value                                                                                                                               | Parameter                | Effect                                    | Example                                                             |
 |------------|-------------------------------------------------------------------------------------------------------------------------------------|--------------------------|-------------------------------------------|---------------------------------------------------------------------|
 | `hover`    | Only `text` ATM                                                                                                                     | Hover text               | Add hover effect to chat component        | `Stop. &[hover time](hover:text What a meme)!`                      |
 | `click`    | `url`, `run`, `suggest`, `copy`, `insert` (same as `suggest`, but requires shift-click)                                             | Action parameters        | Add click functionality to chat component | `&[Click to get 100 robux](click:url https://youtu.be/dQw4w9WgXcQ)` |
@@ -14,7 +16,6 @@ to follow: `&[My special text](key:value parameters)`. Those are its possible co
 | `font`     | Namespaced key of a font                                                                                                            | None                     | Change fonts of a text                    | `Wow, &[almost HD fonts](font:minecraft:uniform)!`                  |
 | `color`    | [Named color](https://jd.advntr.dev/api/4.13.1/net/kyori/adventure/text/format/NamedTextColor.html) (lower case) or hex (`#123456`) | None ATM                 | Colorize colorless text                   | `&[This text is green](color:green)`                                |
 | `gradient` | `spectre` (`rainbow`) or `color1-color2-colorN` (look `color` tag)                                                                  | None ATM                 | Colorize colorless text with gradient     | `&aLook!&r &[Fancy!](gradient:rainbow)(decor:bold)`                 |
-
 
 ## TODO (until full release)
 - Placeholders (for keybinds, translations, selectors)
