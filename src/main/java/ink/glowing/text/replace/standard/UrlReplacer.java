@@ -13,7 +13,7 @@ import static ink.glowing.text.rich.RichNode.literalNode;
 import static ink.glowing.text.style.tag.standard.ClickTag.clickTag;
 
 public final class UrlReplacer implements Replacer.Regex {
-    private static final Pattern SIMPLE_URL = Pattern.compile("[hH][tT]{2}[pP][sS]?://\\S+?\\.\\S+?(?:(?=[\\s)(\\]\\[.,!?])|\\S$)");
+    private static final Pattern SIMPLE_URL = Pattern.compile("[hH][tT]{2}[pP][sS]?://\\S+?\\.\\S+?(?:(?=[\\s()\\[\\].,!?])|\\S$)");
 
     public static @NotNull UrlReplacer urlReplacer() {
         return Provider.PROVIDER.instance;

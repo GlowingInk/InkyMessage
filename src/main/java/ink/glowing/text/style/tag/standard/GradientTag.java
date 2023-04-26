@@ -33,11 +33,11 @@ public final class GradientTag implements StyleTag {
     public @NotNull Component modify(@NotNull BuildContext context, @NotNull Component text, @NotNull String param, @NotNull String value) {
         FloatFunction<TextColor> colorGetter;
         int indexedLength;
-        if (param.equals("spectre") || param.equals("rainbow")) {
+        if (param.equals("spectrum") || param.equals("rainbow")) {
             int length = length(text);
             if (length <= 1) return text.colorIfAbsent(AVERAGE_RAINBOW);
             indexedLength = length;
-            colorGetter = GradientTag::colorSpectre;
+            colorGetter = GradientTag::colorSpectrum;
         } else {
             List<TextColor> colors = readMultipleColors(param);
             if (colors.isEmpty()) return text;
@@ -106,7 +106,7 @@ public final class GradientTag implements StyleTag {
         return TextColor.color(red, green, blue);
     }
 
-    private static @NotNull TextColor colorSpectre(float step) {
+    private static @NotNull TextColor colorSpectrum(float step) {
         return TextColor.color(HSVLike.hsvLike(step, 1f, 1f));
     }
 
