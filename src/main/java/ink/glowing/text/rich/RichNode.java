@@ -1,6 +1,7 @@
 package ink.glowing.text.rich;
 
 import ink.glowing.text.rich.impl.ComplexRichNode;
+import ink.glowing.text.rich.impl.ComponentRichNode;
 import ink.glowing.text.rich.impl.EmptyRichNode;
 import ink.glowing.text.rich.impl.LiteralRichNode;
 import ink.glowing.text.style.tag.StyleTag;
@@ -10,6 +11,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 
+@FunctionalInterface
 public interface RichNode {
     @ApiStatus.Internal
     char SECTION_CHAR = '§';
@@ -20,6 +22,10 @@ public interface RichNode {
 
     static @NotNull RichNode emptyNode() {
         return EmptyRichNode.instance();
+    }
+
+    static @NotNull RichNode componentNode(@NotNull Component component) {
+        return new ComponentRichNode(component);
     }
 
     static @NotNull RichNode literalNode(@NotNull String text) {

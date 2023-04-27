@@ -15,28 +15,21 @@ import java.util.regex.Pattern;
 import static net.kyori.adventure.text.Component.text;
 
 @ApiStatus.Internal
-public final class LiteralRichNode implements RichNode {
+public record LiteralRichNode(@NotNull String textStr, @NotNull List<StyleTag.Prepared> tags) implements RichNode {
     private static final Pattern CHILD_NODE_PATTERN = Pattern.compile(RichNode.SECTION + "(\\d+)" + RichNode.SECTION);
-    private final String text;
-    private final List<StyleTag.Prepared> tags;
-
-    public LiteralRichNode(@NotNull String text, @NotNull List<StyleTag.Prepared> tags) {
-        this.text = text;
-        this.tags = tags;
-    }
-
+    
     @Override
     public @NotNull Component render(@NotNull BuildContext context) {
         TextComponent.Builder builder = Component.text();
-        Matcher matcher = CHILD_NODE_PATTERN.matcher(text);
+        Matcher matcher = CHILD_NODE_PATTERN.matcher(textStr);
         int lastAppend = 0;
         while (matcher.find()) {
-            builder.append(text(text.substring(lastAppend, matcher.start())));
+            builder.append(text(textStr.substring(lastAppend, matcher.start())));
             builder.append(context.innerNode(Integer.parseInt(matcher.group(1))).render(context));
             lastAppend = matcher.end();
         }
-        if (lastAppend != text.length()) {
-            builder.append(text(text.substring(lastAppend)));
+        if (lastAppend != textStr.length()) {
+            builder.append(text(textStr.substring(lastAppend)));
         }
         Component result = builder.build();
         for (var preparedTag : tags) {

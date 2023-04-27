@@ -1,9 +1,9 @@
 package ink.glowing.text;
 
 import ink.glowing.text.replace.Replacer;
-import ink.glowing.text.replace.standard.UrlReplacer;
 import ink.glowing.text.rich.RichNode;
 import ink.glowing.text.style.symbolic.SymbolicStyle;
+import ink.glowing.text.style.symbolic.impl.VirtualHexSymbolicStyle;
 import ink.glowing.text.style.tag.StyleTag;
 import ink.glowing.text.style.tag.standard.ClickTag;
 import ink.glowing.text.style.tag.standard.ColorTag;
@@ -11,26 +11,19 @@ import ink.glowing.text.style.tag.standard.DecorTag;
 import ink.glowing.text.style.tag.standard.FontTag;
 import ink.glowing.text.style.tag.standard.GradientTag;
 import ink.glowing.text.style.tag.standard.HoverTag;
-import ink.glowing.text.utils.GeneralUtils;
 import net.kyori.adventure.builder.AbstractBuilder;
+import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.Style;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.function.Function;
-import java.util.function.UnaryOperator;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import static ink.glowing.text.rich.RichNode.nodeId;
+import static ink.glowing.text.replace.StandardReplacers.urlReplacer;
 import static ink.glowing.text.style.symbolic.SymbolicStyle.*;
 
 public final class InkyMessageResolver {
@@ -45,14 +38,14 @@ public final class InkyMessageResolver {
                     DecorTag.decorTag())
             .addSymbolics(notchianColors())
             .addSymbolics(notchianDecorations())
-            .addSymbolic(notchianReset())
-            .addReplacer(UrlReplacer.urlReplacer())
+            .symbolicReset(notchianReset())
+            .addReplacer(urlReplacer())
             .build();
 
     private final Map<String, StyleTag> tags;
+    private final Collection<Replacer> replacers;
     private final Map<Character, SymbolicStyle> symbolics;
-    private final List<Replacer.Literal> literalReplacers;
-    private final List<Replacer.Regex> regexReplacers;
+    private final SymbolicStyle symbolicReset;
 
     /**
      * Contains recommended options for a resolver
@@ -73,20 +66,20 @@ public final class InkyMessageResolver {
 
     private InkyMessageResolver(
             @NotNull Iterable<StyleTag> tags,
+            @NotNull Collection<Replacer> replacers,
             @NotNull Iterable<SymbolicStyle> symbolics,
-            @NotNull List<Replacer.Literal> literalReplacers,
-            @NotNull List<Replacer.Regex> regexReplacers
+            @Nullable SymbolicStyle symbolicReset
     ) {
-        this.tags = toMap(tags, StyleTag::namespace, UnaryOperator.identity());
-        this.symbolics = toMap(symbolics, SymbolicStyle::symbol, UnaryOperator.identity());
-        this.literalReplacers = literalReplacers;
-        this.regexReplacers = regexReplacers;
+        this.tags = toMap(tags, StyleTag::namespace);
+        this.replacers = replacers;
+        this.symbolics = toMap(symbolics, SymbolicStyle::symbol);
+        this.symbolicReset = symbolicReset;
     }
 
-    private static <O, K, V> Map<K, V> toMap(Iterable<O> origin, Function<O, K> keyFunction, Function<O, V> valueFunction) {
-        Map<K, V> map = new HashMap<>();
+    private static <O, K> Map<K, O> toMap(Iterable<O> origin, Function<O, K> keyFunction) {
+        Map<K, O> map = new HashMap<>();
         for (O obj : origin) {
-            map.put(keyFunction.apply(obj), valueFunction.apply(obj));
+            map.put(keyFunction.apply(obj), obj);
         }
         return map.isEmpty() ? Collections.emptyMap() : Collections.unmodifiableMap(map);
     }
@@ -132,139 +125,147 @@ public final class InkyMessageResolver {
     @Contract(mutates = "param2")
     public @NotNull String applyReplacers(@NotNull String input, @NotNull List<RichNode> nodes) {
         String result = input;
-        for (var replacer : regexReplacers) {
-            result = replacer.search().matcher(result).replaceAll(match -> {
-                RichNode node = replacer.replace(match.group());
-                if (node == null) return Matcher.quoteReplacement(match.group());
-                nodes.add(node);
-                return nodeId(nodes.size() - 1);
-            });
-        }
-        for (var replacer : literalReplacers) {
-            result = GeneralUtils.replaceEach(result, replacer.search(), () -> {
-                RichNode node = replacer.replace(replacer.search());
-                if (node == null) return replacer.search();
-                nodes.add(node);
-                return nodeId(nodes.size() - 1);
-            });
+        for (var replacer : replacers) {
+            result = replacer.replace(result, nodes);
         }
         return result;
     }
 
+    public @NotNull TreeSet<SymbolicStyle> readSymbolics(@NotNull Component text) {
+        TreeSet<SymbolicStyle> symbolics = new TreeSet<>();
+        Style style = text.style();
+        boolean hasColor = false;
+        for (var symb : this.symbolics.values()) {
+            if (symb.isApplied(style)) {
+                if (symb.hasColor()) hasColor = true;
+                symbolics.add(symb);
+            }
+        }
+        if (!hasColor && text.color() != null) {
+            symbolics.add(new VirtualHexSymbolicStyle(text.color()));
+        }
+        return symbolics;
+    }
+
+    public @NotNull List<StyleTag.Prepared> readStyleTags(@NotNull Component text) {
+        List<StyleTag.Prepared> tags = new ArrayList<>();
+        for (var tag : this.tags.values()) {
+            tags.addAll(tag.read(this, text));
+        }
+        return tags;
+    }
+
+    public @NotNull SymbolicStyle symbolicReset() {
+        return symbolicReset;
+    }
+
     public @NotNull InkyMessageResolver.Builder toBuilder() {
         return new Builder()
-                .tags(tags.values())
-                .symbolics(symbolics.values());
+                .addTags(tags.values())
+                .symbolicReset(symbolicReset)
+                .addSymbolics(symbolics.values());
     }
 
     public static class Builder implements AbstractBuilder<InkyMessageResolver> {
-        private List<StyleTag> tags;
-        private List<SymbolicStyle> symbolics;
-        private List<Replacer.Literal> literalReplacers;
-        private List<Replacer.Regex> regexReplacers;
+        private Set<StyleTag> tags;
+        private Set<Replacer> replacers;
+        private Set<SymbolicStyle> symbolics;
+        private SymbolicStyle symbolicReset;
 
         private Builder() {
-            this.tags = new ArrayList<>();
-            this.symbolics = new ArrayList<>();
-            this.literalReplacers = new ArrayList<>();
-            this.regexReplacers = new ArrayList<>();
+            this.tags = new HashSet<>();
+            this.replacers = new HashSet<>();
+            this.symbolics = new HashSet<>();
         }
 
         @Contract("_ -> this")
-        public @NotNull Builder literalReplacers(@NotNull Replacer.Literal... literalReplacers) {
-            return literalReplacers(Arrays.asList(literalReplacers));
+        public @NotNull Builder replacers(@NotNull Replacer @NotNull ... replacers) {
+            return replacers(Arrays.asList(replacers));
         }
 
         @Contract("_ -> this")
-        public @NotNull Builder literalReplacers(@NotNull Collection<Replacer.Literal> literalReplacers) {
-            this.literalReplacers = new ArrayList<>(literalReplacers);
+        public @NotNull Builder replacers(@NotNull Collection<@NotNull Replacer> replacers) {
+            this.replacers = new HashSet<>(replacers);
             return this;
         }
 
         @Contract("_ -> this")
-        public @NotNull Builder regexReplacers(@NotNull Replacer.Regex... regexReplacers) {
-            return regexReplacers(Arrays.asList(regexReplacers));
-        }
-
-        @Contract("_ -> this")
-        public @NotNull Builder regexReplacers(@NotNull Collection<Replacer.Regex> regexReplacers) {
-            this.regexReplacers = new ArrayList<>(regexReplacers);
+        public @NotNull Builder addReplacer(@NotNull Replacer replacer) {
+            this.replacers.add(replacer);
             return this;
         }
 
         @Contract("_ -> this")
-        public @NotNull Builder addReplacer(Replacer<?> replacer) {
-            if (replacer instanceof Replacer.Literal literal) {
-                literalReplacers.add(literal);
-            } else if (replacer instanceof Replacer.Regex regex) {
-                regexReplacers.add(regex);
-            }
-            return this;
-        }
-
-        @Contract("_ -> this")
-        public @NotNull Builder addReplacers(Replacer<?>... replacers) {
+        public @NotNull Builder addReplacers(@NotNull Replacer @NotNull ... replacers) {
             return addReplacers(Arrays.asList(replacers));
         }
 
         @Contract("_ -> this")
-        public @NotNull Builder addReplacers(Iterable<Replacer<?>> replacers) {
+        public @NotNull Builder addReplacers(@NotNull Iterable<@NotNull Replacer> replacers) {
             for (var replacer : replacers) addReplacer(replacer);
             return this;
         }
 
         @Contract("_ -> this")
-        public @NotNull Builder tags(@NotNull StyleTag... styleTags) {
+        public @NotNull Builder tags(@NotNull StyleTag @NotNull ... styleTags) {
             return tags(Arrays.asList(styleTags));
         }
 
         @Contract("_ -> this")
-        public @NotNull Builder tags(@NotNull Collection<StyleTag> styleTags) {
-            this.tags = new ArrayList<>(styleTags);
+        public @NotNull Builder tags(@NotNull Collection<@NotNull StyleTag> styleTags) {
+            this.tags = new HashSet<>(styleTags);
             return this;
         }
 
         @Contract("_ -> this")
-        public @NotNull Builder addTag(StyleTag tag) {
+        public @NotNull Builder addTag(@NotNull StyleTag tag) {
             this.tags.add(tag);
             return this;
         }
 
         @Contract("_ -> this")
-        public @NotNull Builder addTags(StyleTag... tags) {
+        public @NotNull Builder addTags(@NotNull StyleTag @NotNull ... tags) {
             return addTags(Arrays.asList(tags));
         }
 
         @Contract("_ -> this")
-        public @NotNull Builder addTags(Iterable<StyleTag> tags) {
+        public @NotNull Builder addTags(@NotNull Iterable<@NotNull StyleTag> tags) {
             for (var tag : tags) addTag(tag);
             return this;
         }
 
         @Contract("_ -> this")
-        public @NotNull Builder symbolics(@NotNull SymbolicStyle... symbolics) {
-            return symbolics(Arrays.asList(symbolics));
-        }
-
-        @Contract("_ -> this")
-        public @NotNull Builder symbolics(@NotNull Collection<SymbolicStyle> symbolics) {
-            this.symbolics = new ArrayList<>(symbolics);
+        public @NotNull Builder symbolicReset(@NotNull SymbolicStyle symbolicReset) {
+            symbolics.remove(this.symbolicReset);
+            symbolics.add(symbolicReset);
+            this.symbolicReset = symbolicReset;
             return this;
         }
 
         @Contract("_ -> this")
-        public @NotNull Builder addSymbolic(SymbolicStyle symbolics) {
+        public @NotNull Builder symbolics(@NotNull SymbolicStyle @NotNull ... symbolics) {
+            return symbolics(Arrays.asList(symbolics));
+        }
+
+        @Contract("_ -> this")
+        public @NotNull Builder symbolics(@NotNull Collection<@NotNull SymbolicStyle> symbolics) {
+            this.symbolics = new HashSet<>(symbolics);
+            return this;
+        }
+
+        @Contract("_ -> this")
+        public @NotNull Builder addSymbolic(@NotNull SymbolicStyle symbolics) {
             this.symbolics.add(symbolics);
             return this;
         }
 
         @Contract("_ -> this")
-        public @NotNull Builder addSymbolics(SymbolicStyle... symbolics) {
+        public @NotNull Builder addSymbolics(@NotNull SymbolicStyle @NotNull ... symbolics) {
             return addSymbolics(Arrays.asList(symbolics));
         }
 
         @Contract("_ -> this")
-        public @NotNull Builder addSymbolics(Iterable<SymbolicStyle> symbolics) {
+        public @NotNull Builder addSymbolics(@NotNull Iterable<@NotNull SymbolicStyle> symbolics) {
             for (var symbolic : symbolics) addSymbolic(symbolic);
             return this;
         }
@@ -272,7 +273,8 @@ public final class InkyMessageResolver {
         @Override
         @Contract("-> new")
         public @NotNull InkyMessageResolver build() {
-            return new InkyMessageResolver(tags, symbolics, literalReplacers, regexReplacers);
+            Objects.requireNonNull(symbolicReset, "InkyMessageResolver requires symbolic reset to be provided");
+            return new InkyMessageResolver(tags, replacers, symbolics, symbolicReset);
         }
     }
 }

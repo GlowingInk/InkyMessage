@@ -18,5 +18,13 @@ public interface StyleTag extends Namespaced {
         public @NotNull Component modify(@NotNull Component text, @NotNull BuildContext context) {
             return styleTag.modify(context, text, param, value);
         }
+
+        @Override
+        public String toString() {
+            String result = styleTag.namespace();
+            if (!param.isEmpty()) result += ":" + param;
+            if (!value.isEmpty()) result += " " + value;
+            return "(" + result + ")";
+        }
     }
 }

@@ -42,6 +42,11 @@ public final class ChainedSymbolicDecoration implements SymbolicStyle {
     }
 
     @Override
+    public boolean hasColor() {
+        return false;
+    }
+
+    @Override
     public boolean isApplied(@NotNull Style inputStyle) {
         return inputStyle.hasDecoration(decoration);
     }

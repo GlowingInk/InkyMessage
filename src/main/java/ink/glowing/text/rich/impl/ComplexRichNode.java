@@ -13,6 +13,7 @@ import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
+import java.util.Objects;
 
 import static net.kyori.adventure.text.Component.text;
 
@@ -51,23 +52,23 @@ public final class ComplexRichNode implements RichNode {
                         String colorStr = input.substring(index + 1, index + 8);
                         TextColor color = AdventureUtils.parseHexColor(colorStr, false);
                         if (color == null) continue;
-                        if (lastAppend != index) appendPart(input, builder, lastAppend, index, context.lastStyle());
+                        appendPart(input, builder, lastAppend, index, context.lastStyle());
                         context.lastStyle(context.lastStyle().color(color));
                         lastAppend = (index += 7) + 1;
                     }
                     case 'x' -> {
                         if (index + 14 >= input.length()) continue;
-                        String colorStr = input.substring(index, index + 14);
+                        String colorStr = input.substring(index + 1, index + 14);
                         TextColor color = AdventureUtils.parseHexColor(colorStr, true);
                         if (color == null) continue;
-                        if (lastAppend != index) appendPart(input, builder, lastAppend, index, context.lastStyle());
+                        appendPart(input, builder, lastAppend, index, context.lastStyle());
                         context.lastStyle(context.lastStyle().color(color));
                         lastAppend = (index += 13) + 1;
                     }
                     default -> {
                         Style newStyle = context.inkyResolver().applySymbolicStyle(styleCh, context.lastStyle());
                         if (newStyle == null) continue;
-                        if (lastAppend != index) appendPart(input, builder, lastAppend, index, context.lastStyle());
+                        appendPart(input, builder, lastAppend, index, context.lastStyle());
                         context.lastStyle(newStyle);
                         lastAppend = (++index) + 1;
                     }
@@ -85,8 +86,29 @@ public final class ComplexRichNode implements RichNode {
     }
 
     private void appendPart(@NotNull String input, @NotNull TextComponent.Builder builder, int start, int end, @NotNull Style style) {
+        if (start == end) return;
         String substring = input.substring(start, end);
         if (hasSlashes) substring = InkyMessage.unescape(substring);
         builder.append(text(substring).style(style));
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof ComplexRichNode that)) return false;
+        return textStr.equals(that.textStr) && tags.equals(that.tags);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(textStr, tags);
+    }
+
+    @Override
+    public String toString() {
+        return "ComplexRichNode{" +
+                "textStr='" + textStr + '\'' +
+                ", tags=" + tags +
+                '}';
     }
 }

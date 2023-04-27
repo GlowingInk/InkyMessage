@@ -19,8 +19,9 @@ Those are its possible tags:
 
 ## TODO (until full release)
 - Placeholders (for keybinds, translations, selectors)
-- Actually implement serializer (as all we have now is deserializer lol)
+- Fix symbolic styles stacking on serialization
 - Simplified MineDown-like style tags (e.g. `&[GitHub Link](https://github.com/)`, `&[Stop the server](/stop)`, `&[Bold text](bold)`)
+- Refactor to not use special characters to detect nodes
 - Closing colors(?)
 - More tests
 
@@ -45,7 +46,7 @@ Add to dependencies
 <dependency>
     <groupId>ink.glowing</groupId>
     <artifactId>inkymessage</artifactId>
-    <version>0.7.2</version> <!-- Check the version above -->
+    <version>0.8.0</version> <!-- Check the version above -->
 </dependency>
 ```
 ### Gradle
@@ -57,6 +58,6 @@ repositories {
 }
 
 dependencies {
-    implementation("ink.glowing:inkymessage:0.7.2") // Check the version above
+    implementation("ink.glowing:inkymessage:0.8.0") // Check the version above
 }
 ```

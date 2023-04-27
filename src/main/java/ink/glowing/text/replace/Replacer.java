@@ -1,84 +1,73 @@
 package ink.glowing.text.replace;
 
 import ink.glowing.text.rich.RichNode;
+import ink.glowing.text.utils.GeneralUtils;
+import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
+import java.util.function.Function;
+import java.util.function.Supplier;
+import java.util.regex.MatchResult;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import static ink.glowing.text.rich.RichNode.node;
+import static ink.glowing.text.rich.RichNode.literalNode;
+import static ink.glowing.text.rich.RichNode.nodeId;
 
-public sealed interface Replacer<T> permits Replacer.Literal, Replacer.Regex {
-    @NotNull T search();
+public sealed interface Replacer permits Replacer.Literal, Replacer.Regex {
+    @Contract(mutates = "param2")
+    @NotNull String replace(@NotNull String str, @NotNull List<RichNode> nodes);
 
-    @Nullable RichNode replace(@NotNull String found);
-
-    static @NotNull Replacer.Literal literalReplacer(@NotNull String search, @NotNull String replacement) {
-        return new Literal.Simple(search, replacement);
+    static @NotNull Replacer replacer(@NotNull String search, @NotNull String replacement) {
+        return replacer(search, literalNode(replacement));
     }
 
-    static @NotNull Replacer.Literal literalReplacer(@NotNull String search, @NotNull RichNode replacement) {
-        return new Literal.Simple(search, replacement);
+    static @NotNull Replacer replacer(@NotNull String search, @NotNull RichNode replacement) {
+        return replacer(search, () -> replacement);
     }
 
-    static @NotNull Replacer.Regex regexReplacer(@NotNull Pattern search, @NotNull String replacement) {
-        return new Regex.Simple(search, replacement);
+    static @NotNull Replacer replacer(@NotNull String search, @NotNull Supplier<RichNode> replacement) {
+        return new Literal(search, replacement);
     }
 
-    static @NotNull Replacer.Regex regexReplacer(@NotNull Pattern search, @NotNull RichNode replacement) {
-        return new Regex.Simple(search, replacement);
+    static @NotNull Replacer replacer(@NotNull Pattern search, @NotNull String replacement) {
+        return replacer(search, literalNode(replacement));
     }
 
-    non-sealed interface Literal extends Replacer<String> {
-        final class Simple implements Literal {
-            private final String search;
-            private final RichNode replacement;
+    static @NotNull Replacer replacer(@NotNull Pattern search, @NotNull RichNode replacement) {
+        return replacer(search, (MatchResult match) -> replacement);
+    }
 
-            private Simple(@NotNull String search, @NotNull String replacement) {
-                this(search, node(replacement, List.of()));
-            }
+    static @NotNull Replacer replacer(@NotNull Pattern search, @NotNull Supplier<RichNode> replacement) {
+        return replacer(search, (MatchResult match) -> replacement.get());
+    }
 
-            private Simple(@NotNull String search, @NotNull RichNode replacement) {
-                this.search = search;
-                this.replacement = replacement;
-            }
+    static @NotNull Replacer replacer(@NotNull Pattern search, @NotNull Function<MatchResult, RichNode> replacement) {
+        return new Replacer.Regex(search, replacement);
+    }
 
-            @Override
-            public @NotNull String search() {
-                return search;
-            }
-
-            @Override
-            public @NotNull RichNode replace(@NotNull String found) {
-                return replacement;
-            }
+    record Literal(@NotNull String search, @NotNull Supplier<RichNode> replacement) implements Replacer {
+        @Override
+        public @NotNull String replace(@NotNull String text, @NotNull List<RichNode> nodes) {
+            return GeneralUtils.replaceEach(text, search, () -> {
+                RichNode node = replacement.get();
+                if (node == null) return search;
+                nodes.add(node);
+                return nodeId(nodes.size() - 1);
+            });
         }
     }
-    
-    non-sealed interface Regex extends Replacer<Pattern> {
-        final class Simple implements Regex {
-            private final Pattern search;
-            private final RichNode replacement;
 
-            private Simple(@NotNull Pattern search, @NotNull String replacement) {
-                this(search, node(replacement, List.of()));
-            }
-
-            private Simple(@NotNull Pattern search, @NotNull RichNode replacement) {
-                this.search = search;
-                this.replacement = replacement;
-            }
-
-            @Override
-            public @NotNull Pattern search() {
-                return search;
-            }
-
-            @Override
-            public @NotNull RichNode replace(@NotNull String found) {
-                return replacement;
-            }
+    record Regex(@NotNull Pattern pattern, @NotNull Function<MatchResult, RichNode> replacement) implements Replacer {
+        @Override
+        public @NotNull String replace(@NotNull String text, @NotNull List<RichNode> nodes) {
+            return pattern.matcher(text).replaceAll((match) -> {
+                RichNode node = replacement.apply(match);
+                if (node == null) return Matcher.quoteReplacement(match.group());
+                nodes.add(node);
+                return nodeId(nodes.size() - 1);
+            });
         }
     }
 }

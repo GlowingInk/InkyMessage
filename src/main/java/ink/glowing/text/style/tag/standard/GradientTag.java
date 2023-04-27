@@ -17,7 +17,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.regex.Pattern;
 
-import static ink.glowing.text.utils.AdventureUtils.parseColor;
+import static ink.glowing.text.utils.AdventureUtils.parseNamedColor;
 
 public final class GradientTag implements StyleTag {
     private static final Pattern PER_SYMBOL = Pattern.compile(".");
@@ -133,7 +133,7 @@ public final class GradientTag implements StyleTag {
         String[] split = param.split("-");
         List<TextColor> colors = new ArrayList<>(split.length);
         for (String colorStr : split) {
-            TextColor color = parseColor(colorStr);
+            TextColor color = parseNamedColor(colorStr);
             if (color != null) colors.add(color);
         }
         return colors;

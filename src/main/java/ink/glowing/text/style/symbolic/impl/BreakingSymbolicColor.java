@@ -74,6 +74,11 @@ public final class BreakingSymbolicColor implements SymbolicStyle {
     }
 
     @Override
+    public boolean hasColor() {
+        return true;
+    }
+
+    @Override
     public boolean isApplied(@NotNull Style inputStyle) {
         return color.equals(inputStyle.color());
     }

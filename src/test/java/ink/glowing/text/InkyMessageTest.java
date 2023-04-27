@@ -1,7 +1,5 @@
 package ink.glowing.text;
 
-import de.themoep.minedown.adventure.MineDown;
-import de.themoep.minedown.adventure.MineDownStringifier;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.event.ClickEvent;
 import org.testng.annotations.DataProvider;
@@ -12,6 +10,8 @@ import java.util.random.RandomGenerator;
 
 import static ink.glowing.text.InkyMessage.inkyMessage;
 import static net.kyori.adventure.text.Component.text;
+import static net.kyori.adventure.text.event.ClickEvent.runCommand;
+import static net.kyori.adventure.text.event.HoverEvent.showText;
 import static net.kyori.adventure.text.format.NamedTextColor.*;
 import static net.kyori.adventure.text.format.TextDecoration.BOLD;
 import static net.kyori.adventure.text.format.TextDecoration.ITALIC;
@@ -43,7 +43,7 @@ public class InkyMessageTest {
                 },
                 {
                         "&[Fully clickable\\]](click:run /helloworld)",
-                        text("Fully clickable]").clickEvent(ClickEvent.runCommand("/helloworld"))
+                        text("Fully clickable]").clickEvent(runCommand("/helloworld"))
                 },
                 {
                         "&aGreen, &[clickable&c red](click:url http://glowing.ink/), red again",
@@ -80,22 +80,105 @@ public class InkyMessageTest {
 
     @Test(dataProvider = "deserializeData")
     public void deserializeTest(String text, Component expected) {
-        if (debug) debugMessages(text, expected);
+        if (debug) debugDeserializer(text, expected);
         try {
             assertEquals(
                     inkyMessage().deserialize(text),
                     expected
             );
         } catch (Throwable throwable) {
-            if (!debug) debugMessages(text, expected);
+            if (!debug) debugDeserializer(text, expected);
             throw throwable;
         }
     }
 
-    private void debugMessages(String text, Component comp) {
+    private void debugDeserializer(String text, Component comp) {
         System.out.println("Inky: " + miniMessage().serialize(inkyMessage().deserialize(text)));
         System.out.println("Mini: " + miniMessage().serialize(comp));
-        System.out.println("Down: " + new MineDownStringifier().stringify(comp));
+    }
+
+    @DataProvider
+    public Object[][] serializeData() {
+        return new Object[][] {
+                {
+                        text("Hi"),
+                        "Hi"
+                },
+                {
+                        text("Green").color(GREEN),
+                        "&aGreen"
+                },
+                {
+                        text()
+                                .append(text("Bold green").color(GREEN).decorate(BOLD))
+                                .append(text(" and "))
+                                .append(text("blue").color(BLUE)).build(),
+                        "&a&lBold green&r and &9blue"
+                },
+                {
+                        text("With hover").hoverEvent(showText(text("Hover!"))),
+                        "&[With hover](hover:text Hover!)"
+                },
+                {
+                        text("Hover and click").hoverEvent(showText(text("Hover!"))).clickEvent(runCommand("cmd")),
+                        "&[Hover and click](hover:text Hover!)(click:run cmd)"
+                },
+                {
+                        text()
+                                .append(text("With "))
+                                .append(text("inner ")
+                                        .append(text("deep").clickEvent(runCommand("cmd")))
+                                .append(text(" component")).hoverEvent(showText(text("Wow")))).build(),
+                        "With &[inner &[deep](click:run cmd) component](hover:text Wow)"
+                },
+                {
+                        text()
+                                .append(text("First green").color(GREEN).decorate(BOLD))
+                                .append(text(" then second green").color(GREEN).decorate(BOLD)).build(),
+                        "&a&lFirst green&a&l then second green"
+                }
+        };
+    }
+
+    @Test(dataProvider = "serializeData")
+    public void serializeTest(Component text, String expected) {
+        if (debug) debugSerializer(text);
+        try {
+            assertEquals(
+                    inkyMessage().serialize(text),
+                    expected
+            );
+        } catch (Throwable throwable) {
+            if (!debug) debugSerializer(text);
+            throw throwable;
+        }
+    }
+
+    private void debugSerializer(Component comp) {
+        System.out.println("Inky: " + inkyMessage().serialize(comp));
+        System.out.println("Mini: " + miniMessage().serialize(comp));
+    }
+
+    @DataProvider
+    public Object[][] serializeAndBackData() {
+        return new Object[][] {
+                {text("Test")},
+                {text("Green").color(GREEN)},
+                {text()
+                        .append(text("Bold green").color(GREEN).decorate(BOLD))
+                        .append(text(" and "))
+                        .append(text("blue").color(BLUE)).build()}
+        };
+    }
+
+    @Test(dataProvider = "serializeAndBackData")
+    public void serializeAndBackTest(Component text) {
+        String ser = inkyMessage().serialize(text);
+        Component deser = inkyMessage().deserialize(ser);
+        assertEquals(
+                inkyMessage().serialize(deser),
+                ser
+        );
     }
 
     private static final String SYMBOLS = "abcde&[]()\\:";
@@ -158,18 +241,15 @@ public class InkyMessageTest {
         return new Object[][] {
                 {
                         "<red>This text is red! <hover:show_text:Cool hover text><click:run_command:test_command><red>Pressing this will <gold>run a command.</click></hover><bold><gold> It's bold yellow",
-                        "&cThis text is red! &[Pressing this will &6run a command.](click:run test_command)(hover:text Cool hover text)&l It's bold yellow",
-                        "&cThis text is red! [&cPressing this will &6run a command.](/test_command Cool hover text)&6&l It's bold yellow"
+                        "&cThis text is red! &[Pressing this will &6run a command.](click:run test_command)(hover:text Cool hover text)&l It's bold yellow"
                 },
                 {
                         "<gradient:white:black:yellow:red>qwertyuiopasdfghjkl;'zxcvbnm,.</gradient>",
-                        "&[qwertyuiopasdfghjkl;'zxcvbnm,.](gradient:white-black-yellow-red)",
-                        "&white-black-yellow-red&qwertyuiopasdfghjkl;'zxcvbnm,."
+                        "&[qwertyuiopasdfghjkl;'zxcvbnm,.](gradient:white-black-yellow-red)"
                 },
                 {
                         "<rainbow>qwertyuiopasdfghjkl;'zxcvbnm,.</rainbow>",
-                        "&[qwertyuiopasdfghjkl;'zxcvbnm,.](gradient:rainbow)",
-                        "&rainbow&qwertyuiopasdfghjkl;'zxcvbnm,."
+                        "&[qwertyuiopasdfghjkl;'zxcvbnm,.](gradient:rainbow)"
                 }
         };
     }
@@ -179,7 +259,7 @@ public class InkyMessageTest {
             description = "The \"test\" exists purely for getting a rough idea of deserializer performance vs MiniMessage vs MineDown",
             enabled = false
     )
-    public void performanceTest(String mini, String inky, String down) {
+    public void performanceTest(String mini, String inky) {
         int warmup = 100000;
         int test = 10000;
 
@@ -190,9 +270,6 @@ public class InkyMessageTest {
         var miniMessage = miniMessage();
         for (int i = 0; i < warmup; i++) {
             miniMessage.deserialize(mini);
-        }
-        for (int i = 0; i < warmup; i++) {
-            MineDown.parse(down);
         }
 
         long start, end;
@@ -212,17 +289,11 @@ public class InkyMessageTest {
         System.out.println(end - start);
 
         start = System.currentTimeMillis();
-        for (int i = 0; i < test; i++) {
-            MineDown.parse(down);
-        }
         end = System.currentTimeMillis();
         System.out.println(end - start);
 
         System.out.println("Inky: " + miniMessage.serialize(inkyMessage.deserialize(inky)));
         System.out.println("<reset>");
         System.out.println("Mini: " + miniMessage.serialize(miniMessage.deserialize(mini)));
-        System.out.println("<reset>");
-        System.out.println("Down: " + miniMessage.serialize(MineDown.parse(down)));
-        System.out.println("<reset>");
     }
 }

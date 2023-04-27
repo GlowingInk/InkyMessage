@@ -12,7 +12,7 @@ import org.jetbrains.annotations.Unmodifiable;
 import java.util.List;
 
 import static ink.glowing.text.style.tag.standard.GradientTag.gradientTag;
-import static ink.glowing.text.utils.AdventureUtils.parseColor;
+import static ink.glowing.text.utils.AdventureUtils.parseNamedColor;
 
 public final class ColorTag implements StyleTag {
     public static @NotNull ColorTag colorTag() {
@@ -23,7 +23,7 @@ public final class ColorTag implements StyleTag {
 
     @Override
     public @NotNull Component modify(@NotNull BuildContext context, @NotNull Component text, @NotNull String param, @NotNull String value) {
-        TextColor color = parseColor(param);
+        TextColor color = parseNamedColor(param);
         if (color != null) {
             return text.color(color);
         } else if (param.equals("null")) {

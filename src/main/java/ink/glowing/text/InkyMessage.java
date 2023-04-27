@@ -1,10 +1,9 @@
 package ink.glowing.text;
 
 import ink.glowing.text.rich.BuildContext;
-import ink.glowing.text.rich.RichNode;
+import ink.glowing.text.style.symbolic.SymbolicStyle;
 import ink.glowing.text.utils.function.InstanceProvider;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.ComponentIteratorType;
 import net.kyori.adventure.text.KeybindComponent;
 import net.kyori.adventure.text.ScoreComponent;
 import net.kyori.adventure.text.SelectorComponent;
@@ -14,7 +13,7 @@ import net.kyori.adventure.text.serializer.ComponentSerializer;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
-import java.util.List;
+import java.util.TreeSet;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -50,9 +49,16 @@ public class InkyMessage implements ComponentSerializer<Component, Component, St
      * @return converted text component
      */
     public @NotNull Component deserialize(@NotNull String inputText, @NotNull InkyMessageResolver inkyResolver) {
-        List<RichNode> richNodes = new ArrayList<>();
-        BuildContext context = new BuildContext(richNodes, inkyResolver);
+        return deserialize(inputText, new BuildContext(new ArrayList<>(), inkyResolver));
+    }
 
+    /**
+     * Convert string into adventure text component
+     * @param inputText input string
+     * @param context context to build with
+     * @return converted text component
+     */
+    public @NotNull Component deserialize(@NotNull String inputText, @NotNull BuildContext context) {
         String oldText = inputText;
         int minimalIndex = inputText.indexOf("](");
         String newText = parseRich(oldText, minimalIndex, context);
@@ -60,7 +66,7 @@ public class InkyMessage implements ComponentSerializer<Component, Component, St
             oldText = newText;
             newText = parseRich(oldText, 2, context);
         }
-        return node(newText).render(new BuildContext(richNodes, inkyResolver)).compact();
+        return node(newText).render(context).compact();
     }
 
     private static @NotNull String parseRich(@NotNull String input, int fromIndex, @NotNull BuildContext context) {
@@ -100,30 +106,72 @@ public class InkyMessage implements ComponentSerializer<Component, Component, St
     }
 
     @Override
-    public @NotNull String serialize(@NotNull Component component) {
-        return serialize(component, standardInkyResolver());
+    public @NotNull String serialize(@NotNull Component text) {
+        return serialize(text, standardInkyResolver());
     }
-    public @NotNull String serialize(@NotNull Component component, @NotNull InkyMessageResolver resolver) {
+
+    public @NotNull String serialize(@NotNull Component text, @NotNull InkyMessageResolver resolver) {
         StringBuilder builder = new StringBuilder();
-        for (var child : component.iterable(ComponentIteratorType.BREADTH_FIRST)) {
-            serialize(builder, child);
-        }
+        serialize(builder, new TreeSet<>(), text, resolver, new boolean[]{false});
         return builder.toString();
     }
 
-    private void serialize(@NotNull StringBuilder builder, @NotNull Component component) {
-        if (component instanceof TextComponent text) {
-            builder.append(text.content());
-        } else if (component instanceof TranslatableComponent translatable) {
-            builder.append(translatable.key());
-        } else if (component instanceof KeybindComponent keybind) {
-            builder.append(keybind.keybind());
-        } else if (component instanceof ScoreComponent score) {
-            builder.append(score.objective());
-        } else if (component instanceof SelectorComponent selector) {
-            builder.append(selector.pattern());
+    private void serialize(
+            @NotNull StringBuilder builder,
+            final @NotNull TreeSet<SymbolicStyle> outerStyle,
+            @NotNull Component text,
+            @NotNull InkyMessageResolver resolver,
+            boolean @NotNull [] previousStyled
+    ) {
+        var tags = resolver.readStyleTags(text);
+        if (!tags.isEmpty()) {
+            builder.append("&[");
+        }
+        var currentStyle = resolver.readSymbolics(text);
+        if (previousStyled[0] && (currentStyle.isEmpty() || !currentStyle.first().resets())) {
+            if (outerStyle.isEmpty()) {
+                builder.append(resolver.symbolicReset().asFormatted());
+            } else for (var symb : outerStyle) {
+                builder.append(symb.asFormatted());
+            }
+        }
+        if (currentStyle.isEmpty()) {
+            previousStyled[0] = false;
         } else {
-            builder.append('?');
+            previousStyled[0] = true;
+            for (var symb : currentStyle) {
+                builder.append(symb.asFormatted());
+            }
+        }
+
+        builder.append(escape(asString(text)));
+        var children = text.children();
+        var newOuterStyle = new TreeSet<>(outerStyle);
+        newOuterStyle.addAll(currentStyle);
+        for (var child : children) {
+            serialize(builder, newOuterStyle, child, resolver, previousStyled);
+        }
+        if (!tags.isEmpty()) {
+            builder.append("]");
+            for (var tag : tags) {
+                builder.append(tag);
+            }
+        }
+    }
+
+    private static String asString(@NotNull Component component) {
+        if (component instanceof TextComponent text) {
+            return text.content();
+        } else if (component instanceof TranslatableComponent translatable) {
+            return "{tl:" + translatable.key() + "}"; // TODO implement; args, fallback
+        } else if (component instanceof KeybindComponent keybind) {
+            return "{keybind:" + keybind.keybind() + "}"; // TODO implement
+        } else if (component instanceof ScoreComponent score) {
+            return score.objective(); // TODO implement
+        } else if (component instanceof SelectorComponent selector) {
+            return selector.pattern(); // TODO implement
+        } else {
+            return "?";
         }
     }
 

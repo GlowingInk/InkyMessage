@@ -6,12 +6,17 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.Objects;
 
-public record SymbolicReset(char symbol) implements SymbolicStyle {
-    public static final SymbolicReset NOTCHIAN_RESET = new SymbolicReset('r');
+public record SimpleSymbolicReset(char symbol) implements SymbolicStyle {
+    public static final SimpleSymbolicReset NOTCHIAN_RESET = new SimpleSymbolicReset('r');
 
     @Override
     public boolean resets() {
         return true;
+    }
+
+    @Override
+    public boolean hasColor() {
+        return false;
     }
 
     @Override
@@ -26,7 +31,7 @@ public record SymbolicReset(char symbol) implements SymbolicStyle {
 
     @Override
     public boolean equals(Object obj) {
-        return obj instanceof SymbolicReset ssr && ssr.symbol == symbol;
+        return obj instanceof SimpleSymbolicReset ssr && ssr.symbol == symbol;
     }
 
     @Override

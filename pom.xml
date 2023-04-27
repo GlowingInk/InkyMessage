@@ -6,7 +6,7 @@
 
     <groupId>ink.glowing</groupId>
     <artifactId>inkymessage</artifactId>
-    <version>0.7.3-SNAPSHOT</version>
+    <version>0.8.0</version>
 
     <properties>
         <adventure.version>4.13.1</adventure.version>
@@ -35,20 +35,7 @@
             <version>4.13.1</version>
             <scope>test</scope>
         </dependency>
-        <dependency>
-            <groupId>de.themoep</groupId>
-            <artifactId>minedown-adventure</artifactId>
-            <version>1.7.1-SNAPSHOT</version>
-            <scope>test</scope>
-        </dependency>
     </dependencies>
-
-    <repositories>
-        <repository>
-            <id>minebench-repo</id>
-            <url>https://repo.minebench.de/</url>
-        </repository>
-    </repositories>
 
     <distributionManagement>
         <repository>
