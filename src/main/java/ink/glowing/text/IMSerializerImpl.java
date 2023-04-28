@@ -13,8 +13,8 @@ import java.util.TreeSet;
 
 import static ink.glowing.text.InkyMessage.escape;
 
-final class SerializerImpl {
-    private SerializerImpl() {}
+final class IMSerializerImpl {
+    private IMSerializerImpl() {}
 
     public static @NotNull String serialize(@NotNull Component text, @NotNull InkyMessage.Resolver resolver) {
         StringBuilder builder = new StringBuilder();

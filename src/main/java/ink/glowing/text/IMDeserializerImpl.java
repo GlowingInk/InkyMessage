@@ -16,7 +16,7 @@ import static ink.glowing.text.InkyMessage.isEscapedAt;
 import static net.kyori.adventure.text.Component.empty;
 import static net.kyori.adventure.text.Component.text;
 
-final class DeserializerImpl {
+final class IMDeserializerImpl {
     private static final char END = 0;
 
     private final String textStr;
@@ -25,7 +25,7 @@ final class DeserializerImpl {
     private final TreeSet<Replacer.FoundSpot> replaceSpots;
     private int globalIndex;
 
-    private DeserializerImpl(@NotNull String textStr, @NotNull InkyMessage.Resolver resolver) {
+    private IMDeserializerImpl(@NotNull String textStr, @NotNull InkyMessage.Resolver resolver) {
         this.textStr = textStr;
         this.hasSlashes = textStr.indexOf('\\') != -1;
         this.resolver = resolver;
@@ -34,7 +34,7 @@ final class DeserializerImpl {
 
     public static @NotNull Component parse(@NotNull String textStr, @NotNull BuildContext context) {
         if (textStr.length() == 0) return empty();
-        return new DeserializerImpl(textStr, context.resolver())
+        return new IMDeserializerImpl(textStr, context.resolver())
                 .parseInner(0, END, context)
                 .compact();
     }

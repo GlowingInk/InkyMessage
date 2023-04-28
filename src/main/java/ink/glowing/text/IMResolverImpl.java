@@ -27,7 +27,7 @@ import java.util.function.Function;
 import static ink.glowing.text.replace.StandardReplacers.urlReplacer;
 import static ink.glowing.text.style.symbolic.SymbolicStyle.*;
 
-final class ResolverImpl implements InkyMessage.Resolver {
+final class IMResolverImpl implements InkyMessage.Resolver {
     static final InkyMessage.Resolver STANDARD_RESOLVER = InkyMessage.Resolver.resolver()
             .addTags(ColorTag.colorTag(),
                     HoverTag.hoverTag(),
@@ -46,7 +46,7 @@ final class ResolverImpl implements InkyMessage.Resolver {
     private final Map<Character, SymbolicStyle> symbolics;
     private final SymbolicStyle symbolicReset;
 
-    ResolverImpl(
+    IMResolverImpl(
             @NotNull Iterable<StyleTag<?>> tags,
             @NotNull Collection<Replacer> replacers,
             @NotNull Iterable<SymbolicStyle> symbolics,

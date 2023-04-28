@@ -62,7 +62,7 @@ public final class InkyMessage implements ComponentSerializer<Component, Compone
      * @return converted text component
      */
     public @NotNull Component deserialize(@NotNull String inputText, @NotNull BuildContext context) {
-        return DeserializerImpl.parse(inputText, context);
+        return IMDeserializerImpl.parse(inputText, context);
     }
 
     @Override
@@ -71,7 +71,7 @@ public final class InkyMessage implements ComponentSerializer<Component, Compone
     }
 
     public @NotNull String serialize(@NotNull Component text, @NotNull Resolver resolver) {
-        return SerializerImpl.serialize(text, resolver);
+        return IMSerializerImpl.serialize(text, resolver);
     }
 
     public static @NotNull String escape(@NotNull String text) {
@@ -118,7 +118,7 @@ public final class InkyMessage implements ComponentSerializer<Component, Compone
          * @return a standard resolver
          */
         static @NotNull InkyMessage.Resolver standardResolver() {
-            return ResolverImpl.STANDARD_RESOLVER;
+            return IMResolverImpl.STANDARD_RESOLVER;
         }
 
         /**
@@ -253,7 +253,7 @@ public final class InkyMessage implements ComponentSerializer<Component, Compone
         @Contract("-> new")
         public @NotNull InkyMessage.Resolver build() {
             Objects.requireNonNull(symbolicReset, "InkyMessageResolver requires symbolic reset to be provided");
-            return new ResolverImpl(tags, replacers, symbolics, symbolicReset);
+            return new IMResolverImpl(tags, replacers, symbolics, symbolicReset);
         }
     }
 }
