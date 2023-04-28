@@ -109,6 +109,10 @@ public class InkyMessageTest {
                         "&aGreen"
                 },
                 {
+                        text().append(text("Italic ").decorate(ITALIC)).append(text("then bold").decorate(BOLD)).build(),
+                        "&oItalic &r&lthen bold"
+                },
+                {
                         text()
                                 .append(text("Bold green").color(GREEN).decorate(BOLD))
                                 .append(text(" and "))
@@ -135,6 +139,10 @@ public class InkyMessageTest {
                         text()
                                 .append(text("First green").color(GREEN).decorate(BOLD))
                                 .append(text(" then second green").color(GREEN).decorate(BOLD)).build(),
+                        "&a&lFirst green&a&l then second green"
+                },
+                {
+                        text("First green").append(text(" then second green")).color(GREEN).decorate(BOLD),
                         "&a&lFirst green&a&l then second green"
                 }
         };

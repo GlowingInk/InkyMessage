@@ -144,7 +144,7 @@ public class InkyMessage implements ComponentSerializer<Component, Component, St
             }
         }
 
-        builder.append(escape(asString(text)));
+        builder.append(asString(text, resolver));
         var children = text.children();
         var newOuterStyle = new TreeSet<>(outerStyle);
         newOuterStyle.addAll(currentStyle);
@@ -159,13 +159,20 @@ public class InkyMessage implements ComponentSerializer<Component, Component, St
         }
     }
 
-    private static String asString(@NotNull Component component) {
+    private String asString(@NotNull Component component, @NotNull InkyMessageResolver resolver) {
         if (component instanceof TextComponent text) {
-            return text.content();
+            return escape(text.content());
         } else if (component instanceof TranslatableComponent translatable) {
-            return "{tl:" + translatable.key() + "}"; // TODO implement; args, fallback
+            StringBuilder builder = new StringBuilder("&{lang:" + translatable.key() + "}");
+            for (var arg : translatable.args()) {
+                builder.append("(arg:").append(serialize(arg, resolver)).append(')');
+            }
+            if (translatable.fallback() != null) {
+                builder.append("(fallback:").append(escape(translatable.fallback())).append(')');
+            }
+            return builder.toString();
         } else if (component instanceof KeybindComponent keybind) {
-            return "{keybind:" + keybind.keybind() + "}"; // TODO implement
+            return "&{key:" + keybind.keybind() + "}"; // TODO implement
         } else if (component instanceof ScoreComponent score) {
             return score.objective(); // TODO implement
         } else if (component instanceof SelectorComponent selector) {
