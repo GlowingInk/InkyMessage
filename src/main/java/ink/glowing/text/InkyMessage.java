@@ -110,7 +110,7 @@ public final class InkyMessage implements ComponentSerializer<Component, Compone
         }
     }
 
-    public interface Resolver {
+    public sealed interface Resolver permits IMResolverImpl {
         /**
          * Contains recommended options for a resolver
          * Using standard style tags, replacers, and Notchian symbolic styles
@@ -145,7 +145,7 @@ public final class InkyMessage implements ComponentSerializer<Component, Compone
         @NotNull InkyMessage.ResolverBuilder toBuilder();
     }
 
-    static class ResolverBuilder implements AbstractBuilder<Resolver> {
+    public static class ResolverBuilder implements AbstractBuilder<Resolver> {
         private Set<StyleTag<?>> tags;
         private Set<Replacer> replacers;
         private Set<SymbolicStyle> symbolics;
