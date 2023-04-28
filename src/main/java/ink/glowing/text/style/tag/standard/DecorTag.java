@@ -1,7 +1,6 @@
 package ink.glowing.text.style.tag.standard;
 
-import ink.glowing.text.InkyMessageResolver;
-import ink.glowing.text.rich.BuildContext;
+import ink.glowing.text.InkyMessage;
 import ink.glowing.text.style.tag.StyleTag;
 import ink.glowing.text.utils.function.InstanceProvider;
 import net.kyori.adventure.text.Component;
@@ -12,15 +11,15 @@ import org.jetbrains.annotations.Unmodifiable;
 
 import java.util.List;
 
-public final class DecorTag implements StyleTag {
+public final class DecorTag implements StyleTag.Plain {
     public static @NotNull DecorTag decorTag() {
-        return Provider.PROVIDER.get();
+        return Provider.PROVIDER.instance;
     }
 
     private DecorTag() {}
 
     @Override
-    public @NotNull Component modify(@NotNull BuildContext context, @NotNull Component text, @NotNull String param, @NotNull String value) {
+    public @NotNull Component modify(@NotNull Component text, @NotNull String param, @NotNull String value) {
         TextDecoration decoration = decorByName(param);
         if (decoration == null) return text;
         return switch (value) {
@@ -31,7 +30,7 @@ public final class DecorTag implements StyleTag {
     }
 
     @Override
-    public @NotNull @Unmodifiable List<Prepared> read(@NotNull InkyMessageResolver resolver, @NotNull Component text) {
+    public @NotNull @Unmodifiable List<String> read(@NotNull InkyMessage.Resolver resolver, @NotNull Component text) {
         return List.of(); // Decorators are handled by &
     }
 

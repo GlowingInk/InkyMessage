@@ -1,8 +1,8 @@
 package ink.glowing.text.style.symbolic;
 
-import ink.glowing.text.style.symbolic.impl.BreakingSymbolicColor;
-import ink.glowing.text.style.symbolic.impl.ChainedSymbolicDecoration;
-import ink.glowing.text.style.symbolic.impl.SimpleSymbolicReset;
+import ink.glowing.text.style.symbolic.standard.BreakingSymbolicColor;
+import ink.glowing.text.style.symbolic.standard.ChainedSymbolicDecoration;
+import ink.glowing.text.style.symbolic.standard.SimpleSymbolicReset;
 import net.kyori.adventure.text.format.Style;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Unmodifiable;

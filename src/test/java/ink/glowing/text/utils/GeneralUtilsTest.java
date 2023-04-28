@@ -5,7 +5,7 @@ import org.testng.annotations.Test;
 
 import java.util.List;
 
-import static ink.glowing.text.utils.GeneralUtils.buildList;
+import static ink.glowing.text.utils.GeneralUtils.concatList;
 import static ink.glowing.text.utils.GeneralUtils.replaceEach;
 import static org.testng.Assert.assertEquals;
 
@@ -20,7 +20,7 @@ public class GeneralUtilsTest {
     @Test(dataProvider = "buildListData")
     public void buildListTest(List<String>[] lists, List<String> expected) {
         assertEquals(
-                buildList(lists),
+                concatList(lists),
                 expected
         );
     }
@@ -35,7 +35,7 @@ public class GeneralUtilsTest {
     @Test(dataProvider = "replaceEachData")
     public void replaceEachTest(String input, String search, String replacement) { // TODO Some better replacement
         assertEquals(
-                replaceEach(input, search, () -> replacement),
+                replaceEach(input, search, (i) -> replacement),
                 input.replace(search, replacement)
         );
     }

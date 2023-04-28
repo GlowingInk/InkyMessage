@@ -1,7 +1,6 @@
 package ink.glowing.text.style.tag.standard;
 
-import ink.glowing.text.InkyMessageResolver;
-import ink.glowing.text.rich.BuildContext;
+import ink.glowing.text.InkyMessage;
 import ink.glowing.text.style.tag.StyleTag;
 import ink.glowing.text.utils.function.FloatFunction;
 import ink.glowing.text.utils.function.InstanceProvider;
@@ -19,18 +18,18 @@ import java.util.regex.Pattern;
 
 import static ink.glowing.text.utils.AdventureUtils.parseNamedColor;
 
-public final class GradientTag implements StyleTag {
+public final class GradientTag implements StyleTag.Plain {
     private static final Pattern PER_SYMBOL = Pattern.compile(".");
     private static final Pattern EVERYTHING = Pattern.compile(".*");
     private static final TextColor AVERAGE_RAINBOW = TextColor.color(0x7F7F7F);
 
     public static @NotNull GradientTag gradientTag() {
-        return Provider.PROVIDER.get();
+        return Provider.PROVIDER.instance;
     }
 
     // FIXME That's really not how this should be done
     @Override
-    public @NotNull Component modify(@NotNull BuildContext context, @NotNull Component text, @NotNull String param, @NotNull String value) {
+    public @NotNull Component modify(@NotNull Component text, @NotNull String param, @NotNull String value) {
         FloatFunction<TextColor> colorGetter;
         int indexedLength;
         if (param.equals("spectrum") || param.equals("rainbow")) {
@@ -140,7 +139,7 @@ public final class GradientTag implements StyleTag {
     }
 
     @Override
-    public @NotNull @Unmodifiable List<Prepared> read(@NotNull InkyMessageResolver resolver, @NotNull Component text) {
+    public @NotNull @Unmodifiable List<String> read(@NotNull InkyMessage.Resolver resolver, @NotNull Component text) {
         return List.of();
     }
 

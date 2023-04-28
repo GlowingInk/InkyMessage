@@ -1,4 +1,4 @@
-package ink.glowing.text.style.symbolic.impl;
+package ink.glowing.text.style.symbolic.standard;
 
 import ink.glowing.text.style.symbolic.SymbolicStyle;
 import ink.glowing.text.utils.GeneralUtils;
@@ -32,7 +32,7 @@ public final class BreakingSymbolicColor implements SymbolicStyle {
             breakingColor('f', WHITE)
     );
 
-    public static final List<SymbolicStyle> BEDROCK_COLORS = GeneralUtils.buildImmutableList(
+    public static final List<SymbolicStyle> BEDROCK_COLORS = GeneralUtils.concatImmutableList(
             NOTCHIAN_COLORS,
             List.of(
                     breakingColor('g', color(0xDDD605)),

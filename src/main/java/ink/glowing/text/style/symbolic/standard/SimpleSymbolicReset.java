@@ -1,4 +1,4 @@
-package ink.glowing.text.style.symbolic.impl;
+package ink.glowing.text.style.symbolic.standard;
 
 import ink.glowing.text.style.symbolic.SymbolicStyle;
 import net.kyori.adventure.text.format.Style;

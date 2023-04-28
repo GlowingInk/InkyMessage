@@ -64,10 +64,11 @@ public class InkyMessageTest {
                         inkyMessage().deserialize("&#123456Hex colors are cool")
                 },
                 {
-                        "Goto https://github.com/GlowingInk.",
-                        text("Goto ")
-                                .append(text("https://github.com/GlowingInk").clickEvent(ClickEvent.openUrl("https://github.com/GlowingInk")))
-                                .append(text("."))
+                        "&aGoto https://github.com/GlowingInk.",
+                        text()
+                                .append(text("Goto ").color(GREEN))
+                                .append(text("https://github.com/GlowingInk").clickEvent(ClickEvent.openUrl("https://github.com/GlowingInk")).color(GREEN))
+                                .append(text(".").color(GREEN)).build()
                 },
                 {
                         "&[aaa&[bbb&[ccc](decor:bold)bbb](decor:italic)&faaa](color:red)",
@@ -189,14 +190,14 @@ public class InkyMessageTest {
         );
     }
 
-    private static final String SYMBOLS = "abcde&[]()\\:";
+    private static final String SYMBOLS = "abcde&[](){}\\:";
 
     @Test(description = "Basically hoping that we'll get no exceptions while creating a hot stinky mess")
     public void randomTest() {
         RandomGenerator rng = ThreadLocalRandom.current();
         for (int i = 0; i < 2048; i++) {
-            StringBuilder builder = new StringBuilder(128);
-            for (int j = 0; j < 128; j++) {
+            StringBuilder builder = new StringBuilder(256);
+            for (int j = 0; j < 256; j++) {
                 builder.append(SYMBOLS.charAt(rng.nextInt(SYMBOLS.length())));
             }
             inkyMessage().deserialize(builder.toString());
@@ -239,7 +240,7 @@ public class InkyMessageTest {
     @Test(dataProvider = "isEscapedData")
     public void isEscapedTest(String input, int index, boolean expected) {
         assertEquals(
-                InkyMessage.isEscaped(input, index),
+                InkyMessage.isEscapedAt(input, index),
                 expected
         );
     }
@@ -264,7 +265,7 @@ public class InkyMessageTest {
 
     @Test(
             dataProvider = "performanceData",
-            description = "The \"test\" exists purely for getting a rough idea of deserializer performance vs MiniMessage vs MineDown",
+            description = "The \"test\" exists purely for getting a rough idea of deserializer performance vs MiniMessage",
             enabled = false
     )
     public void performanceTest(String mini, String inky) {
@@ -293,10 +294,6 @@ public class InkyMessageTest {
         for (int i = 0; i < test; i++) {
             miniMessage.deserialize(mini);
         }
-        end = System.currentTimeMillis();
-        System.out.println(end - start);
-
-        start = System.currentTimeMillis();
         end = System.currentTimeMillis();
         System.out.println(end - start);
 

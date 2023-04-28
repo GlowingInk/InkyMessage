@@ -1,10 +1,11 @@
 package ink.glowing.text.replace;
 
-import ink.glowing.text.rich.RichNode;
 import ink.glowing.text.utils.GeneralUtils;
-import org.jetbrains.annotations.Contract;
+import net.kyori.adventure.text.Component;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Unmodifiable;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -12,62 +13,75 @@ import java.util.regex.MatchResult;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import static ink.glowing.text.rich.RichNode.literalNode;
-import static ink.glowing.text.rich.RichNode.nodeId;
+import static net.kyori.adventure.text.Component.text;
 
 public sealed interface Replacer permits Replacer.Literal, Replacer.Regex {
-    @Contract(mutates = "param2")
-    @NotNull String replace(@NotNull String str, @NotNull List<RichNode> nodes);
+    @NotNull @Unmodifiable List<FoundSpot> findSpots(@NotNull String str);
 
     static @NotNull Replacer replacer(@NotNull String search, @NotNull String replacement) {
-        return replacer(search, literalNode(replacement));
+        return replacer(search, text(replacement));
     }
 
-    static @NotNull Replacer replacer(@NotNull String search, @NotNull RichNode replacement) {
+    static @NotNull Replacer replacer(@NotNull String search, @NotNull Component replacement) {
         return replacer(search, () -> replacement);
     }
 
-    static @NotNull Replacer replacer(@NotNull String search, @NotNull Supplier<RichNode> replacement) {
+    static @NotNull Replacer replacer(@NotNull String search, @NotNull Supplier<Component> replacement) {
         return new Literal(search, replacement);
     }
 
     static @NotNull Replacer replacer(@NotNull Pattern search, @NotNull String replacement) {
-        return replacer(search, literalNode(replacement));
+        return replacer(search, text(replacement));
     }
 
-    static @NotNull Replacer replacer(@NotNull Pattern search, @NotNull RichNode replacement) {
+    static @NotNull Replacer replacer(@NotNull Pattern search, @NotNull Component replacement) {
         return replacer(search, (MatchResult match) -> replacement);
     }
 
-    static @NotNull Replacer replacer(@NotNull Pattern search, @NotNull Supplier<RichNode> replacement) {
+    static @NotNull Replacer replacer(@NotNull Pattern search, @NotNull Supplier<Component> replacement) {
         return replacer(search, (MatchResult match) -> replacement.get());
     }
 
-    static @NotNull Replacer replacer(@NotNull Pattern search, @NotNull Function<MatchResult, RichNode> replacement) {
+    static @NotNull Replacer replacer(@NotNull Pattern search, @NotNull Function<MatchResult, Component> replacement) {
         return new Replacer.Regex(search, replacement);
     }
 
-    record Literal(@NotNull String search, @NotNull Supplier<RichNode> replacement) implements Replacer {
+    record Literal(@NotNull String search, @NotNull Supplier<Component> replacement) implements Replacer {
         @Override
-        public @NotNull String replace(@NotNull String text, @NotNull List<RichNode> nodes) {
-            return GeneralUtils.replaceEach(text, search, () -> {
-                RichNode node = replacement.get();
-                if (node == null) return search;
-                nodes.add(node);
-                return nodeId(nodes.size() - 1);
+        public @NotNull List<FoundSpot> findSpots(@NotNull String text) {
+            List<FoundSpot> spots = new ArrayList<>(0);
+            GeneralUtils.findEach(text, search, (index) -> {
+                Component node = replacement.get();
+                if (node == null) return;
+                spots.add(new FoundSpot(index, search.length(), () -> node));
             });
+            return spots;
         }
     }
 
-    record Regex(@NotNull Pattern pattern, @NotNull Function<MatchResult, RichNode> replacement) implements Replacer {
+    record Regex(@NotNull Pattern pattern, @NotNull Function<MatchResult, Component> replacement) implements Replacer {
         @Override
-        public @NotNull String replace(@NotNull String text, @NotNull List<RichNode> nodes) {
-            return pattern.matcher(text).replaceAll((match) -> {
-                RichNode node = replacement.apply(match);
-                if (node == null) return Matcher.quoteReplacement(match.group());
-                nodes.add(node);
-                return nodeId(nodes.size() - 1);
-            });
+        public @NotNull List<FoundSpot> findSpots(@NotNull String text) {
+            Matcher matcher = pattern.matcher(text);
+            if (!matcher.find()) return List.of();
+            List<FoundSpot> spots = new ArrayList<>(1);
+            do {
+                MatchResult match = matcher.toMatchResult();
+                spots.add(new FoundSpot(match.start(), match.end(), () -> replacement.apply(match)));
+            } while (matcher.find());
+            return spots;
+        }
+    }
+
+    record FoundSpot(int start, int end, Supplier<Component> replacement) implements Comparable<FoundSpot> {
+        @Override
+        public int compareTo(@NotNull Replacer.FoundSpot o) {
+            if (start == o.start) {
+                return Integer.compare(o.end, end);
+            } else if (start < o.start) {
+                return 1;
+            }
+            return -1;
         }
     }
 }

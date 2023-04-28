@@ -1,7 +1,6 @@
 package ink.glowing.text.style.tag.standard;
 
-import ink.glowing.text.InkyMessageResolver;
-import ink.glowing.text.rich.BuildContext;
+import ink.glowing.text.InkyMessage;
 import ink.glowing.text.style.tag.StyleTag;
 import ink.glowing.text.utils.function.InstanceProvider;
 import net.kyori.adventure.key.Key;
@@ -11,24 +10,24 @@ import org.jetbrains.annotations.Unmodifiable;
 
 import java.util.List;
 
-public final class FontTag implements StyleTag {
+public final class FontTag implements StyleTag.Plain {
     public static @NotNull FontTag fontTag() {
-        return Provider.PROVIDER.get();
+        return Provider.PROVIDER.instance;
     }
 
     private FontTag() {}
 
     @Override
-    public @NotNull Component modify(@NotNull BuildContext context, @NotNull Component text, @NotNull String param, @NotNull String value) {
+    public @NotNull Component modify(@NotNull Component text, @NotNull String param, @NotNull String value) {
         //noinspection PatternValidation
         return Key.parseable(param) ? text.font(Key.key(param)) : text;
     }
 
     @Override
-    public @NotNull @Unmodifiable List<Prepared> read(@NotNull InkyMessageResolver resolver, @NotNull Component text) {
+    public @NotNull @Unmodifiable List<String> read(@NotNull InkyMessage.Resolver resolver, @NotNull Component text) {
         return text.font() == null
                 ? List.of()
-                : List.of(new Prepared(this, text.font().asString(), ""));
+                : List.of(asFormatted(text.font().asString(), ""));
     }
 
     @Override

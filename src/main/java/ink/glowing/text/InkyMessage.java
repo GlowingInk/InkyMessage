@@ -1,32 +1,35 @@
 package ink.glowing.text;
 
-import ink.glowing.text.rich.BuildContext;
+import ink.glowing.text.replace.Replacer;
 import ink.glowing.text.style.symbolic.SymbolicStyle;
+import ink.glowing.text.style.tag.StyleTag;
 import ink.glowing.text.utils.function.InstanceProvider;
+import net.kyori.adventure.builder.AbstractBuilder;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.KeybindComponent;
-import net.kyori.adventure.text.ScoreComponent;
-import net.kyori.adventure.text.SelectorComponent;
-import net.kyori.adventure.text.TextComponent;
-import net.kyori.adventure.text.TranslatableComponent;
+import net.kyori.adventure.text.format.Style;
 import net.kyori.adventure.text.serializer.ComponentSerializer;
+import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
-import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Objects;
+import java.util.Set;
 import java.util.TreeSet;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import static ink.glowing.text.InkyMessageResolver.standardInkyResolver;
-import static ink.glowing.text.rich.RichNode.node;
-import static ink.glowing.text.rich.RichNode.nodeId;
+import static ink.glowing.text.InkyMessage.Resolver.standardResolver;
 
-public class InkyMessage implements ComponentSerializer<Component, Component, String> {
+public final class InkyMessage implements ComponentSerializer<Component, Component, String> {
     private static final Pattern ESCAPE_PATTERN = Pattern.compile("[&\\]()]");
     private static final Pattern UNESCAPE_PATTERN = Pattern.compile("\\\\([&\\]()\\\\])");
 
     public static @NotNull InkyMessage inkyMessage() {
-        return Provider.PROVIDER.get();
+        return Provider.PROVIDER.instance;
     }
 
     private InkyMessage() {}
@@ -35,21 +38,21 @@ public class InkyMessage implements ComponentSerializer<Component, Component, St
      * Convert string into adventure text component using standard resolver
      * @param inputText input string
      * @return converted text component
-     * @see InkyMessageResolver#standardInkyResolver()
+     * @see Resolver#standardResolver()
      */
     @Override
     public @NotNull Component deserialize(@NotNull String inputText) {
-        return deserialize(inputText, standardInkyResolver());
+        return deserialize(inputText, standardResolver());
     }
 
     /**
      * Convert string into adventure text component
      * @param inputText input string
-     * @param inkyResolver resolver to use
+     * @param resolver resolver to use
      * @return converted text component
      */
-    public @NotNull Component deserialize(@NotNull String inputText, @NotNull InkyMessageResolver inkyResolver) {
-        return deserialize(inputText, new BuildContext(new ArrayList<>(), inkyResolver));
+    public @NotNull Component deserialize(@NotNull String inputText, @NotNull Resolver resolver) {
+        return deserialize(inputText, new BuildContext(resolver));
     }
 
     /**
@@ -59,127 +62,16 @@ public class InkyMessage implements ComponentSerializer<Component, Component, St
      * @return converted text component
      */
     public @NotNull Component deserialize(@NotNull String inputText, @NotNull BuildContext context) {
-        String oldText = inputText;
-        int minimalIndex = inputText.indexOf("](");
-        String newText = parseRich(oldText, minimalIndex, context);
-        while (!newText.equals(oldText)) {
-            oldText = newText;
-            newText = parseRich(oldText, 2, context);
-        }
-        return node(newText).render(context).compact();
-    }
-
-    private static @NotNull String parseRich(@NotNull String input, int fromIndex, @NotNull BuildContext context) {
-        int closeIndex = input.indexOf("](", fromIndex);
-        while (isEscaped(input, closeIndex)) closeIndex = input.indexOf("](", closeIndex + 1);
-        if (closeIndex == -1) return input;
-        int startIndex = -1;
-        for (int index = closeIndex - 1; index > 0; index--) {
-            if (input.charAt(index) == '[' && input.charAt(index - 1) == '&' && !isEscaped(input, index - 1)) {
-                startIndex = index - 1;
-                break;
-            }
-        }
-        if (startIndex == -1) return input;
-        int modStart = closeIndex + 1;
-        int modEnd = -1;
-        for (int index = modStart + 1; index < input.length(); index++) {
-            char ch = input.charAt(index);
-            if (ch == ')' && !isEscaped(input, index)) {
-                if (index + 1 == input.length() || input.charAt(index + 1) != '(') {
-                    modEnd = index;
-                    break;
-                }
-            } else if (ch == '&' && index + 1 < input.length() && input.charAt(index + 1) == '[' && !isEscaped(input, index)) {
-                input = parseRich(input, index, context);
-            }
-        }
-        if (++modEnd == 0) {
-            modEnd = input.length();
-        }
-        return input.substring(0, startIndex) +
-                nodeId(context.innerNodeAdd(node(
-                        input.substring(startIndex + 2, closeIndex),
-                        context.inkyResolver().parseTags(input.substring(modStart, modEnd))
-                ))) +
-                input.substring(modEnd);
+        return DeserializerImpl.parse(inputText, context);
     }
 
     @Override
     public @NotNull String serialize(@NotNull Component text) {
-        return serialize(text, standardInkyResolver());
+        return serialize(text, standardResolver());
     }
 
-    public @NotNull String serialize(@NotNull Component text, @NotNull InkyMessageResolver resolver) {
-        StringBuilder builder = new StringBuilder();
-        serialize(builder, new TreeSet<>(), text, resolver, new boolean[]{false});
-        return builder.toString();
-    }
-
-    private void serialize(
-            @NotNull StringBuilder builder,
-            final @NotNull TreeSet<SymbolicStyle> outerStyle,
-            @NotNull Component text,
-            @NotNull InkyMessageResolver resolver,
-            boolean @NotNull [] previousStyled
-    ) {
-        var tags = resolver.readStyleTags(text);
-        if (!tags.isEmpty()) {
-            builder.append("&[");
-        }
-        var currentStyle = resolver.readSymbolics(text);
-        if (previousStyled[0] && (currentStyle.isEmpty() || !currentStyle.first().resets())) {
-            if (outerStyle.isEmpty()) {
-                builder.append(resolver.symbolicReset().asFormatted());
-            } else for (var symb : outerStyle) {
-                builder.append(symb.asFormatted());
-            }
-        }
-        if (currentStyle.isEmpty()) {
-            previousStyled[0] = false;
-        } else {
-            previousStyled[0] = true;
-            for (var symb : currentStyle) {
-                builder.append(symb.asFormatted());
-            }
-        }
-
-        builder.append(asString(text, resolver));
-        var children = text.children();
-        var newOuterStyle = new TreeSet<>(outerStyle);
-        newOuterStyle.addAll(currentStyle);
-        for (var child : children) {
-            serialize(builder, newOuterStyle, child, resolver, previousStyled);
-        }
-        if (!tags.isEmpty()) {
-            builder.append("]");
-            for (var tag : tags) {
-                builder.append(tag);
-            }
-        }
-    }
-
-    private String asString(@NotNull Component component, @NotNull InkyMessageResolver resolver) {
-        if (component instanceof TextComponent text) {
-            return escape(text.content());
-        } else if (component instanceof TranslatableComponent translatable) {
-            StringBuilder builder = new StringBuilder("&{lang:" + translatable.key() + "}");
-            for (var arg : translatable.args()) {
-                builder.append("(arg:").append(serialize(arg, resolver)).append(')');
-            }
-            if (translatable.fallback() != null) {
-                builder.append("(fallback:").append(escape(translatable.fallback())).append(')');
-            }
-            return builder.toString();
-        } else if (component instanceof KeybindComponent keybind) {
-            return "&{key:" + keybind.keybind() + "}"; // TODO implement
-        } else if (component instanceof ScoreComponent score) {
-            return score.objective(); // TODO implement
-        } else if (component instanceof SelectorComponent selector) {
-            return selector.pattern(); // TODO implement
-        } else {
-            return "?";
-        }
+    public @NotNull String serialize(@NotNull Component text, @NotNull Resolver resolver) {
+        return SerializerImpl.serialize(text, resolver);
     }
 
     public static @NotNull String escape(@NotNull String text) {
@@ -202,7 +94,7 @@ public class InkyMessage implements ComponentSerializer<Component, Component, St
         return matcher.appendTail(builder).toString();
     }
 
-    public static boolean isEscaped(@NotNull String input, int index) {
+    public static boolean isEscapedAt(@NotNull String input, int index) {
         boolean escaped = false;
         while (--index > -1 && input.charAt(index) == '\\') escaped = !escaped;
         return escaped;
@@ -210,11 +102,158 @@ public class InkyMessage implements ComponentSerializer<Component, Component, St
 
     private enum Provider implements InstanceProvider<InkyMessage> {
         PROVIDER;
-        private final InkyMessage inkyMessage = new InkyMessage();
+        private final InkyMessage instance = new InkyMessage();
 
         @Override
         public @NotNull InkyMessage get() {
-            return inkyMessage;
+            return instance;
+        }
+    }
+
+    public interface Resolver {
+        /**
+         * Contains recommended options for a resolver
+         * Using standard style tags, replacers, and Notchian symbolic styles
+         *
+         * @return a standard resolver
+         */
+        static @NotNull InkyMessage.Resolver standardResolver() {
+            return ResolverImpl.STANDARD_RESOLVER;
+        }
+
+        /**
+         * Creates a new resolver builder
+         *
+         * @return a builder
+         */
+        static @NotNull InkyMessage.ResolverBuilder resolver() {
+            return new ResolverBuilder();
+        }
+
+        @Nullable StyleTag<?> getTag(@NotNull String namespace);
+
+        @Nullable Style applySymbolicStyle(char symbol, @NotNull Style currentStyle);
+
+        @NotNull TreeSet<Replacer.FoundSpot> findReplacements(@NotNull String input);
+
+        @NotNull TreeSet<SymbolicStyle> readSymbolics(@NotNull Component text);
+
+        @NotNull List<String> readStyleTags(@NotNull Component text);
+
+        @NotNull SymbolicStyle symbolicReset();
+
+        @NotNull InkyMessage.ResolverBuilder toBuilder();
+    }
+
+    static class ResolverBuilder implements AbstractBuilder<Resolver> {
+        private Set<StyleTag<?>> tags;
+        private Set<Replacer> replacers;
+        private Set<SymbolicStyle> symbolics;
+        private SymbolicStyle symbolicReset;
+
+        ResolverBuilder() {
+            this.tags = new HashSet<>();
+            this.replacers = new HashSet<>();
+            this.symbolics = new HashSet<>();
+        }
+
+        @Contract("_ -> this")
+        public @NotNull InkyMessage.ResolverBuilder replacers(@NotNull Replacer @NotNull ... replacers) {
+            return replacers(Arrays.asList(replacers));
+        }
+
+        @Contract("_ -> this")
+        public @NotNull InkyMessage.ResolverBuilder replacers(@NotNull Collection<@NotNull Replacer> replacers) {
+            this.replacers = new HashSet<>(replacers);
+            return this;
+        }
+
+        @Contract("_ -> this")
+        public @NotNull InkyMessage.ResolverBuilder addReplacer(@NotNull Replacer replacer) {
+            this.replacers.add(replacer);
+            return this;
+        }
+
+        @Contract("_ -> this")
+        public @NotNull InkyMessage.ResolverBuilder addReplacers(@NotNull Replacer @NotNull ... replacers) {
+            return addReplacers(Arrays.asList(replacers));
+        }
+
+        @Contract("_ -> this")
+        public @NotNull InkyMessage.ResolverBuilder addReplacers(@NotNull Iterable<@NotNull Replacer> replacers) {
+            for (var replacer : replacers) addReplacer(replacer);
+            return this;
+        }
+
+        @Contract("_ -> this")
+        public @NotNull InkyMessage.ResolverBuilder tags(@NotNull StyleTag<?> @NotNull ... styleTags) {
+            return tags(Arrays.asList(styleTags));
+        }
+
+        @Contract("_ -> this")
+        public @NotNull InkyMessage.ResolverBuilder tags(@NotNull Collection<@NotNull StyleTag<?>> styleTags) {
+            this.tags = new HashSet<>(styleTags);
+            return this;
+        }
+
+        @Contract("_ -> this")
+        public @NotNull InkyMessage.ResolverBuilder addTag(@NotNull StyleTag<?> tag) {
+            this.tags.add(tag);
+            return this;
+        }
+
+        @Contract("_ -> this")
+        public @NotNull InkyMessage.ResolverBuilder addTags(@NotNull StyleTag<?> @NotNull ... tags) {
+            return addTags(Arrays.asList(tags));
+        }
+
+        @Contract("_ -> this")
+        public @NotNull InkyMessage.ResolverBuilder addTags(@NotNull Iterable<@NotNull StyleTag<?>> tags) {
+            for (var tag : tags) addTag(tag);
+            return this;
+        }
+
+        @Contract("_ -> this")
+        public @NotNull InkyMessage.ResolverBuilder symbolicReset(@NotNull SymbolicStyle symbolicReset) {
+            symbolics.remove(this.symbolicReset);
+            symbolics.add(symbolicReset);
+            this.symbolicReset = symbolicReset;
+            return this;
+        }
+
+        @Contract("_ -> this")
+        public @NotNull InkyMessage.ResolverBuilder symbolics(@NotNull SymbolicStyle @NotNull ... symbolics) {
+            return symbolics(Arrays.asList(symbolics));
+        }
+
+        @Contract("_ -> this")
+        public @NotNull InkyMessage.ResolverBuilder symbolics(@NotNull Collection<@NotNull SymbolicStyle> symbolics) {
+            this.symbolics = new HashSet<>(symbolics);
+            return this;
+        }
+
+        @Contract("_ -> this")
+        public @NotNull InkyMessage.ResolverBuilder addSymbolic(@NotNull SymbolicStyle symbolics) {
+            this.symbolics.add(symbolics);
+            return this;
+        }
+
+        @Contract("_ -> this")
+        public @NotNull InkyMessage.ResolverBuilder addSymbolics(@NotNull SymbolicStyle @NotNull ... symbolics) {
+            return addSymbolics(Arrays.asList(symbolics));
+        }
+
+        @Contract("_ -> this")
+        public @NotNull InkyMessage.ResolverBuilder addSymbolics(@NotNull Iterable<@NotNull SymbolicStyle> symbolics) {
+            for (var symbolic : symbolics) addSymbolic(symbolic);
+            return this;
+        }
+
+        @Override
+        @Contract("-> new")
+        public @NotNull InkyMessage.Resolver build() {
+            Objects.requireNonNull(symbolicReset, "InkyMessageResolver requires symbolic reset to be provided");
+            return new ResolverImpl(tags, replacers, symbolics, symbolicReset);
         }
     }
 }
