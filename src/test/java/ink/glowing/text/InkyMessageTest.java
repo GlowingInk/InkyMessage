@@ -75,6 +75,13 @@ public class InkyMessageTest {
                         text("aaa").color(RED)
                                 .append(text("bbb").decorate(ITALIC).append(text("ccc").decorate(BOLD)).append(text("bbb")))
                                 .append(text("aaa").color(WHITE))
+                },
+                {
+                        "&cSome &[hover parsing](hover:text &atest!).",
+                        text()
+                                .append(text("Some ").color(RED))
+                                .append(text("hover parsing").color(RED).hoverEvent(showText(text("test!").color(GREEN))))
+                                .append(text(".").color(RED)).build()
                 }
         };
     }

@@ -6,7 +6,7 @@
 
     <groupId>ink.glowing</groupId>
     <artifactId>inkymessage</artifactId>
-    <version>0.9.1</version>
+    <version>0.9.2</version>
 
     <properties>
         <adventure.version>4.13.1</adventure.version>

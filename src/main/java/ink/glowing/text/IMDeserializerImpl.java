@@ -106,7 +106,7 @@ final class IMDeserializerImpl {
                 comp = plainTag.modify(comp, params, value);
             } else if (tag instanceof StyleTag.Complex complexTag) {
                 Component value = parseInner(from, ')', context.colorlessCopy());
-                comp = complexTag.modify(comp, params, value);
+                comp = complexTag.modify(comp, params, value.compact());
             }
         }
         if (++globalIndex < textStr.length() && textStr.charAt(globalIndex) == '(') {
