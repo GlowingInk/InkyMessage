@@ -51,9 +51,7 @@ public sealed interface Replacer permits Replacer.Literal, Replacer.Regex {
         public @NotNull List<FoundSpot> findSpots(@NotNull String text) {
             List<FoundSpot> spots = new ArrayList<>(0);
             GeneralUtils.findEach(text, search, (index) -> {
-                Component node = replacement.get();
-                if (node == null) return;
-                spots.add(new FoundSpot(index, search.length(), () -> node));
+                spots.add(new FoundSpot(index, search.length(), replacement));
             });
             return spots;
         }

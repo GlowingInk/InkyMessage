@@ -120,15 +120,13 @@ final class IMDeserializerImpl {
         var builder = text();
         int lastAppend = from;
         for (int index = from; index < until; index++) {
-            if (!replaceSpots.isEmpty()) {
-                var spot = matchSpot(index, until);
-                if (spot != null) {
-                    appendPart(textStr, builder, lastAppend, index, context.lastStyle());
-                    index = spot.end() - 1;
-                    lastAppend = index + 1;
-                    builder.append(empty().style(context.lastStyle()).append(spot.replacement().get()));
-                    continue;
-                }
+            var spot = matchSpot(index, until);
+            if (spot != null) {
+                appendPart(textStr, builder, lastAppend, index, context.lastStyle());
+                index = spot.end() - 1;
+                lastAppend = index + 1;
+                builder.append(empty().style(context.lastStyle()).append(spot.replacement().get()));
+                continue;
             }
             char ch = textStr.charAt(index);
             if (!isSpecial(ch)) continue;
@@ -154,7 +152,7 @@ final class IMDeserializerImpl {
                     lastAppend = (index += 13) + 1;
                 }
                 default -> {
-                    Style newStyle = context.resolver().applySymbolicStyle(styleCh, context.lastStyle());
+                    Style newStyle = resolver.applySymbolicStyle(styleCh, context.lastStyle());
                     if (newStyle == null) continue;
                     appendPart(textStr, builder, lastAppend, index, context.lastStyle());
                     context.lastStyle(newStyle);
@@ -169,13 +167,17 @@ final class IMDeserializerImpl {
     }
 
     private @Nullable Replacer.FoundSpot matchSpot(int index, int end) {
-        var spot = replaceSpots.last();
-        if (spot.start() == index) {
-            replaceSpots.pollLast();
-            if (spot.end() > end) return null;
-            return spot;
-        } else if (spot.start() < index) {
-            replaceSpots.pollLast();
+        while (!replaceSpots.isEmpty()) {
+            var spot = replaceSpots.last();
+            if (spot.start() == index) {
+                replaceSpots.pollLast();
+                if (spot.end() > end) return null;
+                return spot;
+            } else if (spot.start() < index) {
+                replaceSpots.pollLast();
+                continue;
+            }
+            break;
         }
         return null;
     }

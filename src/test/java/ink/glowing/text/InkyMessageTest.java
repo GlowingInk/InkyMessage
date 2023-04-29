@@ -1,7 +1,6 @@
 package ink.glowing.text;
 
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.event.ClickEvent;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
@@ -10,6 +9,7 @@ import java.util.random.RandomGenerator;
 
 import static ink.glowing.text.InkyMessage.inkyMessage;
 import static net.kyori.adventure.text.Component.text;
+import static net.kyori.adventure.text.event.ClickEvent.openUrl;
 import static net.kyori.adventure.text.event.ClickEvent.runCommand;
 import static net.kyori.adventure.text.event.HoverEvent.showText;
 import static net.kyori.adventure.text.format.NamedTextColor.*;
@@ -49,26 +49,29 @@ public class InkyMessageTest {
                         "&aGreen, &[clickable&c red](click:url http://glowing.ink/), red again",
                         text()
                                 .append(text("Green, ").color(GREEN))
-                                .append(text().clickEvent(ClickEvent.openUrl("http://glowing.ink/"))
+                                .append(text().clickEvent(openUrl("http://glowing.ink/"))
                                         .append(text("clickable").color(GREEN))
                                         .append(text(" red").color(RED)))
                                 .append(text(", red again").color(RED)).build()
                 },
                 {
-                        "\\&aRegular \\&[text](color:gold), and some&b \\aqua",
+                        "\\&aRegular \\&[text](color:gold), and some&a \\green",
                         text("&aRegular &[text](color:gold), and some")
-                                .append(text(" \\aqua").color(AQUA))
+                                .append(text(" \\green").color(GREEN))
                 },
                 {
                         "&x&1&2&3&4&5&6Hex colors are cool",
                         inkyMessage().deserialize("&#123456Hex colors are cool")
                 },
                 {
-                        "&aGoto https://github.com/GlowingInk.",
+                        "&aGoto https://github.com/GlowingInk and http://repo.glowing.ink.",
                         text()
                                 .append(text("Goto ").color(GREEN))
-                                .append(text("https://github.com/GlowingInk").clickEvent(ClickEvent.openUrl("https://github.com/GlowingInk")).color(GREEN))
-                                .append(text(".").color(GREEN)).build()
+                                .append(text("https://github.com/GlowingInk").clickEvent(openUrl("https://github.com/GlowingInk")).color(GREEN))
+                                .append(text(" and ").color(GREEN))
+                                .append(text("http://repo.glowing.ink").clickEvent(openUrl("http://repo.glowing.ink")).color(GREEN))
+                                .append(text(".").color(GREEN))
+                                .build()
                 },
                 {
                         "&[aaa&[bbb&[ccc](decor:bold)bbb](decor:italic)&faaa](color:red)",
