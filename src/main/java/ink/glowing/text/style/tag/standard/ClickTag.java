@@ -76,7 +76,7 @@ public final class ClickTag implements StyleTag.Plain {
         private final ClickTag instance = new ClickTag();
 
         @Override
-        public @NotNull ClickTag get() {
+        public @NotNull ClickTag instance() {
             return instance;
         }
     }

@@ -42,7 +42,7 @@ public final class HoverTag implements StyleTag.Complex {
         private final HoverTag instance = new HoverTag();
 
         @Override
-        public @NotNull HoverTag get() {
+        public @NotNull HoverTag instance() {
             return instance;
         }
     }

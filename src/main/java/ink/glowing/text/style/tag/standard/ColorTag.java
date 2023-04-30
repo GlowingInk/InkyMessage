@@ -49,7 +49,7 @@ public final class ColorTag implements StyleTag.Plain {
         private final ColorTag instance = new ColorTag();
 
         @Override
-        public @NotNull ColorTag get() {
+        public @NotNull ColorTag instance() {
             return instance;
         }
     }

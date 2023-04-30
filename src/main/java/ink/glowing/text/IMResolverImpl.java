@@ -28,7 +28,7 @@ import static ink.glowing.text.replace.StandardReplacers.urlReplacer;
 import static ink.glowing.text.style.symbolic.SymbolicStyle.*;
 
 final class IMResolverImpl implements InkyMessage.Resolver {
-    static final InkyMessage.Resolver STANDARD_RESOLVER = InkyMessage.Resolver.resolver()
+    static final InkyMessage.Resolver STANDARD_RESOLVER = InkyMessage.resolver()
             .addTags(ColorTag.colorTag(),
                     HoverTag.hoverTag(),
                     ClickTag.clickTag(),

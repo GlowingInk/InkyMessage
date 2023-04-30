@@ -55,7 +55,7 @@ public final class DecorTag implements StyleTag.Plain {
         private final DecorTag instance = new DecorTag();
 
         @Override
-        public @NotNull DecorTag get() {
+        public @NotNull DecorTag instance() {
             return instance;
         }
     }

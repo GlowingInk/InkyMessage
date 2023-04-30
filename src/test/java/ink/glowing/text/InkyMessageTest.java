@@ -38,8 +38,8 @@ public class InkyMessageTest {
                         text().append(text("Bold ").decorate(BOLD)).append(text("then not").color(RED)).build()
                 },
                 {
-                        "&a&lFirst bold green &rthen&6 gold",
-                        text().append(text("First bold green ").color(GREEN).decorate(BOLD)).append(text("then")).append(text(" gold").color(GOLD)).build()
+                        "&a&lFirst bold green &rthen&c red",
+                        text().append(text("First bold green ").color(GREEN).decorate(BOLD)).append(text("then")).append(text(" red").color(RED)).build()
                 },
                 {
                         "&[Fully clickable\\]](click:run /helloworld)",
@@ -74,10 +74,10 @@ public class InkyMessageTest {
                                 .build()
                 },
                 {
-                        "&[aaa&[bbb&[ccc](decor:bold)bbb](decor:italic)&faaa](color:red)",
+                        "&[aaa&[bbb&[ccc](decor:bold)bbb](decor:italic)&aaaa](color:red)",
                         text("aaa").color(RED)
                                 .append(text("bbb").decorate(ITALIC).append(text("ccc").decorate(BOLD)).append(text("bbb")))
-                                .append(text("aaa").color(WHITE))
+                                .append(text("aaa").color(GREEN))
                 },
                 {
                         "&cSome &[hover parsing](hover:text &atest!).",
@@ -202,7 +202,7 @@ public class InkyMessageTest {
 
     private static final String SYMBOLS = "abcde&[](){}\\:";
 
-    @Test(description = "Basically hoping that we'll get no exceptions while creating a hot stinky mess")
+    @Test(description = "Basically hoping that we'll get no exceptions while parsing a hot stinky mess")
     public void randomTest() {
         RandomGenerator rng = ThreadLocalRandom.current();
         for (int i = 0; i < 2048; i++) {
@@ -237,7 +237,7 @@ public class InkyMessageTest {
     }
 
     @DataProvider
-    public Object[][] isEscapedData() {
+    public Object[][] isEscapedAtData() {
         return new Object[][] {
                 {"\\&[test]", 1, true},
                 {"\\\\&[test]", 1, true},
@@ -247,8 +247,8 @@ public class InkyMessageTest {
         };
     }
 
-    @Test(dataProvider = "isEscapedData")
-    public void isEscapedTest(String input, int index, boolean expected) {
+    @Test(dataProvider = "isEscapedAtData")
+    public void isEscapedAtTest(String input, int index, boolean expected) {
         assertEquals(
                 InkyMessage.isEscapedAt(input, index),
                 expected

@@ -22,12 +22,17 @@ import java.util.TreeSet;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import static ink.glowing.text.InkyMessage.Resolver.standardResolver;
-
+/**
+ * Legacy-friendly component (de)serializer.
+ */
 public final class InkyMessage implements ComponentSerializer<Component, Component, String> {
-    private static final Pattern ESCAPE_PATTERN = Pattern.compile("[&\\]()]");
-    private static final Pattern UNESCAPE_PATTERN = Pattern.compile("\\\\([&\\]()\\\\])");
+    private static final Pattern ESCAPE_PATTERN = Pattern.compile("[&\\]()}]");
+    private static final Pattern UNESCAPE_PATTERN = Pattern.compile("\\\\([&\\]()\\\\}])");
 
+    /**
+     * Gets the instance of InkyMessage.
+     * @return the instance
+     */
     public static @NotNull InkyMessage inkyMessage() {
         return Provider.PROVIDER.instance;
     }
@@ -35,10 +40,10 @@ public final class InkyMessage implements ComponentSerializer<Component, Compone
     private InkyMessage() {}
 
     /**
-     * Convert string into adventure text component using standard resolver
+     * Convert string into adventure text component using standard resolver.
      * @param inputText input string
      * @return converted text component
-     * @see Resolver#standardResolver()
+     * @see InkyMessage#standardResolver()
      */
     @Override
     public @NotNull Component deserialize(@NotNull String inputText) {
@@ -46,7 +51,7 @@ public final class InkyMessage implements ComponentSerializer<Component, Compone
     }
 
     /**
-     * Convert string into adventure text component
+     * Convert string into adventure text component.
      * @param inputText input string
      * @param resolver resolver to use
      * @return converted text component
@@ -56,24 +61,42 @@ public final class InkyMessage implements ComponentSerializer<Component, Compone
     }
 
     /**
-     * Convert string into adventure text component
+     * Convert string into adventure text component.
      * @param inputText input string
-     * @param context context to build with
+     * @param context context to deserialize with
      * @return converted text component
      */
     public @NotNull Component deserialize(@NotNull String inputText, @NotNull BuildContext context) {
-        return IMDeserializerImpl.parse(inputText, context);
+        return IMDeserializerImpl.parse(inputText, context).compact();
     }
 
+    /**
+     * Convert adventure component into string using standard resolver.
+     * @param text input component
+     * @return converted string representation
+     * @see InkyMessage#standardResolver()
+     */
     @Override
     public @NotNull String serialize(@NotNull Component text) {
         return serialize(text, standardResolver());
     }
 
+    /**
+     * Convert adventure component into string.
+     * @param text input component
+     * @param resolver resolver to use
+     * @return converted string representation
+     * @see InkyMessage#standardResolver()
+     */
     public @NotNull String serialize(@NotNull Component text, @NotNull Resolver resolver) {
         return IMSerializerImpl.serialize(text, resolver);
     }
 
+    /**
+     * Escape special characters with slashes.
+     * @param text text to escape
+     * @return escaped string
+     */
     public static @NotNull String escape(@NotNull String text) {
         StringBuilder builder = new StringBuilder(text.length());
         Matcher matcher = ESCAPE_PATTERN.matcher(text);
@@ -84,6 +107,11 @@ public final class InkyMessage implements ComponentSerializer<Component, Compone
         return matcher.appendTail(builder).toString();
     }
 
+    /**
+     * Unescape special characters.
+     * @param text text to unescape
+     * @return unescaped string
+     */
     public static @NotNull String unescape(@NotNull String text) {
         StringBuilder builder = new StringBuilder(text.length());
         Matcher matcher = UNESCAPE_PATTERN.matcher(text);
@@ -94,10 +122,65 @@ public final class InkyMessage implements ComponentSerializer<Component, Compone
         return matcher.appendTail(builder).toString();
     }
 
+    /**
+     * Check if character is escaped.
+     * @param input text to check in
+     * @param index index of character to check
+     * @return is character escaped
+     */
     public static boolean isEscapedAt(@NotNull String input, int index) {
         boolean escaped = false;
         while (--index > -1 && input.charAt(index) == '\\') escaped = !escaped;
         return escaped;
+    }
+
+    /**
+     * Check if character is not escaped.
+     * @param input text to check in
+     * @param index index of character to check
+     * @return is character unescaped
+     */
+    public static boolean isUnescapedAt(@NotNull String input, int index) {
+        return !isEscapedAt(input, index);
+    }
+
+    /**
+     * Check if character equals to desired and is escaped.
+     * @param equal desired character
+     * @param input text to check in
+     * @param index index of character to check
+     * @return is character escaped
+     */
+    public static boolean isUnescapedAt(char equal, @NotNull String input, int index) {
+        return input.charAt(index) == equal && !isEscapedAt(input, index);
+    }
+
+    /**
+     * Check if character equals to desired and is escaped.
+     * @param equal desired list of characters
+     * @param input text to check in
+     * @param index index of character to check
+     * @return is character escaped
+     */
+    public static boolean isUnescapedAt(@NotNull String equal, @NotNull String input, int index) {
+        return equal.indexOf(input.charAt(index)) != -1 && !isEscapedAt(input, index);
+    }
+
+    /**
+     * Creates a new resolver builder.
+     * @return a builder
+     */
+    public static @NotNull InkyMessage.ResolverBuilder resolver() {
+        return new ResolverBuilder();
+    }
+
+    /**
+     * Contains recommended options for a resolver.
+     * Using standard style tags, replacers, and notchian symbolic styles.
+     * @return a standard resolver
+     */
+    public static @NotNull InkyMessage.Resolver standardResolver() {
+        return IMResolverImpl.STANDARD_RESOLVER;
     }
 
     private enum Provider implements InstanceProvider<InkyMessage> {
@@ -105,31 +188,12 @@ public final class InkyMessage implements ComponentSerializer<Component, Compone
         private final InkyMessage instance = new InkyMessage();
 
         @Override
-        public @NotNull InkyMessage get() {
+        public @NotNull InkyMessage instance() {
             return instance;
         }
     }
 
     public sealed interface Resolver permits IMResolverImpl {
-        /**
-         * Contains recommended options for a resolver
-         * Using standard style tags, replacers, and Notchian symbolic styles
-         *
-         * @return a standard resolver
-         */
-        static @NotNull InkyMessage.Resolver standardResolver() {
-            return IMResolverImpl.STANDARD_RESOLVER;
-        }
-
-        /**
-         * Creates a new resolver builder
-         *
-         * @return a builder
-         */
-        static @NotNull InkyMessage.ResolverBuilder resolver() {
-            return new ResolverBuilder();
-        }
-
         @Nullable StyleTag<?> getTag(@NotNull String namespace);
 
         @Nullable Style applySymbolicStyle(char symbol, @NotNull Style currentStyle);
@@ -252,7 +316,7 @@ public final class InkyMessage implements ComponentSerializer<Component, Compone
         @Override
         @Contract("-> new")
         public @NotNull InkyMessage.Resolver build() {
-            Objects.requireNonNull(symbolicReset, "InkyMessageResolver requires symbolic reset to be provided");
+            Objects.requireNonNull(symbolicReset, "Resolver requires symbolic reset to be provided");
             return new IMResolverImpl(tags, replacers, symbolics, symbolicReset);
         }
     }

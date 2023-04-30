@@ -40,7 +40,7 @@ public final class FontTag implements StyleTag.Plain {
         private final FontTag instance = new FontTag();
 
         @Override
-        public @NotNull FontTag get() {
+        public @NotNull FontTag instance() {
             return instance;
         }
     }

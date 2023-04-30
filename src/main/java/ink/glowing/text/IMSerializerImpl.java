@@ -71,10 +71,10 @@ final class IMSerializerImpl {
         } else if (component instanceof TranslatableComponent translatable) {
             StringBuilder builder = new StringBuilder("&{lang:" + translatable.key() + "}");
             for (var arg : translatable.args()) {
-                builder.append("(arg:").append(serialize(arg, resolver)).append(')');
+                builder.append("(arg ").append(serialize(arg, resolver)).append(')');
             }
             if (translatable.fallback() != null) {
-                builder.append("(fallback:").append(escape(translatable.fallback())).append(')');
+                builder.append("(fallback ").append(escape(translatable.fallback())).append(')');
             }
             return builder.toString();
         } else if (component instanceof KeybindComponent keybind) {

@@ -153,7 +153,7 @@ public final class GradientTag implements StyleTag.Plain {
         private final GradientTag instance = new GradientTag();
 
         @Override
-        public @NotNull GradientTag get() {
+        public @NotNull GradientTag instance() {
             return instance;
         }
     }

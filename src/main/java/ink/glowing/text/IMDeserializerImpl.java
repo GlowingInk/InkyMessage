@@ -12,7 +12,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.TreeSet;
 
-import static ink.glowing.text.InkyMessage.isEscapedAt;
+import static ink.glowing.text.InkyMessage.*;
 import static net.kyori.adventure.text.Component.empty;
 import static net.kyori.adventure.text.Component.text;
 
@@ -35,11 +35,10 @@ final class IMDeserializerImpl {
     public static @NotNull Component parse(@NotNull String textStr, @NotNull BuildContext context) {
         if (textStr.length() == 0) return empty();
         return new IMDeserializerImpl(textStr, context.resolver())
-                .parseInner(0, END, context)
-                .compact();
+                .parseRecursive(0, END, context);
     }
 
-    private @NotNull Component parseInner(int from, char until, @NotNull BuildContext context) {
+    private @NotNull Component parseRecursive(int from, char until, @NotNull BuildContext context) {
         var builder = text();
         for (globalIndex = from; globalIndex < textStr.length(); globalIndex++) {
             char ch = textStr.charAt(globalIndex);
@@ -48,12 +47,12 @@ final class IMDeserializerImpl {
                 char nextCh = textStr.charAt(globalIndex + 1);
                 if (nextCh == '[') {
                     builder.append(parseComponent(from, globalIndex, context));
-                    builder.append(parseInner(globalIndex + 2, ']', context));
+                    builder.append(parseRecursive(globalIndex + 2, ']', context));
                     from = globalIndex;
                 } /*else if (nextCh == '{') {
                     // TODO placeholders
                 }*/
-            } else if (ch == until && !isEscapedAt(textStr, globalIndex)) {
+            } else if (ch == until && isUnescapedAt(textStr, globalIndex)) {
                 builder.append(parseComponent(from, globalIndex, context));
                 if (globalIndex + 1 >= textStr.length() || textStr.charAt(globalIndex + 1) != '(') {
                     return builder.build();
@@ -88,6 +87,7 @@ final class IMDeserializerImpl {
                 for (globalIndex = from; globalIndex < textStr.length(); globalIndex++) {
                     if (" )".indexOf(textStr.charAt(globalIndex)) != -1) {
                         params = textStr.substring(from, globalIndex);
+                        if (hasSlashes) params = unescape(params);
                         from = globalIndex + 1;
                         break;
                     }
@@ -97,15 +97,16 @@ final class IMDeserializerImpl {
                 String value = "";
                 if (textStr.charAt(globalIndex) != ')') {
                     for (globalIndex = from; globalIndex < textStr.length(); globalIndex++) {
-                        if (textStr.charAt(globalIndex) == ')' && !isEscapedAt(textStr, globalIndex)) {
+                        if (isUnescapedAt(')', textStr, globalIndex)) {
                             value = textStr.substring(from, globalIndex);
+                            if (hasSlashes) value = unescape(value);
                             break;
                         }
                     }
                 }
                 comp = plainTag.modify(comp, params, value);
             } else if (tag instanceof StyleTag.Complex complexTag) {
-                Component value = parseInner(from, ')', context.colorlessCopy());
+                Component value = parseRecursive(from, ')', context.colorlessCopy());
                 comp = complexTag.modify(comp, params, value.compact());
             }
         }
@@ -122,10 +123,10 @@ final class IMDeserializerImpl {
         for (int index = from; index < until; index++) {
             var spot = matchSpot(index, until);
             if (spot != null) {
-                appendPart(textStr, builder, lastAppend, index, context.lastStyle());
-                index = spot.end() - 1;
-                lastAppend = index + 1;
+                appendPrevious(textStr, builder, lastAppend, index, context);
                 builder.append(empty().style(context.lastStyle()).append(spot.replacement().get()));
+                lastAppend = spot.end();
+                index = lastAppend - 1;
                 continue;
             }
             char ch = textStr.charAt(index);
@@ -138,7 +139,7 @@ final class IMDeserializerImpl {
                     String colorStr = textStr.substring(index + 1, index + 8);
                     TextColor color = AdventureUtils.parseHexColor(colorStr, false);
                     if (color == null) continue;
-                    appendPart(textStr, builder, lastAppend, index, context.lastStyle());
+                    appendPrevious(textStr, builder, lastAppend, index, context);
                     context.lastStyle(context.lastStyle().color(color));
                     lastAppend = (index += 7) + 1;
                 }
@@ -147,23 +148,30 @@ final class IMDeserializerImpl {
                     String colorStr = textStr.substring(index + 1, index + 14);
                     TextColor color = AdventureUtils.parseHexColor(colorStr, true);
                     if (color == null) continue;
-                    appendPart(textStr, builder, lastAppend, index, context.lastStyle());
+                    appendPrevious(textStr, builder, lastAppend, index, context);
                     context.lastStyle(context.lastStyle().color(color));
                     lastAppend = (index += 13) + 1;
                 }
                 default -> {
                     Style newStyle = resolver.applySymbolicStyle(styleCh, context.lastStyle());
                     if (newStyle == null) continue;
-                    appendPart(textStr, builder, lastAppend, index, context.lastStyle());
+                    appendPrevious(textStr, builder, lastAppend, index, context);
                     context.lastStyle(newStyle);
                     lastAppend = (++index) + 1;
                 }
             }
         }
         if (lastAppend < until) {
-            appendPart(textStr, builder, lastAppend, until, context.lastStyle());
+            appendPrevious(textStr, builder, lastAppend, until, context);
         }
         return builder.build();
+    }
+
+    private void appendPrevious(@NotNull String piece, @NotNull TextComponent.Builder builder, int start, int end, @NotNull BuildContext context) {
+        if (start == end) return;
+        String substring = piece.substring(start, end);
+        if (hasSlashes) substring = unescape(substring);
+        builder.append(text(substring).style(context.lastStyle()));
     }
 
     private @Nullable Replacer.FoundSpot matchSpot(int index, int end) {
@@ -171,8 +179,7 @@ final class IMDeserializerImpl {
             var spot = replaceSpots.last();
             if (spot.start() == index) {
                 replaceSpots.pollLast();
-                if (spot.end() > end) return null;
-                return spot;
+                return spot.end() > end ? null : spot;
             } else if (spot.start() < index) {
                 replaceSpots.pollLast();
                 continue;
@@ -180,13 +187,6 @@ final class IMDeserializerImpl {
             break;
         }
         return null;
-    }
-
-    private void appendPart(@NotNull String piece, @NotNull TextComponent.Builder builder, int start, int end, @NotNull Style style) {
-        if (start == end) return;
-        String substring = piece.substring(start, end);
-        if (hasSlashes) substring = InkyMessage.unescape(substring);
-        builder.append(text(substring).style(style));
     }
 
     private static boolean isSpecial(char ch) {
