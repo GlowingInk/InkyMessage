@@ -267,8 +267,8 @@ public class InkyMessageTest {
                         "&[qwertyuiopasdfghjkl;'zxcvbnm,.](gradient:white-black-yellow-red)"
                 },
                 {
-                        "<rainbow>qwertyuiopasdfghjkl;'zxcvbnm,.</rainbow>",
-                        "&[qwertyuiopasdfghjkl;'zxcvbnm,.](gradient:rainbow)"
+                        "<rainbow>qwertyuiopasdfghjkl<white>;'zxcvbnm,.</rainbow>",
+                        "&[qwertyuiopasdfghjkl&f;'zxcvbnm,.](gradient:rainbow)"
                 }
         };
     }

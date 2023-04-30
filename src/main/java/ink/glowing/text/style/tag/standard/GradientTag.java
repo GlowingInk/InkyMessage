@@ -34,13 +34,13 @@ public final class GradientTag implements StyleTag.Plain {
         int indexedLength;
         if (param.equals("spectrum") || param.equals("rainbow")) {
             int length = length(text);
-            if (length <= 1) return text.colorIfAbsent(AVERAGE_RAINBOW);
+            if (length <= 1) return text.color(AVERAGE_RAINBOW);
             indexedLength = length;
             colorGetter = GradientTag::colorSpectrum;
         } else {
             List<TextColor> colors = readMultipleColors(param);
             if (colors.isEmpty()) return text;
-            if (colors.size() == 1) return text.colorIfAbsent(colors.get(0));
+            if (colors.size() == 1) return text.color(colors.get(0));
             int length = length(text);
             if (length <= 1) return text.color() == null ? text.color(averageColor(colors)) : text;
             indexedLength = length - 1;

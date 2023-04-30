@@ -97,7 +97,7 @@ final class IMDeserializerImpl {
                 String value = "";
                 if (textStr.charAt(globalIndex) != ')') {
                     for (globalIndex = from; globalIndex < textStr.length(); globalIndex++) {
-                        if (isUnescapedAt(')', textStr, globalIndex)) {
+                        if (isUnescapedAt(textStr, globalIndex, ')')) {
                             value = textStr.substring(from, globalIndex);
                             if (hasSlashes) value = unescape(value);
                             break;
