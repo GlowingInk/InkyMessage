@@ -26,7 +26,8 @@ import java.util.regex.Pattern;
  * User-friendly component (de)serializer with legacy format.
  */
 public final class InkyMessage implements ComponentSerializer<Component, Component, String> {
-    private static final Pattern ESCAPE_PATTERN = Pattern.compile("[&\\]()}]");
+    private static final String ESCAPABLE_SYMBOLS = "&]()}\\";
+    private static final Pattern ESCAPE_PATTERN = Pattern.compile("[&\\]()}\\\\]");
     private static final Pattern UNESCAPE_PATTERN = Pattern.compile("\\\\([&\\]()\\\\}])");
 
     /**
@@ -113,6 +114,7 @@ public final class InkyMessage implements ComponentSerializer<Component, Compone
      * @return unescaped string
      */
     public static @NotNull String unescape(@NotNull String text) {
+        if (text.indexOf('\\') == -1) return text;
         StringBuilder builder = new StringBuilder(text.length());
         Matcher matcher = UNESCAPE_PATTERN.matcher(text);
         while (matcher.find()) {
@@ -145,25 +147,12 @@ public final class InkyMessage implements ComponentSerializer<Component, Compone
     }
 
     /**
-     * Check if character equals to desired and is escaped.
-     * @param input text to check in
-     * @param index index of character to check
-     * @param equal desired character
-     * @return is character escaped
+     * Check if character can be escaped.
+     * @param ch character to check
+     * @return is character escapable
      */
-    public static boolean isUnescapedAt(@NotNull String input, int index, char equal) {
-        return input.charAt(index) == equal && !isEscapedAt(input, index);
-    }
-
-    /**
-     * Check if character equals to desired and is escaped.
-     * @param input text to check in
-     * @param index index of character to check
-     * @param equal desired list of characters
-     * @return is character escaped
-     */
-    public static boolean isUnescapedAt(@NotNull String input, int index, @NotNull String equal) {
-        return equal.indexOf(input.charAt(index)) != -1 && !isEscapedAt(input, index);
+    public static boolean isEscapable(char ch) {
+        return ESCAPABLE_SYMBOLS.indexOf(ch) != -1;
     }
 
     /**

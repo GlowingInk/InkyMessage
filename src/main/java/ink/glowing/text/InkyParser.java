@@ -20,14 +20,14 @@ final class InkyParser {
     private static final char END = 0;
 
     private final String textStr;
-    private final boolean hasSlashes;
+    private final int textLength;
     private final InkyMessage.Resolver resolver;
     private final TreeSet<Replacer.FoundSpot> replaceSpots;
     private int globalIndex;
 
     private InkyParser(@NotNull String textStr, @NotNull InkyMessage.Resolver resolver) {
         this.textStr = textStr;
-        this.hasSlashes = textStr.indexOf('\\') != -1;
+        this.textLength = textStr.length();
         this.resolver = resolver;
         this.replaceSpots = resolver.findReplacements(textStr);
     }
@@ -40,10 +40,10 @@ final class InkyParser {
 
     private @NotNull Component parseRecursive(int from, char until, @NotNull BuildContext context) {
         var builder = text();
-        for (globalIndex = from; globalIndex < textStr.length(); globalIndex++) {
+        for (globalIndex = from; globalIndex < textLength; globalIndex++) {
             char ch = textStr.charAt(globalIndex);
             if (isSpecial(ch)) {
-                if (isEscapedAt(textStr, globalIndex) || globalIndex + 1 >= textStr.length()) continue;
+                if (isEscapedAt(textStr, globalIndex) || globalIndex + 1 >= textLength) continue;
                 char nextCh = textStr.charAt(globalIndex + 1);
                 if (nextCh == '[') {
                     builder.append(parseComponent(from, globalIndex, context));
@@ -54,28 +54,33 @@ final class InkyParser {
                 }*/
             } else if (ch == until && isUnescapedAt(textStr, globalIndex)) {
                 builder.append(parseComponent(from, globalIndex, context));
-                if (globalIndex + 1 >= textStr.length() || textStr.charAt(globalIndex + 1) != '(') {
+                if (globalIndex + 1 >= textLength || textStr.charAt(globalIndex + 1) != '(') {
+                    globalIndex += 1;
                     return builder.build();
                 }
                 return applyTags(builder.build(), globalIndex + 2, context);
             }
         }
         // In a case when we didn't find the 'until' char
-        builder.append(parseComponent(from, textStr.length(), context));
+        builder.append(parseComponent(from, textLength, context));
         return builder.build();
     }
 
     private @NotNull Component applyTags(@NotNull Component comp, int from, @NotNull BuildContext context) {
         StyleTag<?> tag = null;
-        for (globalIndex = from; globalIndex < textStr.length(); globalIndex++) {
+        for (globalIndex = from; globalIndex < textLength; globalIndex++) {
             char ch = textStr.charAt(globalIndex);
             if ("): ".indexOf(ch) != -1) { // My face when I'm rewriting parsing for the third time
                 tag = resolver.getTag(textStr.substring(from, globalIndex));
-                from = globalIndex + 1;
                 break;
             }
         }
-        if (globalIndex >= textStr.length() || textStr.charAt(globalIndex) == ')') {
+        if (tag == null) {
+            globalIndex = from - 1;
+            return comp;
+        }
+        from = globalIndex + 1;
+        if (globalIndex >= textLength || textStr.charAt(globalIndex) == ')') {
             if (tag instanceof StyleTag.Plain plainTag) {
                 comp = plainTag.modify(comp, "", "");
             } else if (tag instanceof StyleTag.Rich richTag) {
@@ -84,33 +89,32 @@ final class InkyParser {
         } else {
             String params = "";
             if (textStr.charAt(globalIndex) == ':') {
-                for (globalIndex = from; globalIndex < textStr.length(); globalIndex++) {
+                for (globalIndex = from; globalIndex < textLength; globalIndex++) {
                     if (" )".indexOf(textStr.charAt(globalIndex)) != -1) {
                         params = textStr.substring(from, globalIndex);
-                        if (hasSlashes) params = unescape(params);
                         from = globalIndex + 1;
                         break;
                     }
                 }
             }
-            if (tag instanceof StyleTag.Plain plainTag) {
+            if (tag instanceof StyleTag.Rich richTag) {
+                Component value = parseRecursive(from, ')', context.colorlessCopy());
+                comp = richTag.modify(comp, params, value.compact());
+                globalIndex -= 1;
+            } else if (tag instanceof StyleTag.Plain plainTag) {
                 String value = "";
-                if (textStr.charAt(globalIndex) != ')') {
-                    for (globalIndex = from; globalIndex < textStr.length(); globalIndex++) {
-                        if (isUnescapedAt(textStr, globalIndex, ')')) {
+                if (globalIndex != textLength && textStr.charAt(globalIndex) != ')') {
+                    for (globalIndex = from; globalIndex < textLength; globalIndex++) {
+                        if (textStr.charAt(globalIndex) == ')' && isUnescapedAt(textStr, globalIndex)) {
                             value = textStr.substring(from, globalIndex);
-                            if (hasSlashes) value = unescape(value);
                             break;
                         }
                     }
                 }
-                comp = plainTag.modify(comp, params, value);
-            } else if (tag instanceof StyleTag.Rich richTag) {
-                Component value = parseRecursive(from, ')', context.colorlessCopy());
-                comp = richTag.modify(comp, params, value.compact());
+                comp = plainTag.modify(comp, params, unescape(value));
             }
         }
-        if (++globalIndex < textStr.length() && textStr.charAt(globalIndex) == '(') {
+        if (++globalIndex < textLength && textStr.charAt(globalIndex) == '(') {
             comp = applyTags(comp, globalIndex + 1, context);
         }
         return comp;
@@ -169,8 +173,7 @@ final class InkyParser {
 
     private void appendPrevious(@NotNull String piece, @NotNull TextComponent.Builder builder, int start, int end, @NotNull BuildContext context) {
         if (start == end) return;
-        String substring = piece.substring(start, end);
-        if (hasSlashes) substring = unescape(substring);
+        String substring = unescape(piece.substring(start, end));
         builder.append(text(substring).style(context.lastStyle()));
     }
 

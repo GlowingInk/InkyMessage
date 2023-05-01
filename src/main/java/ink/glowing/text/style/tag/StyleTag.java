@@ -8,8 +8,6 @@ import org.jetbrains.annotations.Unmodifiable;
 
 import java.util.List;
 
-import static ink.glowing.text.InkyMessage.escape;
-
 public sealed interface StyleTag<T> extends Namespaced {
     @NotNull Component modify(@NotNull Component text, @NotNull String param, @NotNull T value);
 
@@ -21,8 +19,8 @@ public sealed interface StyleTag<T> extends Namespaced {
 
     default @NotNull String asFormatted(@NotNull String param, @NotNull String value) {
             String result = namespace();
-            if (!param.isEmpty()) result += ":" + escape(param);
-            if (!value.isEmpty()) result += " " + escape(value);
+            if (!param.isEmpty()) result += ":" + param;
+            if (!value.isEmpty()) result += " " + value;
             return "(" + result + ")";
     }
 }

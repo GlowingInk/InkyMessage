@@ -9,6 +9,7 @@ import org.jetbrains.annotations.Unmodifiable;
 
 import java.util.List;
 
+import static ink.glowing.text.InkyMessage.escape;
 import static net.kyori.adventure.text.event.ClickEvent.*;
 
 public final class ClickTag implements StyleTag.Plain {
@@ -38,14 +39,14 @@ public final class ClickTag implements StyleTag.Plain {
         if (text.clickEvent() != null) {
             if (text.insertion() != null) {
                 return List.of(
-                        asFormatted("inset", text.insertion()),
+                        asFormatted("insert", escape(text.insertion())),
                         asPreparedClick(text)
                 );
             } else {
                 return List.of(asPreparedClick(text));
             }
         } else if (text.insertion() != null) {
-            return List.of(asFormatted("insert", text.insertion()));
+            return List.of(asFormatted("insert", escape(text.insertion())));
         }
         return List.of();
     }
@@ -62,7 +63,7 @@ public final class ClickTag implements StyleTag.Plain {
                     case COPY_TO_CLIPBOARD -> "copy";
                     default -> "unknown";
                 },
-                text.clickEvent().value()
+                escape(text.clickEvent().value())
         );
     }
 

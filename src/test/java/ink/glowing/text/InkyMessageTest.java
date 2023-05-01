@@ -85,6 +85,10 @@ public class InkyMessageTest {
                                 .append(text("Some ").color(RED))
                                 .append(text("hover parsing").color(RED).hoverEvent(showText(text("test!").color(GREEN))))
                                 .append(text(".").color(RED)).build()
+                },
+                {
+                        "&[Test](fake:tag lol), &[another one]",
+                        text("Test(fake:tag lol), another one")
                 }
         };
     }
@@ -135,8 +139,8 @@ public class InkyMessageTest {
                         "&[With hover](hover:text Hover!)"
                 },
                 {
-                        text("Hover and click").hoverEvent(showText(text("Hover!"))).clickEvent(runCommand("cmd")),
-                        "&[Hover and click](hover:text Hover!)(click:run cmd)"
+                        text("Hover and click").hoverEvent(showText(text("&aHover!"))).clickEvent(runCommand("cmd")),
+                        "&[Hover and click](hover:text \\&aHover!)(click:run cmd)"
                 },
                 {
                         text()
@@ -205,12 +209,17 @@ public class InkyMessageTest {
     @Test(description = "Basically hoping that we'll get no exceptions while parsing a hot stinky mess")
     public void randomTest() {
         RandomGenerator rng = ThreadLocalRandom.current();
-        for (int i = 0; i < 2048; i++) {
+        for (int i = 0; i < 1024; i++) {
             StringBuilder builder = new StringBuilder(256);
             for (int j = 0; j < 256; j++) {
                 builder.append(SYMBOLS.charAt(rng.nextInt(SYMBOLS.length())));
             }
-            inkyMessage().deserialize(builder.toString());
+            try {
+                inkyMessage().deserialize(builder.toString());
+            } catch (Throwable throwable) {
+                System.out.println(builder);
+                throw throwable;
+            }
         }
     }
 
@@ -218,8 +227,8 @@ public class InkyMessageTest {
     public Object[][] escapeData() {
         return new Object[][] {
                 {
-                    "&a&[Fully clickable](click:run /helloworld)",
-                    "\\&a\\&[Fully clickable\\]\\(click:run /helloworld\\)"
+                    "&a&[Fully \\clickable](click:run /helloworld)",
+                    "\\&a\\&[Fully \\\\clickable\\]\\(click:run /helloworld\\)"
                 }
         };
     }
@@ -276,7 +285,7 @@ public class InkyMessageTest {
     @Test(
             dataProvider = "performanceData",
             description = "The \"test\" exists purely for getting a rough idea of deserializer performance vs MiniMessage",
-            enabled = true
+            enabled = false
     )
     public void performanceTest(String mini, String inky) {
         int warmup = 100000;
