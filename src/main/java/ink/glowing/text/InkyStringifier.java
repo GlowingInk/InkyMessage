@@ -13,16 +13,16 @@ import java.util.TreeSet;
 
 import static ink.glowing.text.InkyMessage.escape;
 
-final class IMSerializerImpl {
-    private IMSerializerImpl() {}
+final class InkyStringifier {
+    private InkyStringifier() {}
 
-    public static @NotNull String serialize(@NotNull Component text, @NotNull InkyMessage.Resolver resolver) {
+    public static @NotNull String stringify(@NotNull Component text, @NotNull InkyMessage.Resolver resolver) {
         StringBuilder builder = new StringBuilder();
-        serialize(builder, new TreeSet<>(), text, resolver, new boolean[]{false});
+        stringify(builder, new TreeSet<>(), text, resolver, new boolean[]{false});
         return builder.toString();
     }
 
-    private static void serialize(
+    private static void stringify(
             @NotNull StringBuilder builder,
             final @NotNull TreeSet<SymbolicStyle> outerStyle,
             @NotNull Component text,
@@ -55,7 +55,7 @@ final class IMSerializerImpl {
         var newOuterStyle = new TreeSet<>(outerStyle);
         newOuterStyle.addAll(currentStyle);
         for (var child : children) {
-            serialize(builder, newOuterStyle, child, resolver, previousStyled);
+            stringify(builder, newOuterStyle, child, resolver, previousStyled);
         }
         if (!tags.isEmpty()) {
             builder.append("]");
@@ -71,7 +71,7 @@ final class IMSerializerImpl {
         } else if (component instanceof TranslatableComponent translatable) {
             StringBuilder builder = new StringBuilder("&{lang:" + translatable.key() + "}");
             for (var arg : translatable.args()) {
-                builder.append("(arg ").append(serialize(arg, resolver)).append(')');
+                builder.append("(arg ").append(stringify(arg, resolver)).append(')');
             }
             if (translatable.fallback() != null) {
                 builder.append("(fallback ").append(escape(translatable.fallback())).append(')');

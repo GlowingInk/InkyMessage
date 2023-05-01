@@ -15,7 +15,7 @@ Those are its possible tags:
 | `decor`    | `bold`, `obfuscated`, `strikethrough`, `underlined`, `italic`                                                                       | `true`, `unset`, `false` | Force decorator on the text               | `&cThat's a &[bold](decor:bold) move!`                              |
 | `font`     | Namespaced key of a font                                                                                                            | None                     | Change fonts of a text                    | `Wow, &[almost HD fonts](font:minecraft:uniform)!`                  |
 | `color`    | [Named color](https://jd.advntr.dev/api/4.13.1/net/kyori/adventure/text/format/NamedTextColor.html) (lower case) or hex (`#123456`) | None ATM                 | Colorize colorless text                   | `&[This text is green](color:green)`                                |
-| `gradient` | `spectrum` (`rainbow`) or `color1-color2-colorN` (look `color` tag)                                                                 | None ATM                 | Colorize colorless text with gradient     | `&aLook!&r &[Fancy!](gradient:spectrum)(decor:bold)`                |
+| `gradient` | `spectrum` or `color1-color2-colorN` (see the `color` tag)                                                                          | None ATM                 | Colorize colorless text with gradient     | `&aLook!&r &[Fancy!](gradient:spectrum)(decor:bold)`                |
 
 ## TODO (until full release)
 - Placeholders (for keybinds, translations, selectors)

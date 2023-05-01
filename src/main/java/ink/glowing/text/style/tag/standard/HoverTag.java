@@ -13,7 +13,7 @@ import java.util.List;
 import static ink.glowing.text.InkyMessage.inkyMessage;
 import static net.kyori.adventure.text.event.HoverEvent.showText;
 
-public final class HoverTag implements StyleTag.Complex {
+public final class HoverTag implements StyleTag.Rich {
     public static @NotNull HoverTag hoverTag() {
         return Provider.PROVIDER.instance;
     }

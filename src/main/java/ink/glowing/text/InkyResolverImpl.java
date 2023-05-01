@@ -3,12 +3,6 @@ package ink.glowing.text;
 import ink.glowing.text.replace.Replacer;
 import ink.glowing.text.style.symbolic.SymbolicStyle;
 import ink.glowing.text.style.tag.StyleTag;
-import ink.glowing.text.style.tag.standard.ClickTag;
-import ink.glowing.text.style.tag.standard.ColorTag;
-import ink.glowing.text.style.tag.standard.DecorTag;
-import ink.glowing.text.style.tag.standard.FontTag;
-import ink.glowing.text.style.tag.standard.GradientTag;
-import ink.glowing.text.style.tag.standard.HoverTag;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.Style;
 import net.kyori.adventure.text.format.TextColor;
@@ -25,16 +19,21 @@ import java.util.TreeSet;
 import java.util.function.Function;
 
 import static ink.glowing.text.replace.StandardReplacers.urlReplacer;
-import static ink.glowing.text.style.symbolic.SymbolicStyle.*;
+import static ink.glowing.text.style.symbolic.StandardSymbolicStyles.*;
+import static ink.glowing.text.style.tag.standard.ClickTag.clickTag;
+import static ink.glowing.text.style.tag.standard.ColorTag.colorTag;
+import static ink.glowing.text.style.tag.standard.DecorTag.decorTag;
+import static ink.glowing.text.style.tag.standard.FontTag.fontTag;
+import static ink.glowing.text.style.tag.standard.HoverTag.hoverTag;
+import static net.kyori.adventure.text.format.Style.style;
 
-final class IMResolverImpl implements InkyMessage.Resolver {
+final class InkyResolverImpl implements InkyMessage.Resolver {
     static final InkyMessage.Resolver STANDARD_RESOLVER = InkyMessage.resolver()
-            .addTags(ColorTag.colorTag(),
-                    HoverTag.hoverTag(),
-                    ClickTag.clickTag(),
-                    GradientTag.gradientTag(),
-                    FontTag.fontTag(),
-                    DecorTag.decorTag())
+            .addTags(colorTag(),
+                    hoverTag(),
+                    clickTag(),
+                    fontTag(),
+                    decorTag())
             .addSymbolics(notchianColors())
             .addSymbolics(notchianDecorations())
             .symbolicReset(notchianReset())
@@ -46,7 +45,7 @@ final class IMResolverImpl implements InkyMessage.Resolver {
     private final Map<Character, SymbolicStyle> symbolics;
     private final SymbolicStyle symbolicReset;
 
-    IMResolverImpl(
+    InkyResolverImpl(
             @NotNull Iterable<StyleTag<?>> tags,
             @NotNull Collection<Replacer> replacers,
             @NotNull Iterable<SymbolicStyle> symbolics,
@@ -80,7 +79,7 @@ final class IMResolverImpl implements InkyMessage.Resolver {
     @Override
     public @Nullable Style applySymbolicStyle(char symbol, @NotNull Style currentStyle) {
         SymbolicStyle symbolic = symbolics.get(symbol);
-        return symbolic == null ? null : symbolic.apply(currentStyle);
+        return symbolic == null ? null : symbolic.merge(currentStyle);
     }
 
     /**
@@ -104,7 +103,7 @@ final class IMResolverImpl implements InkyMessage.Resolver {
         boolean hasColor = false;
         for (var symb : this.symbolics.values()) {
             if (symb.isApplied(style)) {
-                if (symb.hasColor()) hasColor = true;
+                if (symb.base().color() != null) hasColor = true;
                 symbolics.add(symb);
             }
         }
@@ -148,17 +147,17 @@ final class IMResolverImpl implements InkyMessage.Resolver {
         }
 
         @Override
-        public boolean hasColor() {
-            return true;
-        }
-
-        @Override
         public boolean isApplied(@NotNull Style inputStyle) {
             return color.equals(inputStyle.color());
         }
 
         @Override
-        public @NotNull Style apply(@NotNull Style inputStyle) {
+        public @NotNull Style base() {
+            return style(color);
+        }
+
+        @Override
+        public @NotNull Style merge(@NotNull Style inputStyle) {
             return inputStyle.color(color);
         }
 

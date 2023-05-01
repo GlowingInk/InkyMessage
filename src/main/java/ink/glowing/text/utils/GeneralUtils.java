@@ -1,12 +1,9 @@
 package ink.glowing.text.utils;
 
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Unmodifiable;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.List;
 import java.util.function.IntConsumer;
 import java.util.function.IntFunction;
 import java.util.function.Supplier;
@@ -25,13 +22,11 @@ public final class GeneralUtils {
     }
 
     @SafeVarargs
-    public static <T> @NotNull List<T> concatList(@NotNull Collection<T> @NotNull ... collections) {
-        return concatCollection(ArrayList::new, collections);
-    }
-
-    @SafeVarargs
-    public static <T> @NotNull @Unmodifiable List<T> concatImmutableList(@NotNull Collection<T> @NotNull ... collections) {
-        return Collections.unmodifiableList(concatList(collections));
+    public static <T> @NotNull Collection<T> concatImmutableCollection(
+            @NotNull Supplier<Collection<T>> colGetter,
+            @NotNull Collection<T> @NotNull ... collections
+    ) {
+        return Collections.unmodifiableCollection(concatCollection(colGetter, collections));
     }
 
     public static @NotNull String replaceEach(@NotNull String input, @NotNull String search, @NotNull IntFunction<String> replaceSupplier) {

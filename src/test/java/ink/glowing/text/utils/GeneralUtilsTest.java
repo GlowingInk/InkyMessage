@@ -3,9 +3,10 @@ package ink.glowing.text.utils;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
+import java.util.ArrayList;
 import java.util.List;
 
-import static ink.glowing.text.utils.GeneralUtils.concatList;
+import static ink.glowing.text.utils.GeneralUtils.concatCollection;
 import static ink.glowing.text.utils.GeneralUtils.replaceEach;
 import static org.testng.Assert.assertEquals;
 
@@ -20,7 +21,7 @@ public class GeneralUtilsTest {
     @Test(dataProvider = "buildListData")
     public void buildListTest(List<String>[] lists, List<String> expected) {
         assertEquals(
-                concatList(lists),
+                concatCollection(ArrayList::new, lists),
                 expected
         );
     }

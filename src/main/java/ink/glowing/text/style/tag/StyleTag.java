@@ -8,6 +8,8 @@ import org.jetbrains.annotations.Unmodifiable;
 
 import java.util.List;
 
+import static ink.glowing.text.InkyMessage.escape;
+
 public sealed interface StyleTag<T> extends Namespaced {
     @NotNull Component modify(@NotNull Component text, @NotNull String param, @NotNull T value);
 
@@ -15,22 +17,12 @@ public sealed interface StyleTag<T> extends Namespaced {
 
     non-sealed interface Plain extends StyleTag<String> {}
 
-    non-sealed interface Complex extends StyleTag<Component> {}
+    non-sealed interface Rich extends StyleTag<Component> {}
 
     default @NotNull String asFormatted(@NotNull String param, @NotNull String value) {
             String result = namespace();
-            if (!param.isEmpty()) result += ":" + param;
-            if (!value.isEmpty()) result += " " + value;
+            if (!param.isEmpty()) result += ":" + escape(param);
+            if (!value.isEmpty()) result += " " + escape(value);
             return "(" + result + ")";
-    }
-
-    default @NotNull Prepared<T> asPrepared(@NotNull String param, @NotNull T value) {
-        return new Prepared<>(this, param, value);
-    }
-
-    record Prepared<T>(@NotNull StyleTag<T> tag, @NotNull String param, @NotNull T value) {
-        public @NotNull Component modify(@NotNull Component text) {
-            return tag.modify(text, param, value);
-        }
     }
 }

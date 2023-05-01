@@ -67,7 +67,7 @@ public final class InkyMessage implements ComponentSerializer<Component, Compone
      * @return converted text component
      */
     public @NotNull Component deserialize(@NotNull String inputText, @NotNull BuildContext context) {
-        return IMDeserializerImpl.parse(inputText, context).compact();
+        return InkyParser.parse(inputText, context).compact();
     }
 
     /**
@@ -89,7 +89,7 @@ public final class InkyMessage implements ComponentSerializer<Component, Compone
      * @see InkyMessage#standardResolver()
      */
     public @NotNull String serialize(@NotNull Component text, @NotNull Resolver resolver) {
-        return IMSerializerImpl.serialize(text, resolver);
+        return InkyStringifier.stringify(text, resolver);
     }
 
     /**
@@ -180,7 +180,7 @@ public final class InkyMessage implements ComponentSerializer<Component, Compone
      * @return a standard resolver
      */
     public static @NotNull InkyMessage.Resolver standardResolver() {
-        return IMResolverImpl.STANDARD_RESOLVER;
+        return InkyResolverImpl.STANDARD_RESOLVER;
     }
 
     private enum Provider implements InstanceProvider<InkyMessage> {
@@ -193,7 +193,7 @@ public final class InkyMessage implements ComponentSerializer<Component, Compone
         }
     }
 
-    public sealed interface Resolver permits IMResolverImpl {
+    public sealed interface Resolver permits InkyResolverImpl {
         @Nullable StyleTag<?> getTag(@NotNull String namespace);
 
         @Nullable Style applySymbolicStyle(char symbol, @NotNull Style currentStyle);
@@ -317,7 +317,7 @@ public final class InkyMessage implements ComponentSerializer<Component, Compone
         @Contract("-> new")
         public @NotNull InkyMessage.Resolver build() {
             Objects.requireNonNull(symbolicReset, "Resolver requires symbolic reset to be provided");
-            return new IMResolverImpl(tags, replacers, symbolics, symbolicReset);
+            return new InkyResolverImpl(tags, replacers, symbolics, symbolicReset);
         }
     }
 }

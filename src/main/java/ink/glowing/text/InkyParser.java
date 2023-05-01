@@ -16,7 +16,7 @@ import static ink.glowing.text.InkyMessage.*;
 import static net.kyori.adventure.text.Component.empty;
 import static net.kyori.adventure.text.Component.text;
 
-final class IMDeserializerImpl {
+final class InkyParser {
     private static final char END = 0;
 
     private final String textStr;
@@ -25,7 +25,7 @@ final class IMDeserializerImpl {
     private final TreeSet<Replacer.FoundSpot> replaceSpots;
     private int globalIndex;
 
-    private IMDeserializerImpl(@NotNull String textStr, @NotNull InkyMessage.Resolver resolver) {
+    private InkyParser(@NotNull String textStr, @NotNull InkyMessage.Resolver resolver) {
         this.textStr = textStr;
         this.hasSlashes = textStr.indexOf('\\') != -1;
         this.resolver = resolver;
@@ -34,7 +34,7 @@ final class IMDeserializerImpl {
 
     public static @NotNull Component parse(@NotNull String textStr, @NotNull BuildContext context) {
         if (textStr.length() == 0) return empty();
-        return new IMDeserializerImpl(textStr, context.resolver())
+        return new InkyParser(textStr, context.resolver())
                 .parseRecursive(0, END, context);
     }
 
@@ -78,8 +78,8 @@ final class IMDeserializerImpl {
         if (globalIndex >= textStr.length() || textStr.charAt(globalIndex) == ')') {
             if (tag instanceof StyleTag.Plain plainTag) {
                 comp = plainTag.modify(comp, "", "");
-            } else if (tag instanceof StyleTag.Complex complexTag) {
-                comp = complexTag.modify(comp, "", empty());
+            } else if (tag instanceof StyleTag.Rich richTag) {
+                comp = richTag.modify(comp, "", empty());
             }
         } else {
             String params = "";
@@ -105,9 +105,9 @@ final class IMDeserializerImpl {
                     }
                 }
                 comp = plainTag.modify(comp, params, value);
-            } else if (tag instanceof StyleTag.Complex complexTag) {
+            } else if (tag instanceof StyleTag.Rich richTag) {
                 Component value = parseRecursive(from, ')', context.colorlessCopy());
-                comp = complexTag.modify(comp, params, value.compact());
+                comp = richTag.modify(comp, params, value.compact());
             }
         }
         if (++globalIndex < textStr.length() && textStr.charAt(globalIndex) == '(') {

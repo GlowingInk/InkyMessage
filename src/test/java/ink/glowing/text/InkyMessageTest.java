@@ -264,11 +264,11 @@ public class InkyMessageTest {
                 },
                 {
                         "<gradient:white:black:yellow:red>qwertyuiopasdfghjkl;'zxcvbnm,.</gradient>",
-                        "&[qwertyuiopasdfghjkl;'zxcvbnm,.](gradient:white-black-yellow-red)"
+                        "&[qwertyuiopasdfghjkl;'zxcvbnm,.](color:white-black-yellow-red)"
                 },
                 {
                         "<rainbow>qwertyuiopasdfghjkl<white>;'zxcvbnm,.</rainbow>",
-                        "&[qwertyuiopasdfghjkl&f;'zxcvbnm,.](gradient:rainbow)"
+                        "&[qwertyuiopasdfghjkl&f;'zxcvbnm,.](color:rainbow)"
                 }
         };
     }
@@ -276,7 +276,7 @@ public class InkyMessageTest {
     @Test(
             dataProvider = "performanceData",
             description = "The \"test\" exists purely for getting a rough idea of deserializer performance vs MiniMessage",
-            enabled = false
+            enabled = true
     )
     public void performanceTest(String mini, String inky) {
         int warmup = 100000;

@@ -1,22 +1,14 @@
-package ink.glowing.text.style.symbolic.standard;
+package ink.glowing.text.style.symbolic;
 
-import ink.glowing.text.style.symbolic.SymbolicStyle;
 import net.kyori.adventure.text.format.Style;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Objects;
 
-public record SimpleSymbolicReset(char symbol) implements SymbolicStyle {
-    public static final SimpleSymbolicReset NOTCHIAN_RESET = new SimpleSymbolicReset('r');
-
+record SimpleSymbolicReset(char symbol) implements SymbolicStyle {
     @Override
     public boolean resets() {
         return true;
-    }
-
-    @Override
-    public boolean hasColor() {
-        return false;
     }
 
     @Override
@@ -25,7 +17,12 @@ public record SimpleSymbolicReset(char symbol) implements SymbolicStyle {
     }
 
     @Override
-    public @NotNull Style apply(@NotNull Style inputStyle) {
+    public @NotNull Style base() {
+        return Style.empty();
+    }
+
+    @Override
+    public @NotNull Style merge(@NotNull Style inputStyle) {
         return Style.empty();
     }
 
@@ -41,7 +38,7 @@ public record SimpleSymbolicReset(char symbol) implements SymbolicStyle {
 
     @Override
     public String toString() {
-        return "SymbolicReset{" +
+        return "SimpleSymbolicReset{" +
                 "symbol=" + symbol +
                 ", decoration=reset" +
                 '}';
