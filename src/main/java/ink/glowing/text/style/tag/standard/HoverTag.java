@@ -10,10 +10,9 @@ import org.jetbrains.annotations.Unmodifiable;
 
 import java.util.List;
 
-import static ink.glowing.text.InkyMessage.inkyMessage;
 import static net.kyori.adventure.text.event.HoverEvent.showText;
 
-public final class HoverTag implements StyleTag.Rich {
+public final class HoverTag implements StyleTag.Complex {
     public static @NotNull HoverTag hoverTag() {
         return Provider.PROVIDER.instance;
     }
@@ -29,7 +28,7 @@ public final class HoverTag implements StyleTag.Rich {
     public @NotNull @Unmodifiable List<String> read(@NotNull InkyMessage.Resolver resolver, @NotNull Component text) {
         return text.hoverEvent() == null || text.hoverEvent().action() != HoverEvent.Action.SHOW_TEXT
                 ? List.of()
-                : List.of(asFormatted("text", inkyMessage().serialize((Component) text.hoverEvent().value(), resolver)));
+                : List.of(asFormatted("text", (Component) text.hoverEvent().value(), resolver));
     }
 
     @Override

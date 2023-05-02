@@ -8,6 +8,8 @@ import org.jetbrains.annotations.Unmodifiable;
 
 import java.util.List;
 
+import static ink.glowing.text.InkyMessage.inkyMessage;
+
 public sealed interface StyleTag<T> extends Namespaced {
     @NotNull Component modify(@NotNull Component text, @NotNull String param, @NotNull T value);
 
@@ -15,12 +17,19 @@ public sealed interface StyleTag<T> extends Namespaced {
 
     non-sealed interface Plain extends StyleTag<String> {}
 
-    non-sealed interface Rich extends StyleTag<Component> {}
+    non-sealed interface Complex extends StyleTag<Component> {}
 
     default @NotNull String asFormatted(@NotNull String param, @NotNull String value) {
-            String result = namespace();
-            if (!param.isEmpty()) result += ":" + param;
-            if (!value.isEmpty()) result += " " + value;
-            return "(" + result + ")";
+        String result = namespace();
+        if (!param.isEmpty()) result += ":" + param;
+        if (!value.isEmpty()) result += " " + value;
+        return "(" + result + ")";
+    }
+
+    default @NotNull String asFormatted(@NotNull String param, @NotNull Component value, @NotNull InkyMessage.Resolver resolver) {
+        String result = namespace();
+        if (!param.isEmpty()) result += ":" + param;
+        if (!value.equals(Component.empty())) result += " " + inkyMessage().serialize(value, resolver);
+        return "(" + result + ")";
     }
 }

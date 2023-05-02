@@ -12,6 +12,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.TreeSet;
 
 import static ink.glowing.text.InkyMessage.escape;
+import static ink.glowing.text.placeholders.internal.LangPlaceholder.langPlaceholder;
 
 final class InkyStringifier {
     private InkyStringifier() {}
@@ -49,7 +50,6 @@ final class InkyStringifier {
                 builder.append(symb.asFormatted());
             }
         }
-
         builder.append(asString(text, resolver));
         var children = text.children();
         var newOuterStyle = new TreeSet<>(outerStyle);
@@ -70,11 +70,8 @@ final class InkyStringifier {
             return escape(text.content());
         } else if (component instanceof TranslatableComponent translatable) {
             StringBuilder builder = new StringBuilder("&{lang:" + translatable.key() + "}");
-            for (var arg : translatable.args()) {
-                builder.append("(arg ").append(stringify(arg, resolver)).append(')');
-            }
-            if (translatable.fallback() != null) {
-                builder.append("(fallback ").append(escape(translatable.fallback())).append(')');
+            for (var tag : langPlaceholder().tag().read(resolver, translatable)) {
+                builder.append(tag);
             }
             return builder.toString();
         } else if (component instanceof KeybindComponent keybind) {

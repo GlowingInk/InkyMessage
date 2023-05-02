@@ -1,6 +1,7 @@
 package ink.glowing.text;
 
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.TextColor;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
@@ -9,10 +10,12 @@ import java.util.random.RandomGenerator;
 
 import static ink.glowing.text.InkyMessage.inkyMessage;
 import static net.kyori.adventure.text.Component.text;
+import static net.kyori.adventure.text.Component.translatable;
 import static net.kyori.adventure.text.event.ClickEvent.openUrl;
 import static net.kyori.adventure.text.event.ClickEvent.runCommand;
 import static net.kyori.adventure.text.event.HoverEvent.showText;
-import static net.kyori.adventure.text.format.NamedTextColor.*;
+import static net.kyori.adventure.text.format.NamedTextColor.GREEN;
+import static net.kyori.adventure.text.format.NamedTextColor.RED;
 import static net.kyori.adventure.text.format.TextDecoration.BOLD;
 import static net.kyori.adventure.text.format.TextDecoration.ITALIC;
 import static net.kyori.adventure.text.minimessage.MiniMessage.miniMessage;
@@ -70,8 +73,7 @@ public class InkyMessageTest {
                                 .append(text("https://github.com/GlowingInk").clickEvent(openUrl("https://github.com/GlowingInk")).color(GREEN))
                                 .append(text(" and ").color(GREEN))
                                 .append(text("http://repo.glowing.ink").clickEvent(openUrl("http://repo.glowing.ink")).color(GREEN))
-                                .append(text(".").color(GREEN))
-                                .build()
+                                .append(text(".").color(GREEN)).build()
                 },
                 {
                         "&[aaa&[bbb&[ccc](decor:bold)bbb](decor:italic)&aaaa](color:red)",
@@ -87,8 +89,16 @@ public class InkyMessageTest {
                                 .append(text(".").color(RED)).build()
                 },
                 {
-                        "&[Test](fake:tag lol), &[another one]",
-                        text("Test(fake:tag lol), another one")
+                        "&[Test](fake:tag lol), &[another one].",
+                        text("Test(fake:tag lol), another one.")
+                },
+                {
+                        "Test &{lang:my.cool.test}(lang:arg &aHello world)(lang:arg Yay...)(lang:fallback Falling back).",
+                        text("Test ")
+                                .append(translatable("my.cool.test")
+                                        .args(text("Hello world").color(GREEN), text("Yay..."))
+                                        .fallback("Falling back"))
+                                .append(text("."))
                 }
         };
     }
@@ -116,8 +126,8 @@ public class InkyMessageTest {
     public Object[][] serializeData() {
         return new Object[][] {
                 {
-                        text("Hi"),
-                        "Hi"
+                        text("Hi").color(TextColor.color(0x123456)),
+                        "&#123456Hi"
                 },
                 {
                         text("Green").color(GREEN),
@@ -131,8 +141,8 @@ public class InkyMessageTest {
                         text()
                                 .append(text("Bold green").color(GREEN).decorate(BOLD))
                                 .append(text(" and "))
-                                .append(text("blue").color(BLUE)).build(),
-                        "&a&lBold green&r and &9blue"
+                                .append(text("red").color(RED)).build(),
+                        "&a&lBold green&r and &cred"
                 },
                 {
                         text("With hover").hoverEvent(showText(text("Hover!"))),
@@ -159,6 +169,12 @@ public class InkyMessageTest {
                 {
                         text("First green").append(text(" then second green")).color(GREEN).decorate(BOLD),
                         "&a&lFirst green&a&l then second green"
+                },
+                {
+                        text("That's so ")
+                                .append(translatable("cool", "Fallbacked", text("Arg1"), text("Arg2\\"))
+                                        .append(text(" Test")).hoverEvent(showText(text("hover!").color(GREEN)))),
+                        "That's so &[&{lang:cool}(lang:arg Arg1)(lang:arg Arg2\\\\)(lang:fallback Fallbacked) Test](hover:text &ahover!)"
                 }
         };
     }
@@ -190,7 +206,7 @@ public class InkyMessageTest {
                 {text()
                         .append(text("Bold green").color(GREEN).decorate(BOLD))
                         .append(text(" and "))
-                        .append(text("blue").color(BLUE)).build()}
+                        .append(text("red").color(RED)).build()}
         };
     }
 

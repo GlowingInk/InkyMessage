@@ -1,5 +1,6 @@
 package ink.glowing.text;
 
+import ink.glowing.text.placeholders.Placeholder;
 import ink.glowing.text.replace.Replacer;
 import ink.glowing.text.style.symbolic.SymbolicStyle;
 import ink.glowing.text.style.tag.StyleTag;
@@ -18,6 +19,7 @@ import java.util.Map;
 import java.util.TreeSet;
 import java.util.function.Function;
 
+import static ink.glowing.text.placeholders.internal.LangPlaceholder.langPlaceholder;
 import static ink.glowing.text.replace.StandardReplacers.urlReplacer;
 import static ink.glowing.text.style.symbolic.StandardSymbolicStyles.*;
 import static ink.glowing.text.style.tag.standard.ClickTag.clickTag;
@@ -28,6 +30,10 @@ import static ink.glowing.text.style.tag.standard.HoverTag.hoverTag;
 import static net.kyori.adventure.text.format.Style.style;
 
 final class InkyResolverImpl implements InkyMessage.Resolver {
+    private static final List<Placeholder> REQUIRED_PLACEHOLDERS = List.of(
+            langPlaceholder()
+    );
+
     static final InkyMessage.Resolver STANDARD_RESOLVER = InkyMessage.resolver()
             .addTags(colorTag(),
                     hoverTag(),
@@ -41,25 +47,31 @@ final class InkyResolverImpl implements InkyMessage.Resolver {
             .build();
 
     private final Map<String, StyleTag<?>> tags;
+    private final Map<String, Placeholder> placeholders;
     private final Collection<Replacer> replacers;
     private final Map<Character, SymbolicStyle> symbolics;
     private final SymbolicStyle symbolicReset;
 
     InkyResolverImpl(
             @NotNull Iterable<StyleTag<?>> tags,
+            @NotNull Collection<Placeholder> placeholders,
             @NotNull Collection<Replacer> replacers,
             @NotNull Iterable<SymbolicStyle> symbolics,
             @Nullable SymbolicStyle symbolicReset
     ) {
-        this.tags = toMap(tags, StyleTag::namespace);
+        this.tags = toMap(tags, StyleTag::namespace, List.of());
+        this.placeholders = toMap(placeholders, Placeholder::namespace, REQUIRED_PLACEHOLDERS);
         this.replacers = replacers;
-        this.symbolics = toMap(symbolics, SymbolicStyle::symbol);
+        this.symbolics = toMap(symbolics, SymbolicStyle::symbol, List.of());
         this.symbolicReset = symbolicReset;
     }
 
-    private static <O, K> Map<K, O> toMap(Iterable<O> origin, Function<O, K> keyFunction) {
+    private static <O, K> Map<K, O> toMap(Iterable<O> origin, Function<O, K> keyFunction, Iterable<O> required) {
         Map<K, O> map = new HashMap<>();
         for (O obj : origin) {
+            map.put(keyFunction.apply(obj), obj);
+        }
+        for (O obj : required) {
             map.put(keyFunction.apply(obj), obj);
         }
         return map.isEmpty() ? Collections.emptyMap() : Collections.unmodifiableMap(map);
@@ -68,6 +80,11 @@ final class InkyResolverImpl implements InkyMessage.Resolver {
     @Override
     public @Nullable StyleTag<?> getTag(@NotNull String namespace) {
         return tags.get(namespace);
+    }
+
+    @Override
+    public @Nullable Placeholder getPlaceholder(@NotNull String namespace) {
+        return placeholders.get(namespace);
     }
 
     /**
