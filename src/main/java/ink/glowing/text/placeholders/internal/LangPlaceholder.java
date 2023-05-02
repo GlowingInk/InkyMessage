@@ -53,7 +53,6 @@ public final class LangPlaceholder implements Placeholder {
         }
     }
 
-    @ApiStatus.Internal
     private static final class Tag implements StyleTag.Complex {
         private Tag() {}
 

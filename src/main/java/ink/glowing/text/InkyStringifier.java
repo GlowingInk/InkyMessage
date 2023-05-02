@@ -50,7 +50,7 @@ final class InkyStringifier {
                 builder.append(symb.asFormatted());
             }
         }
-        builder.append(asString(text, resolver));
+        appendComponent(builder, text, resolver);
         var children = text.children();
         var newOuterStyle = new TreeSet<>(outerStyle);
         newOuterStyle.addAll(currentStyle);
@@ -65,23 +65,26 @@ final class InkyStringifier {
         }
     }
 
-    private static String asString(@NotNull Component component, @NotNull InkyMessage.Resolver resolver) {
+    private static void appendComponent(
+            @NotNull StringBuilder builder,
+            @NotNull Component component,
+            @NotNull InkyMessage.Resolver resolver
+    ) {
         if (component instanceof TextComponent text) {
-            return escape(text.content());
+            builder.append(escape(text.content()));
         } else if (component instanceof TranslatableComponent translatable) {
-            StringBuilder builder = new StringBuilder("&{lang:" + translatable.key() + "}");
+            builder.append("&{lang:").append(translatable.key()).append("}");
             for (var tag : langPlaceholder().tag().read(resolver, translatable)) {
                 builder.append(tag);
             }
-            return builder.toString();
         } else if (component instanceof KeybindComponent keybind) {
-            return "&{key:" + keybind.keybind() + "}"; // TODO implement
+            builder.append("&{key:").append(keybind.keybind()).append("}"); // TODO implement
         } else if (component instanceof ScoreComponent score) {
-            return score.objective(); // TODO implement
+            builder.append(score.objective()); // TODO implement
         } else if (component instanceof SelectorComponent selector) {
-            return selector.pattern(); // TODO implement
+            builder.append(selector.pattern()); // TODO implement
         } else {
-            return "?";
+            builder.append("?");
         }
     }
 }
