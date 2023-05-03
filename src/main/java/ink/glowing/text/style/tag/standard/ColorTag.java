@@ -3,7 +3,6 @@ package ink.glowing.text.style.tag.standard;
 import ink.glowing.text.InkyMessage;
 import ink.glowing.text.style.tag.StyleTag;
 import ink.glowing.text.utils.function.FloatFunction;
-import ink.glowing.text.utils.function.InstanceProvider;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -29,8 +28,9 @@ public final class ColorTag implements StyleTag.Plain {
     private static final TextColor AVERAGE_SPECTRUM = TextColor.color(0x7F7F7F);
     private static final Map<String, NamedTextColor> NAMED_COLORS = NamedTextColor.NAMES.keyToValue();
 
+    private static final ColorTag INSTANCE = new ColorTag();
     public static @NotNull ColorTag colorTag() {
-        return Provider.PROVIDER.instance;
+        return INSTANCE;
     }
 
     // FIXME That's really not how this should be done
@@ -160,15 +160,5 @@ public final class ColorTag implements StyleTag.Plain {
     @Override
     public @NotNull String namespace() {
         return "color";
-    }
-
-    private enum Provider implements InstanceProvider<ColorTag> {
-        PROVIDER;
-        private final ColorTag instance = new ColorTag();
-
-        @Override
-        public @NotNull ColorTag instance() {
-            return instance;
-        }
     }
 }

@@ -3,7 +3,6 @@ package ink.glowing.text.placeholders.internal;
 import ink.glowing.text.InkyMessage;
 import ink.glowing.text.placeholders.Placeholder;
 import ink.glowing.text.style.tag.StyleTag;
-import ink.glowing.text.utils.function.InstanceProvider;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TranslatableComponent;
 import net.kyori.adventure.text.flattener.ComponentFlattener;
@@ -19,9 +18,12 @@ import static ink.glowing.text.InkyMessage.escape;
 
 @ApiStatus.Internal
 public final class LangPlaceholder implements Placeholder {
+    private static final LangPlaceholder INSTANCE = new LangPlaceholder();
     public static @NotNull LangPlaceholder langPlaceholder() {
-        return Provider.PROVIDER.instance;
+        return INSTANCE;
     }
+
+    private LangPlaceholder() {}
 
     @Override
     public @NotNull Component parse(@NotNull String value) {
@@ -43,21 +45,12 @@ public final class LangPlaceholder implements Placeholder {
         return "lang";
     }
 
-    private enum Provider implements InstanceProvider<LangPlaceholder> {
-        PROVIDER;
-        private final LangPlaceholder instance = new LangPlaceholder();
-
-        @Override
-        public @NotNull LangPlaceholder instance() {
-            return instance;
-        }
-    }
-
     private static final class Tag implements StyleTag.Complex {
+        private static final Tag INSTANCE = new Tag();
         private Tag() {}
 
         static @NotNull LangPlaceholder.Tag langTag() {
-            return Provider.PROVIDER.instance;
+            return INSTANCE;
         }
 
         @Override
@@ -94,16 +87,6 @@ public final class LangPlaceholder implements Placeholder {
         @Override
         public @NotNull String namespace() {
             return "lang";
-        }
-
-        private enum Provider implements InstanceProvider<Tag> {
-            PROVIDER;
-            private final Tag instance = new Tag();
-
-            @Override
-            public @NotNull LangPlaceholder.Tag instance() {
-                return instance;
-            }
         }
     }
 }

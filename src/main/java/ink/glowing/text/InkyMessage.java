@@ -4,7 +4,6 @@ import ink.glowing.text.placeholders.Placeholder;
 import ink.glowing.text.replace.Replacer;
 import ink.glowing.text.style.symbolic.SymbolicStyle;
 import ink.glowing.text.style.tag.StyleTag;
-import ink.glowing.text.utils.function.InstanceProvider;
 import net.kyori.adventure.builder.AbstractBuilder;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.Style;
@@ -31,12 +30,14 @@ public final class InkyMessage implements ComponentSerializer<Component, Compone
     private static final Pattern ESCAPE_PATTERN = Pattern.compile("[&\\]()}\\\\]");
     private static final Pattern UNESCAPE_PATTERN = Pattern.compile("\\\\([&\\]()\\\\}])");
 
+    private static final InkyMessage INSTANCE = new InkyMessage();
+
     /**
      * Gets the instance of InkyMessage.
      * @return the instance
      */
     public static @NotNull InkyMessage inkyMessage() {
-        return Provider.PROVIDER.instance;
+        return INSTANCE;
     }
 
     private InkyMessage() {}
@@ -171,16 +172,6 @@ public final class InkyMessage implements ComponentSerializer<Component, Compone
      */
     public static @NotNull InkyMessage.Resolver standardResolver() {
         return InkyResolverImpl.STANDARD_RESOLVER;
-    }
-
-    private enum Provider implements InstanceProvider<InkyMessage> {
-        PROVIDER;
-        private final InkyMessage instance = new InkyMessage();
-
-        @Override
-        public @NotNull InkyMessage instance() {
-            return instance;
-        }
     }
 
     public sealed interface Resolver permits InkyResolverImpl {

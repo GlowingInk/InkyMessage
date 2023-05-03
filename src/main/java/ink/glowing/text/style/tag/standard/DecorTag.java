@@ -2,7 +2,6 @@ package ink.glowing.text.style.tag.standard;
 
 import ink.glowing.text.InkyMessage;
 import ink.glowing.text.style.tag.StyleTag;
-import ink.glowing.text.utils.function.InstanceProvider;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextDecoration;
 import org.jetbrains.annotations.NotNull;
@@ -12,8 +11,9 @@ import org.jetbrains.annotations.Unmodifiable;
 import java.util.List;
 
 public final class DecorTag implements StyleTag.Plain {
+    private static final DecorTag INSTANCE = new DecorTag();
     public static @NotNull DecorTag decorTag() {
-        return Provider.PROVIDER.instance;
+        return INSTANCE;
     }
 
     private DecorTag() {}
@@ -48,15 +48,5 @@ public final class DecorTag implements StyleTag.Plain {
             case "obfuscated", "obfuscate", "obf" ->    TextDecoration.OBFUSCATED;
             default -> null;
         };
-    }
-
-    private enum Provider implements InstanceProvider<DecorTag> {
-        PROVIDER;
-        private final DecorTag instance = new DecorTag();
-
-        @Override
-        public @NotNull DecorTag instance() {
-            return instance;
-        }
     }
 }

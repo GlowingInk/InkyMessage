@@ -2,7 +2,6 @@ package ink.glowing.text.style.tag.standard;
 
 import ink.glowing.text.InkyMessage;
 import ink.glowing.text.style.tag.StyleTag;
-import ink.glowing.text.utils.function.InstanceProvider;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.event.HoverEvent;
 import org.jetbrains.annotations.NotNull;
@@ -13,8 +12,9 @@ import java.util.List;
 import static net.kyori.adventure.text.event.HoverEvent.showText;
 
 public final class HoverTag implements StyleTag.Complex {
+    private static final HoverTag INSTANCE = new HoverTag();
     public static @NotNull HoverTag hoverTag() {
-        return Provider.PROVIDER.instance;
+        return INSTANCE;
     }
 
     private HoverTag() {}
@@ -34,15 +34,5 @@ public final class HoverTag implements StyleTag.Complex {
     @Override
     public @NotNull String namespace() {
         return "hover";
-    }
-
-    private enum Provider implements InstanceProvider<HoverTag> {
-        PROVIDER;
-        private final HoverTag instance = new HoverTag();
-
-        @Override
-        public @NotNull HoverTag instance() {
-            return instance;
-        }
     }
 }

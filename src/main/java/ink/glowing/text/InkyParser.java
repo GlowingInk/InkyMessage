@@ -53,7 +53,7 @@ final class InkyParser {
                     from = globalIndex;
                 } else if (nextCh == '{') {
                     int initIndex = globalIndex;
-                    if (!iterateUntil(':')) {
+                    if (!iterateUntil(":}")) {
                         globalIndex = initIndex;
                         continue;
                     }
@@ -62,13 +62,19 @@ final class InkyParser {
                         globalIndex = initIndex;
                         continue;
                     }
-                    int paramsIndex = globalIndex += 1;
-                    if (!iterateUntil('}')) {
-                        globalIndex = initIndex;
-                        continue;
+                    String params;
+                    if (textStr.charAt(globalIndex) == '}') {
+                        params = "";
+                    } else {
+                        int paramsIndex = globalIndex += 1;
+                        if (!iterateUntil('}')) {
+                            globalIndex = initIndex;
+                            continue;
+                        }
+                        params = textStr.substring(paramsIndex, globalIndex);
                     }
                     builder.append(parseComponent(from, initIndex, context));
-                    builder.append(findTags(placeholder.parse(textStr.substring(paramsIndex, globalIndex)), context, placeholder::getLocalTag));
+                    builder.append(findTags(placeholder.parse(params), context, placeholder::getLocalTag));
                     from = globalIndex;
                 }
             } else if (ch == until && isUnescapedAt(textStr, globalIndex)) {

@@ -2,7 +2,6 @@ package ink.glowing.text.style.tag.standard;
 
 import ink.glowing.text.InkyMessage;
 import ink.glowing.text.style.tag.StyleTag;
-import ink.glowing.text.utils.function.InstanceProvider;
 import net.kyori.adventure.text.Component;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Unmodifiable;
@@ -13,8 +12,9 @@ import static ink.glowing.text.InkyMessage.escape;
 import static net.kyori.adventure.text.event.ClickEvent.*;
 
 public final class ClickTag implements StyleTag.Plain {
+    private static final ClickTag INSTANCE = new ClickTag();
     public static @NotNull ClickTag clickTag() {
-        return Provider.PROVIDER.instance;
+        return INSTANCE;
     }
 
     private ClickTag() {}
@@ -70,15 +70,5 @@ public final class ClickTag implements StyleTag.Plain {
     @Override
     public @NotNull String namespace() {
         return "click";
-    }
-
-    private enum Provider implements InstanceProvider<ClickTag> {
-        PROVIDER;
-        private final ClickTag instance = new ClickTag();
-
-        @Override
-        public @NotNull ClickTag instance() {
-            return instance;
-        }
     }
 }
