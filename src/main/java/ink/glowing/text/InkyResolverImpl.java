@@ -57,7 +57,7 @@ final class InkyResolverImpl implements InkyMessage.Resolver {
             @NotNull Collection<Placeholder> placeholders,
             @NotNull Collection<Replacer> replacers,
             @NotNull Iterable<SymbolicStyle> symbolics,
-            @Nullable SymbolicStyle symbolicReset
+            @NotNull SymbolicStyle symbolicReset
     ) {
         this.tags = toMap(tags, StyleTag::namespace, List.of());
         this.placeholders = toMap(placeholders, Placeholder::namespace, REQUIRED_PLACEHOLDERS);

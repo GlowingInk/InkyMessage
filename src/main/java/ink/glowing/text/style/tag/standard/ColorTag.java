@@ -52,9 +52,8 @@ public final class ColorTag implements StyleTag.Plain {
             indexedLength = length - 1;
             colorGetter = colorLerp(colors);
         }
-        int[] step = new int[]{0};
         TextComponent.Builder builder = text();
-        applyGradient(builder, text, colorGetter, step, indexedLength);
+        applyGradient(builder, text, colorGetter, new int[]{0}, indexedLength);
         return builder.build();
     }
 

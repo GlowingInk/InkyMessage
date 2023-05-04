@@ -329,8 +329,10 @@ public final class InkyMessage implements ComponentSerializer<Component, Compone
         @Override
         @Contract("-> new")
         public @NotNull InkyMessage.Resolver build() {
-            Objects.requireNonNull(symbolicReset, "Resolver requires symbolic reset to be provided");
-            return new InkyResolverImpl(tags, placeholders, replacers, symbolics, symbolicReset);
+            return new InkyResolverImpl(
+                    tags, placeholders, replacers, symbolics,
+                    Objects.requireNonNull(symbolicReset, "Resolver requires symbolic reset to be provided")
+            );
         }
     }
 }

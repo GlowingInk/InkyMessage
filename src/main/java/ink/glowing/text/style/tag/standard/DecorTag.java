@@ -8,6 +8,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Unmodifiable;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public final class DecorTag implements StyleTag.Plain {
@@ -31,7 +32,15 @@ public final class DecorTag implements StyleTag.Plain {
 
     @Override
     public @NotNull @Unmodifiable List<String> read(@NotNull InkyMessage.Resolver resolver, @NotNull Component text) {
-        return List.of(); // Decorators are handled by &
+        var entries = text.decorations().entrySet();
+        if (entries.isEmpty()) return List.of();
+        List<String> tagStr = new ArrayList<>(0);
+        for (var entry : entries) {
+            if (entry.getValue() == TextDecoration.State.FALSE) {
+                tagStr.add(asFormatted(entry.getKey().toString(), "false"));
+            }
+        }
+        return tagStr;
     }
 
     @Override
