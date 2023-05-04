@@ -3,6 +3,7 @@ package ink.glowing.text.style.tag;
 import ink.glowing.text.InkyMessage;
 import net.kyori.adventure.key.Namespaced;
 import net.kyori.adventure.text.Component;
+import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Unmodifiable;
 
@@ -10,6 +11,7 @@ import java.util.List;
 
 import static ink.glowing.text.InkyMessage.inkyMessage;
 
+@ApiStatus.OverrideOnly
 public sealed interface StyleTag<T> extends Namespaced {
     @NotNull Component modify(@NotNull Component text, @NotNull String param, @NotNull T value);
 

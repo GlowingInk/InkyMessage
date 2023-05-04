@@ -12,7 +12,7 @@ public final class GeneralUtils {
     private GeneralUtils() {}
 
     @SafeVarargs
-    public static <T, C extends Collection<T>> @NotNull C concatCollection(
+    public static <T, C extends Collection<T>> @NotNull C concat(
             @NotNull Supplier<C> colGetter,
             @NotNull Collection<T> @NotNull ... collections
     ) {
@@ -22,17 +22,17 @@ public final class GeneralUtils {
     }
 
     @SafeVarargs
-    public static <T> @NotNull Collection<T> concatImmutableCollection(
+    public static <T> @NotNull Collection<T> concatImmutable(
             @NotNull Supplier<Collection<T>> colGetter,
             @NotNull Collection<T> @NotNull ... collections
     ) {
-        return Collections.unmodifiableCollection(concatCollection(colGetter, collections));
+        return Collections.unmodifiableCollection(concat(colGetter, collections));
     }
 
     public static @NotNull String replaceEach(@NotNull String input, @NotNull String search, @NotNull IntFunction<String> replaceSupplier) {
         int lastAppend = 0;
         StringBuilder builder = new StringBuilder();
-        for (int index = input.indexOf(search, lastAppend); index != -1; index = input.indexOf(search, lastAppend)) {
+        for (int index = input.indexOf(search); index != -1; index = input.indexOf(search, lastAppend)) {
             builder.append(input, lastAppend, index).append(replaceSupplier.apply(index));
             lastAppend = index + search.length();
         }
@@ -43,10 +43,8 @@ public final class GeneralUtils {
     }
 
     public static void findEach(@NotNull String input, @NotNull String search, @NotNull IntConsumer indexConsumer) {
-        int lastFind = 0;
-        for (int index = input.indexOf(search, lastFind); index != -1; index = input.indexOf(search, lastFind)) {
+        for (int index = input.indexOf(search); index != -1; index = input.indexOf(search, index + search.length())) {
             indexConsumer.accept(index);
-            lastFind = index + search.length();
         }
     }
 }

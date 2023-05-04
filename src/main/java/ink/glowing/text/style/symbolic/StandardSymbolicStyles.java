@@ -35,7 +35,7 @@ public final class StandardSymbolicStyles {
             resettingColor('f', WHITE)
     );
 
-    private static final Collection<SymbolicStyle> BEDROCK_COLORS = GeneralUtils.concatImmutableCollection(
+    private static final Collection<SymbolicStyle> BEDROCK_COLORS = GeneralUtils.concatImmutable(
             HashSet::new,
             NOTCHIAN_COLORS,
             List.of(
@@ -59,7 +59,7 @@ public final class StandardSymbolicStyles {
             chainedDecoration('o', ITALIC)
     );
 
-    private static final Collection<SymbolicStyle> NOTCHIAN_DECORATIONS = GeneralUtils.concatImmutableCollection(
+    private static final Collection<SymbolicStyle> NOTCHIAN_DECORATIONS = GeneralUtils.concatImmutable(
             HashSet::new,
             BEDROCK_DECORATIONS,
             Arrays.asList(

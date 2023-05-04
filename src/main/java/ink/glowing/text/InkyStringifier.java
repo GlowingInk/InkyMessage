@@ -23,6 +23,7 @@ final class InkyStringifier {
         return builder.toString();
     }
 
+    // TODO Use ComponentFlattener?
     private static void stringify(
             @NotNull StringBuilder builder,
             final @NotNull TreeSet<SymbolicStyle> outerStyle,
