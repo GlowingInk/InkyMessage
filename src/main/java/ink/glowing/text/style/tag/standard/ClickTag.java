@@ -68,7 +68,7 @@ public final class ClickTag implements StyleTag.Plain {
     }
 
     @Override
-    public @NotNull String namespace() {
+    public @NotNull String name() {
         return "click";
     }
 }

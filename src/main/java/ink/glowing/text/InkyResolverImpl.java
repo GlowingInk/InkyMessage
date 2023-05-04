@@ -59,8 +59,8 @@ final class InkyResolverImpl implements InkyMessage.Resolver {
             @NotNull Iterable<SymbolicStyle> symbolics,
             @NotNull SymbolicStyle symbolicReset
     ) {
-        this.tags = toMap(tags, StyleTag::namespace, List.of());
-        this.placeholders = toMap(placeholders, Placeholder::namespace, REQUIRED_PLACEHOLDERS);
+        this.tags = toMap(tags, StyleTag::name, List.of());
+        this.placeholders = toMap(placeholders, Placeholder::name, REQUIRED_PLACEHOLDERS);
         this.replacers = replacers;
         this.symbolics = toMap(symbolics, SymbolicStyle::symbol, List.of());
         this.symbolicReset = symbolicReset;
@@ -78,13 +78,13 @@ final class InkyResolverImpl implements InkyMessage.Resolver {
     }
 
     @Override
-    public @Nullable StyleTag<?> getTag(@NotNull String namespace) {
-        return tags.get(namespace);
+    public @Nullable StyleTag<?> getTag(@NotNull String name) {
+        return tags.get(name);
     }
 
     @Override
-    public @Nullable Placeholder getPlaceholder(@NotNull String namespace) {
-        return placeholders.get(namespace);
+    public @Nullable Placeholder getPlaceholder(@NotNull String name) {
+        return placeholders.get(name);
     }
 
     /**

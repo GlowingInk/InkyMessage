@@ -32,7 +32,7 @@ public final class HoverTag implements StyleTag.Complex {
     }
 
     @Override
-    public @NotNull String namespace() {
+    public @NotNull String name() {
         return "hover";
     }
 }

@@ -175,9 +175,9 @@ public final class InkyMessage implements ComponentSerializer<Component, Compone
     }
 
     public sealed interface Resolver permits InkyResolverImpl {
-        @Nullable StyleTag<?> getTag(@NotNull String namespace);
+        @Nullable StyleTag<?> getTag(@NotNull String name);
         
-        @Nullable Placeholder getPlaceholder(@NotNull String namespace);
+        @Nullable Placeholder getPlaceholder(@NotNull String name);
 
         @Nullable Style applySymbolicStyle(char symbol, @NotNull Style currentStyle);
 

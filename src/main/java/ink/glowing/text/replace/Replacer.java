@@ -62,7 +62,7 @@ public sealed interface Replacer permits Replacer.Literal, Replacer.Regex {
         public @NotNull List<FoundSpot> findSpots(@NotNull String text) {
             Matcher matcher = pattern.matcher(text);
             if (!matcher.find()) return List.of();
-            List<FoundSpot> spots = new ArrayList<>(1);
+            List<FoundSpot> spots = new ArrayList<>(0);
             do {
                 MatchResult match = matcher.toMatchResult();
                 spots.add(new FoundSpot(match.start(), match.end(), () -> replacement.apply(match)));

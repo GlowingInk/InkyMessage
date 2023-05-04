@@ -6,7 +6,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.function.Function;
 
 record SimplePlaceholder(
-        @NotNull String namespace,
+        @NotNull String name,
         @NotNull Function<@NotNull String, @NotNull Component> resultFunct
 ) implements Placeholder {
     @Override
