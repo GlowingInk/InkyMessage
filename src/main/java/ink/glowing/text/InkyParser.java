@@ -47,11 +47,11 @@ final class InkyParser {
             if (isSpecial(ch)) {
                 if (isEscapedAt(textStr, globalIndex) || globalIndex + 1 >= textLength) continue;
                 char nextCh = textStr.charAt(globalIndex + 1);
-                if (nextCh == '[') {
+                if (nextCh == '[') { // &[...]
                     builder.append(parseComponent(from, globalIndex, context));
                     builder.append(parseRecursive(globalIndex + 2, ']', context, true));
                     from = globalIndex;
-                } else if (nextCh == '{') {
+                } else if (nextCh == '{') { // &{ph} | &{ph:...}
                     int initIndex = globalIndex;
                     if (!iterateUntil(":}")) {
                         globalIndex = initIndex;
@@ -74,17 +74,17 @@ final class InkyParser {
                         params = textStr.substring(paramsIndex, globalIndex);
                     }
                     builder.append(parseComponent(from, initIndex, context));
-                    builder.append(findTags(placeholder.parse(params), context, placeholder::getLocalTag));
+                    builder.append(applyTags(placeholder.parse(params), context, placeholder::findLocalTag));
                     from = globalIndex;
                 }
             } else if (ch == until && isUnescapedAt(textStr, globalIndex)) {
                 builder.append(parseComponent(from, globalIndex, context));
                 return readTags
-                        ? findTags(builder.build(), context, resolver::getTag)
+                        ? applyTags(builder.build(), context, resolver::getTag)
                         : builder.build();
             }
         }
-        // In a case when we didn't find the 'until' char
+        // In a case we didn't find the 'until' char
         builder.append(parseComponent(from, textLength, context));
         return builder.build();
     }
@@ -133,7 +133,28 @@ final class InkyParser {
         return builder.build();
     }
 
-    private @NotNull Component findTags(
+    private void appendPrevious(@NotNull String piece, @NotNull TextComponent.Builder builder, int start, int end, @NotNull BuildContext context) {
+        if (start == end) return;
+        String substring = unescape(piece.substring(start, end));
+        builder.append(text(substring).style(context.lastStyle()));
+    }
+
+    private @Nullable Replacer.FoundSpot matchSpot(int index, int end) {
+        while (!replaceSpots.isEmpty()) {
+            var spot = replaceSpots.last();
+            if (spot.start() == index) {
+                replaceSpots.pollLast();
+                return spot.end() > end ? null : spot;
+            } else if (spot.start() < index) {
+                replaceSpots.pollLast();
+                continue;
+            }
+            break;
+        }
+        return null;
+    }
+
+    private @NotNull Component applyTags(
             @NotNull Component comp,
             @NotNull BuildContext context,
             @NotNull Function<String, StyleTag<?>> tagGetter
@@ -151,7 +172,8 @@ final class InkyParser {
             @NotNull BuildContext context,
             @NotNull Function<String, StyleTag<?>> tagGetter
     ) {
-        StyleTag<?> tag = findNextTag(from, tagGetter);
+        String tagStr = findNextTag(from);
+        StyleTag<?> tag = tagGetter.apply(tagStr);
         if (tag == null) {
             globalIndex = from - 1;
             return comp;
@@ -183,10 +205,10 @@ final class InkyParser {
         return comp;
     }
 
-    private @Nullable StyleTag<?> findNextTag(int from, Function<String, StyleTag<?>> tagGetter) {
+    private @Nullable String findNextTag(int from) {
         globalIndex = from;
         if (iterateUntil(":) ")) {
-            return tagGetter.apply(textStr.substring(from, globalIndex));
+            return textStr.substring(from, globalIndex);
         }
         return null;
     }
@@ -225,27 +247,6 @@ final class InkyParser {
             if (until.indexOf(textStr.charAt(globalIndex)) != -1 && isUnescapedAt(textStr, globalIndex)) return true;
         }
         return false;
-    }
-
-    private void appendPrevious(@NotNull String piece, @NotNull TextComponent.Builder builder, int start, int end, @NotNull BuildContext context) {
-        if (start == end) return;
-        String substring = unescape(piece.substring(start, end));
-        builder.append(text(substring).style(context.lastStyle()));
-    }
-
-    private @Nullable Replacer.FoundSpot matchSpot(int index, int end) {
-        while (!replaceSpots.isEmpty()) {
-            var spot = replaceSpots.last();
-            if (spot.start() == index) {
-                replaceSpots.pollLast();
-                return spot.end() > end ? null : spot;
-            } else if (spot.start() < index) {
-                replaceSpots.pollLast();
-                continue;
-            }
-            break;
-        }
-        return null;
     }
 
     private static boolean isSpecial(char ch) {

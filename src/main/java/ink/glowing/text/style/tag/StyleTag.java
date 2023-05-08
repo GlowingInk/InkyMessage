@@ -12,13 +12,15 @@ import java.util.List;
 import static ink.glowing.text.InkyMessage.inkyMessage;
 
 @ApiStatus.OverrideOnly
-public sealed interface StyleTag<T> extends Named {
+public sealed interface StyleTag<T> extends Named permits StyleTag.Complex, StyleTag.Plain {
     @NotNull Component modify(@NotNull Component text, @NotNull String param, @NotNull T value);
 
     @NotNull @Unmodifiable List<String> read(@NotNull InkyMessage.Resolver resolver, @NotNull Component text);
 
+    @ApiStatus.OverrideOnly
     non-sealed interface Plain extends StyleTag<String> {}
 
+    @ApiStatus.OverrideOnly
     non-sealed interface Complex extends StyleTag<Component> {}
 
     default @NotNull String asFormatted(@NotNull String param, @NotNull String value) {
@@ -29,9 +31,6 @@ public sealed interface StyleTag<T> extends Named {
     }
 
     default @NotNull String asFormatted(@NotNull String param, @NotNull Component value, @NotNull InkyMessage.Resolver resolver) {
-        String result = name();
-        if (!param.isEmpty()) result += ":" + param;
-        if (!value.equals(Component.empty())) result += " " + inkyMessage().serialize(value, resolver);
-        return "(" + result + ")";
+        return asFormatted(param, inkyMessage().serialize(value, resolver));
     }
 }

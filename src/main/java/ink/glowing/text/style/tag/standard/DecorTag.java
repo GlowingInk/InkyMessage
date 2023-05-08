@@ -32,10 +32,10 @@ public final class DecorTag implements StyleTag.Plain {
 
     @Override
     public @NotNull @Unmodifiable List<String> read(@NotNull InkyMessage.Resolver resolver, @NotNull Component text) {
-        var entries = text.decorations().entrySet();
-        if (entries.isEmpty()) return List.of();
+        var textDecors = text.decorations().entrySet();
+        if (textDecors.isEmpty()) return List.of();
         List<String> tagStr = new ArrayList<>(0);
-        for (var entry : entries) {
+        for (var entry : textDecors) {
             if (entry.getValue() == TextDecoration.State.FALSE) {
                 tagStr.add(asFormatted(entry.getKey().toString(), "false"));
             }

@@ -9,7 +9,7 @@ import java.util.regex.Pattern;
 
 public final class AdventureUtils {
     public static final Pattern HEX_PATTERN = Pattern.compile("#(?:[0-9a-f]{3}){1,2}");
-    public static final Pattern QUIRKY_HEX_PATTERN = Pattern.compile("x" + "(?:&([0-9a-f]))".repeat(6));
+    public static final Pattern QUIRKY_HEX_PATTERN = Pattern.compile("x" + "(?:[&§]([0-9a-f]))".repeat(6));
 
     private AdventureUtils() {}
 

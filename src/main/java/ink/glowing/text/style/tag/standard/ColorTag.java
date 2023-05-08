@@ -16,10 +16,13 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ThreadLocalRandom;
+import java.util.random.RandomGenerator;
 import java.util.regex.Pattern;
 
 import static net.kyori.adventure.text.Component.empty;
 import static net.kyori.adventure.text.Component.text;
+import static net.kyori.adventure.text.format.TextColor.color;
 
 public final class ColorTag implements StyleTag.Plain {
     private static final Pattern PER_SYMBOL = Pattern.compile(".");
@@ -38,19 +41,27 @@ public final class ColorTag implements StyleTag.Plain {
     public @NotNull Component modify(@NotNull Component text, @NotNull String param, @NotNull String value) {
         FloatFunction<TextColor> colorGetter;
         int indexedLength;
-        if (param.equals("spectrum") || param.equals("rainbow")) {
-            int length = length(text);
-            if (length <= 1) return text.color(AVERAGE_SPECTRUM);
-            indexedLength = length;
-            colorGetter = ColorTag::colorSpectrum;
-        } else {
-            List<TextColor> colors = readColors(param);
-            if (colors.isEmpty()) return text;
-            if (colors.size() == 1) return text.color(colors.get(0));
-            int length = length(text);
-            if (length <= 1) return text.color() == null ? text.color(averageColor(colors)) : text;
-            indexedLength = length - 1;
-            colorGetter = colorLerp(colors);
+        switch (param) {
+            case "spectrum", "rainbow" -> {
+                int length = length(text);
+                if (length <= 1) return text.color(AVERAGE_SPECTRUM);
+                indexedLength = length;
+                colorGetter = ColorTag::colorSpectrum;
+            }
+            case "random" -> {
+                indexedLength = 0;
+                RandomGenerator rng = ThreadLocalRandom.current();
+                colorGetter = (step) -> TextColor.color(rng.nextInt());
+            }
+            default -> {
+                List<TextColor> colors = parseColors(param);
+                if (colors.isEmpty()) return text;
+                if (colors.size() == 1) return text.color(colors.get(0));
+                int length = length(text);
+                if (length <= 1) return text.color() == null ? text.color(averageColor(colors)) : text;
+                indexedLength = length - 1;
+                colorGetter = lerpFunction(colors);
+            }
         }
         TextComponent.Builder builder = text();
         applyGradient(builder, text, colorGetter, new int[]{0}, indexedLength);
@@ -110,11 +121,24 @@ public final class ColorTag implements StyleTag.Plain {
         return TextColor.color(red, green, blue);
     }
 
+    /**
+     * @see TextColor#color(HSVLike)
+     */
     private static @NotNull TextColor colorSpectrum(float step) {
-        return TextColor.color(HSVLike.hsvLike(step, 1f, 1f));
+        float hue = step * 6;
+        int sector = (int) Math.floor(hue);
+        float remainder = hue - sector;
+        return switch (sector) {
+            case 0 ->   color(1f, remainder, 0f);
+            case 1 ->   color((1 - remainder), 1f, 0f);
+            case 2 ->   color(0f, 1f, remainder);
+            case 3 ->   color(0f, (1 - remainder), 1f);
+            case 4 ->   color(remainder, 0f, 1f);
+            default ->  color(1f, 0f, (1 - remainder));
+        };
     }
 
-    private static @NotNull FloatFunction<TextColor> colorLerp(@NotNull List<TextColor> colors) {
+    private static @NotNull FloatFunction<TextColor> lerpFunction(@NotNull List<TextColor> colors) {
         if (colors.size() == 2) {
             TextColor start = colors.get(0);
             TextColor end = colors.get(1);
@@ -122,28 +146,29 @@ public final class ColorTag implements StyleTag.Plain {
         } else {
             int indexedSize = colors.size() - 1;
             return step -> {
-                int firstColor = (int) (step * indexedSize);
-                if (firstColor == indexedSize) {
+                int firstColorIndex = (int) (step * indexedSize);
+                if (firstColorIndex == indexedSize) {
                     return colors.get(indexedSize);
                 }
-                float stepAtFirst = (float) firstColor / indexedSize;
-                float localStep = (step - stepAtFirst) * indexedSize;
-                return TextColor.lerp(localStep, colors.get(firstColor), colors.get(firstColor + 1));
+                return TextColor.lerp((step * indexedSize) - firstColorIndex,
+                        colors.get(firstColorIndex),
+                        colors.get(firstColorIndex + 1)
+                );
             };
         }
     }
 
-    private static @NotNull List<TextColor> readColors(@NotNull String param) {
+    private static @NotNull List<TextColor> parseColors(@NotNull String param) {
         String[] split = param.split("-");
         List<TextColor> colors = new ArrayList<>(split.length);
         for (String colorStr : split) {
-            TextColor color = parseNamedColor(colorStr);
+            TextColor color = parseColor(colorStr);
             if (color != null) colors.add(color);
         }
         return colors;
     }
 
-    private static @Nullable TextColor parseNamedColor(@NotNull String param) {
+    private static @Nullable TextColor parseColor(@NotNull String param) {
         if (param.startsWith("#")) {
             return TextColor.fromCSSHexString(param);
         } else {

@@ -19,9 +19,8 @@ Those are its possible tags:
 
 ## TODO (until full release)
 - Placeholders (for keybinds, selectors)
-- Fix symbolic styles stacking on serialization
-- Simplified MineDown-like style tags (e.g. `&[GitHub Link](https://github.com/)`, `&[Stop the server](/stop)`, `&[Bold text](bold)`)
-- Closing colors(?)
+- Better symbolic styles stacking on serialization
+- Some actual useful API
 - More tests
 
 ## Get it ![Version](https://img.shields.io/github/v/tag/GlowingInk/InkyMessage?sort=semver)

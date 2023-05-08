@@ -31,7 +31,7 @@ public final class LangPlaceholder implements Placeholder {
     }
 
     @Override
-    public @Nullable StyleTag.Complex getLocalTag(@NotNull String tagName) {
+    public @Nullable StyleTag.Complex findLocalTag(@NotNull String tagName) {
         return tagName.equals("lang") ? Tag.langTag() : null;
     }
 

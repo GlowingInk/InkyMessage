@@ -13,7 +13,7 @@ import java.util.function.Function;
 public interface Placeholder extends Named {
     @NotNull Component parse(@NotNull String value);
 
-    default @Nullable StyleTag<?> getLocalTag(@NotNull String tagName) {
+    default @Nullable StyleTag<?> findLocalTag(@NotNull String tagName) {
         return null;
     }
 
