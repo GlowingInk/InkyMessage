@@ -6,7 +6,7 @@
 
     <groupId>ink.glowing</groupId>
     <artifactId>inkymessage</artifactId>
-    <version>0.10.1-SNAPSHOT</version>
+    <version>0.11.0</version>
 
     <properties>
         <annotations.version>24.0.1</annotations.version>

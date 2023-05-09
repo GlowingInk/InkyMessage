@@ -23,7 +23,8 @@ Those are its possible tags:
 - Some actual useful API
 - More tests
 
-## Get it ![Version](https://img.shields.io/github/v/tag/GlowingInk/InkyMessage?sort=semver)
+## Get it ![Version](https://img.shields.io/github/v/tag/GlowingInk/InkyMessage?sort=semver&style=flat&label=release)
+Versions in dependency sections may be outdated. Check the badge above for the latest one.
 ### Maven
 Add to repositories
 ```xml
@@ -44,7 +45,7 @@ Add to dependencies
 <dependency>
     <groupId>ink.glowing</groupId>
     <artifactId>inkymessage</artifactId>
-    <version>0.10.0</version> <!-- Check the version above -->
+    <version>0.11.0</version>
 </dependency>
 ```
 ### Gradle
@@ -52,10 +53,11 @@ Add to dependencies
 repositories {
     maven {
         url = uri("https://repo.glowing.ink/releases")
+        // url = uri("https://repo.glowing.ink/snapshots")
     }
 }
 
 dependencies {
-    implementation("ink.glowing:inkymessage:0.10.0") // Check the version above
+    implementation("ink.glowing:inkymessage:0.11.0")
 }
 ```
