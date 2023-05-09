@@ -12,10 +12,10 @@ import org.jetbrains.annotations.NotNull;
 import java.util.TreeSet;
 
 import static ink.glowing.text.InkyMessage.escape;
-import static ink.glowing.text.placeholders.internal.LangPlaceholder.langPlaceholder;
+import static ink.glowing.text.style.tag.internal.LangTag.langTag;
 
-final class InkyStringifier {
-    private InkyStringifier() {}
+final class Stringifier {
+    private Stringifier() {}
 
     public static @NotNull String stringify(@NotNull Component text, @NotNull InkyMessage.Resolver resolver) {
         StringBuilder builder = new StringBuilder();
@@ -75,7 +75,7 @@ final class InkyStringifier {
             builder.append(escape(text.content()));
         } else if (component instanceof TranslatableComponent translatable) {
             builder.append("&{lang:").append(translatable.key()).append("}");
-            for (var tag : langPlaceholder().tag().read(resolver, translatable)) {
+            for (var tag : langTag().read(resolver, translatable)) {
                 builder.append(tag);
             }
         } else if (component instanceof KeybindComponent keybind) {

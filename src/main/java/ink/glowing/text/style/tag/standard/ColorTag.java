@@ -35,6 +35,7 @@ public final class ColorTag implements StyleTag.Plain {
     public static @NotNull ColorTag colorTag() {
         return INSTANCE;
     }
+    private ColorTag() {}
 
     // FIXME That's really not how this should be done
     @Override

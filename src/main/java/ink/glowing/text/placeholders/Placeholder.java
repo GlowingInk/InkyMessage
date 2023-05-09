@@ -1,34 +1,46 @@
 package ink.glowing.text.placeholders;
 
-import ink.glowing.text.style.tag.StyleTag;
+import ink.glowing.text.style.tag.TagGetter;
 import ink.glowing.text.utils.Named;
 import net.kyori.adventure.text.Component;
-import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.function.Function;
+import java.util.function.Supplier;
 
-@ApiStatus.OverrideOnly
-public interface Placeholder extends Named {
+public sealed interface Placeholder extends Named, PlaceholderGetter, TagGetter permits PlaceholderImpl {
     @NotNull Component parse(@NotNull String value);
 
-    default @Nullable StyleTag<?> findLocalTag(@NotNull String tagName) {
-        return null;
-    }
-
-    static @NotNull Placeholder placeholder(@NotNull String name, @NotNull String result) {
-        return placeholder(name, Component.text(result));
-    }
-
-    static @NotNull Placeholder placeholder(@NotNull String name, @NotNull Component result) {
+    static @NotNull Placeholder placeholder(@NotNull String name,
+                                            @NotNull Component result) {
         return placeholder(name, (v) -> result);
     }
 
-    static @NotNull Placeholder placeholder(
-            @NotNull String name,
-            @NotNull Function<@NotNull String, @NotNull Component> resultFunct
-    ) {
-        return new SimplePlaceholder(name, resultFunct);
+    static @NotNull Placeholder placeholder(@NotNull String name,
+                                            @NotNull Supplier<@NotNull Component> result) {
+        return placeholder(name, (v) -> result.get());
+    }
+
+    static @NotNull Placeholder placeholder(@NotNull String name,
+                                            @NotNull Function<@NotNull String, @NotNull Component> resultFunct) {
+        return placeholder(name, resultFunct, (s) -> null);
+    }
+
+    static @NotNull Placeholder placeholder(@NotNull String name,
+                                            @NotNull Component result,
+                                            @NotNull TagGetter localTags) {
+        return placeholder(name, (v) -> result, localTags);
+    }
+
+    static @NotNull Placeholder placeholder(@NotNull String name,
+                                            @NotNull Supplier<@NotNull Component> result,
+                                            @NotNull TagGetter localTags) {
+        return placeholder(name, (v) -> result.get(), localTags);
+    }
+
+    static @NotNull Placeholder placeholder(@NotNull String name,
+                                            @NotNull Function<@NotNull String, @NotNull Component> resultFunct,
+                                            @NotNull TagGetter localTags) {
+        return new PlaceholderImpl(name, resultFunct, localTags);
     }
 }

@@ -1,9 +1,11 @@
 package ink.glowing.text;
 
 import ink.glowing.text.placeholders.Placeholder;
+import ink.glowing.text.placeholders.PlaceholderGetter;
 import ink.glowing.text.replace.Replacer;
 import ink.glowing.text.style.symbolic.SymbolicStyle;
 import ink.glowing.text.style.tag.StyleTag;
+import ink.glowing.text.style.tag.TagGetter;
 import net.kyori.adventure.builder.AbstractBuilder;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.Style;
@@ -21,6 +23,8 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import static ink.glowing.text.placeholders.PlaceholderGetter.placeholderGetter;
 
 /**
  * User-friendly component (de)serializer with legacy format.
@@ -57,10 +61,33 @@ public final class InkyMessage implements ComponentSerializer<Component, Compone
      * Convert string into adventure text component.
      * @param inputText input string
      * @param resolver resolver to use
+     * @param placeholders custom placeholders
      * @return converted text component
      */
-    public @NotNull Component deserialize(@NotNull String inputText, @NotNull Resolver resolver) {
-        return deserialize(inputText, new BuildContext(resolver));
+    public @NotNull Component deserialize(@NotNull String inputText, @NotNull Resolver resolver, @NotNull Placeholder@NotNull ... placeholders) {
+        return deserialize(inputText, new BuildContext(resolver, placeholderGetter(placeholders)));
+    }
+
+    /**
+     * Convert string into adventure text component.
+     * @param inputText input string
+     * @param resolver resolver to use
+     * @param placeholder custom placeholder
+     * @return converted text component
+     */
+    public @NotNull Component deserialize(@NotNull String inputText, @NotNull Resolver resolver, @NotNull Placeholder placeholder) {
+        return deserialize(inputText, new BuildContext(resolver, placeholder));
+    }
+
+    /**
+     * Convert string into adventure text component.
+     * @param inputText input string
+     * @param resolver resolver to use
+     * @param placeholders custom placeholders
+     * @return converted text component
+     */
+    public @NotNull Component deserialize(@NotNull String inputText, @NotNull Resolver resolver, @NotNull PlaceholderGetter placeholders) {
+        return deserialize(inputText, new BuildContext(resolver, placeholders));
     }
 
     /**
@@ -70,7 +97,7 @@ public final class InkyMessage implements ComponentSerializer<Component, Compone
      * @return converted text component
      */
     public @NotNull Component deserialize(@NotNull String inputText, @NotNull BuildContext context) {
-        return InkyParser.parse(inputText, context).compact();
+        return Parser.parse(inputText, context).compact();
     }
 
     /**
@@ -92,7 +119,7 @@ public final class InkyMessage implements ComponentSerializer<Component, Compone
      * @see InkyMessage#standardResolver()
      */
     public @NotNull String serialize(@NotNull Component text, @NotNull Resolver resolver) {
-        return InkyStringifier.stringify(text, resolver);
+        return Stringifier.stringify(text, resolver);
     }
 
     /**
@@ -174,14 +201,10 @@ public final class InkyMessage implements ComponentSerializer<Component, Compone
         return InkyResolverImpl.STANDARD_RESOLVER;
     }
 
-    public sealed interface Resolver permits InkyResolverImpl {
-        @Nullable StyleTag<?> getTag(@NotNull String name);
-        
-        @Nullable Placeholder getPlaceholder(@NotNull String name);
-
+    public sealed interface Resolver extends TagGetter, PlaceholderGetter permits InkyResolverImpl {
         @Nullable Style applySymbolicStyle(char symbol, @NotNull Style currentStyle);
 
-        @NotNull TreeSet<Replacer.FoundSpot> findReplacements(@NotNull String input);
+        @NotNull TreeSet<Replacer.FoundSpot> matchReplacements(@NotNull String input);
 
         @NotNull TreeSet<SymbolicStyle> readSymbolics(@NotNull Component text);
 

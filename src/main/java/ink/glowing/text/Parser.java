@@ -3,6 +3,7 @@ package ink.glowing.text;
 import ink.glowing.text.placeholders.Placeholder;
 import ink.glowing.text.replace.Replacer;
 import ink.glowing.text.style.tag.StyleTag;
+import ink.glowing.text.style.tag.TagGetter;
 import ink.glowing.text.utils.AdventureUtils;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
@@ -12,13 +13,12 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.TreeSet;
-import java.util.function.Function;
 
 import static ink.glowing.text.InkyMessage.*;
 import static net.kyori.adventure.text.Component.empty;
 import static net.kyori.adventure.text.Component.text;
 
-final class InkyParser {
+final class Parser {
     private static final char END = 0;
 
     private final String textStr;
@@ -27,20 +27,20 @@ final class InkyParser {
     private final TreeSet<Replacer.FoundSpot> replaceSpots;
     private int globalIndex;
 
-    private InkyParser(@NotNull String textStr, @NotNull InkyMessage.Resolver resolver) {
+    private Parser(@NotNull String textStr, @NotNull InkyMessage.Resolver resolver) {
         this.textStr = textStr;
         this.textLength = textStr.length();
         this.resolver = resolver;
-        this.replaceSpots = resolver.findReplacements(textStr);
+        this.replaceSpots = resolver.matchReplacements(textStr);
     }
 
     public static @NotNull Component parse(@NotNull String textStr, @NotNull BuildContext context) {
         if (textStr.length() == 0) return empty();
-        return new InkyParser(textStr, context.resolver())
-                .parseRecursive(0, END, context, true);
+        return new Parser(textStr, context.resolver())
+                .parseRecursive(0, END, context);
     }
 
-    private @NotNull Component parseRecursive(int from, char until, @NotNull BuildContext context, boolean readTags) {
+    private @NotNull Component parseRecursive(int from, char until, @NotNull BuildContext context) {
         var builder = text();
         for (globalIndex = from; globalIndex < textLength; globalIndex++) {
             char ch = textStr.charAt(globalIndex);
@@ -49,15 +49,15 @@ final class InkyParser {
                 char nextCh = textStr.charAt(globalIndex + 1);
                 if (nextCh == '[') { // &[...]
                     builder.append(parseComponent(from, globalIndex, context));
-                    builder.append(parseRecursive(globalIndex + 2, ']', context, true));
-                    from = globalIndex;
+                    builder.append(parseRecursive(globalIndex + 2, ']', context));
+                    from = globalIndex--;
                 } else if (nextCh == '{') { // &{ph} | &{ph:...}
                     int initIndex = globalIndex;
                     if (!iterateUntil(":}")) {
                         globalIndex = initIndex;
                         continue;
                     }
-                    Placeholder placeholder = resolver.getPlaceholder(textStr.substring(initIndex + 2, globalIndex));
+                    Placeholder placeholder = context.findPlaceholder(textStr.substring(initIndex + 2, globalIndex));
                     if (placeholder == null) {
                         globalIndex = initIndex;
                         continue;
@@ -74,13 +74,13 @@ final class InkyParser {
                         params = textStr.substring(paramsIndex, globalIndex);
                     }
                     builder.append(parseComponent(from, initIndex, context));
-                    builder.append(applyTags(placeholder.parse(params), context, placeholder::findLocalTag));
-                    from = globalIndex;
+                    builder.append(applyTags(placeholder.parse(params), context, placeholder));
+                    from = globalIndex--;
                 }
             } else if (ch == until && isUnescapedAt(textStr, globalIndex)) {
                 builder.append(parseComponent(from, globalIndex, context));
-                return readTags
-                        ? applyTags(builder.build(), context, resolver::getTag)
+                return until != ')'
+                        ? applyTags(builder.build(), context, resolver)
                         : builder.build();
             }
         }
@@ -157,25 +157,17 @@ final class InkyParser {
     private @NotNull Component applyTags(
             @NotNull Component comp,
             @NotNull BuildContext context,
-            @NotNull Function<String, StyleTag<?>> tagGetter
+            @NotNull TagGetter tagGetter
     ) {
-        if (globalIndex + 1 >= textLength || textStr.charAt(globalIndex + 1) != '(') {
-            globalIndex += 1;
+        int from = globalIndex + 1;
+        if (from >= textLength || textStr.charAt(from) != '(') {
+            globalIndex = from;
             return comp;
         }
-        return applyTags(comp, globalIndex + 2, context, tagGetter);
-    }
-
-    private @NotNull Component applyTags(
-            @NotNull Component comp,
-            int from,
-            @NotNull BuildContext context,
-            @NotNull Function<String, StyleTag<?>> tagGetter
-    ) {
-        String tagStr = findNextTag(from);
-        StyleTag<?> tag = tagGetter.apply(tagStr);
+        String tagStr = extractPlain(from + 1, ":) ");
+        StyleTag<?> tag = tagGetter.findTag(tagStr);
         if (tag == null) {
-            globalIndex = from - 1;
+            globalIndex = from;
             return comp;
         }
         from = globalIndex + 1;
@@ -188,34 +180,23 @@ final class InkyParser {
         } else {
             String params = "";
             if (textStr.charAt(globalIndex) == ':') {
-                params = extractTagParams(from);
+                params = extractPlain(from, " )");
                 from += params.length() + 1;
             }
             if (tag instanceof StyleTag.Complex complexTag) {
-                Component value = parseRecursive(from, ')', context.colorlessCopy(), false);
+                Component value = parseRecursive(from, ')', context.colorlessCopy());
                 comp = complexTag.modify(comp, params, value.compact());
             } else if (tag instanceof StyleTag.Plain plainTag) {
                 String value = extractPlainTagValue(from);
                 comp = plainTag.modify(comp, params, unescape(value));
             }
         }
-        if (++globalIndex < textLength && textStr.charAt(globalIndex) == '(') {
-            comp = applyTags(comp, globalIndex + 1, context, tagGetter);
-        }
-        return comp;
+        return applyTags(comp, context, tagGetter);
     }
 
-    private @Nullable String findNextTag(int from) {
+    private @NotNull String extractPlain(int from, @NotNull String until) {
         globalIndex = from;
-        if (iterateUntil(":) ")) {
-            return textStr.substring(from, globalIndex);
-        }
-        return null;
-    }
-
-    private @NotNull String extractTagParams(int from) {
-        globalIndex = from;
-        if (iterateUntil(" )")) {
+        if (iterateUntil(until)) {
             return textStr.substring(from, globalIndex);
         }
         return "";

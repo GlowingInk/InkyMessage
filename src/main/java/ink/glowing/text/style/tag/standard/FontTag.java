@@ -14,7 +14,6 @@ public final class FontTag implements StyleTag.Plain {
     public static @NotNull FontTag fontTag() {
         return INSTANCE;
     }
-
     private FontTag() {}
 
     @Override

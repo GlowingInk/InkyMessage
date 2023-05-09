@@ -10,8 +10,10 @@
 
     <properties>
         <adventure.version>4.13.1</adventure.version>
-        <maven.compiler.source>17</maven.compiler.source>
-        <maven.compiler.target>17</maven.compiler.target>
+        <java.version>17</java.version>
+
+        <maven.compiler.source>${java.version}</maven.compiler.source>
+        <maven.compiler.target>${java.version}</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
 
@@ -40,11 +42,11 @@
     <distributionManagement>
         <repository>
             <id>glowing-ink</id>
-            <url>http://repo.glowing.ink/releases</url>
+            <url>https://repo.glowing.ink/releases</url>
         </repository>
         <snapshotRepository>
             <id>glowing-ink</id>
-            <url>http://repo.glowing.ink/snapshots</url>
+            <url>https://repo.glowing.ink/snapshots</url>
         </snapshotRepository>
     </distributionManagement>
 </project>

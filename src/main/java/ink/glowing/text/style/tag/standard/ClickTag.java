@@ -16,7 +16,6 @@ public final class ClickTag implements StyleTag.Plain {
     public static @NotNull ClickTag clickTag() {
         return INSTANCE;
     }
-
     private ClickTag() {}
 
     @Override

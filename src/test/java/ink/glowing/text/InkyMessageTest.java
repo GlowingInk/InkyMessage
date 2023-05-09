@@ -23,7 +23,7 @@ import static org.testng.Assert.assertEquals;
 
 public class InkyMessageTest {
     @SuppressWarnings("FieldCanBeLocal")
-    private final boolean debug = false;
+    private final boolean debug = true;
 
     @DataProvider
     public Object[][] deserializeData() {
@@ -63,10 +63,6 @@ public class InkyMessageTest {
                                 .append(text(" \\green").color(GREEN))
                 },
                 {
-                        "&x&1&2&3&4&5&6Hex colors are cool",
-                        inkyMessage().deserialize("&#123456Hex colors are cool")
-                },
-                {
                         "&aGoto https://github.com/GlowingInk and http://repo.glowing.ink.",
                         text()
                                 .append(text("Goto ").color(GREEN))
@@ -93,12 +89,16 @@ public class InkyMessageTest {
                         text("Test(fake:tag lol), another one.")
                 },
                 {
-                        "Test &{lang:my.cool.test}(lang:arg &aHello world)(lang:arg Yay...)(lang:fallback Falling back).",
+                        "&[Test](hover:text Hover)&[ and another](decor:cursive)",
+                        text().append(text("Test").hoverEvent(showText(text("Hover")))).append(text(" and another").decorate(ITALIC)).build()
+                },
+                {
+                        "Test &{lang:my.cool.test}(lang:arg &aHello world)(lang:arg Yay...)(lang:fallback Falling back)&{lang:test}",
                         text("Test ")
                                 .append(translatable("my.cool.test")
                                         .args(text("Hello world").color(GREEN), text("Yay..."))
                                         .fallback("Falling back"))
-                                .append(text("."))
+                                .append(translatable("test"))
                 }
         };
     }
@@ -115,6 +115,14 @@ public class InkyMessageTest {
             if (!debug) debugDeserializer(text, expected);
             throw throwable;
         }
+    }
+
+    @Test
+    public void deserializeHexTest() {
+        assertEquals(
+                inkyMessage().deserialize("&x&1&2&3&4&5&6Hex colors are cool"),
+                inkyMessage().deserialize("&#123456Hex colors are cool")
+        );
     }
 
     private void debugDeserializer(String text, Component comp) {
@@ -288,8 +296,8 @@ public class InkyMessageTest {
                         "&cThis text is red! &[Pressing this will &6run a command.](click:run test_command)(hover:text Cool hover text)&l It's bold yellow"
                 },
                 {
-                        "<gradient:white:black:yellow:red>qwertyuiopasdfghjkl;'zxcvbnm,.</gradient>",
-                        "&[qwertyuiopasdfghjkl;'zxcvbnm,.](color:white-black-yellow-red)"
+                        "<gradient:white:black:yellow:red>qwertyuiopasdfghjkl;'zxcvbnm,.</gradient><lang:test:'Test'>",
+                        "&[qwertyuiopasdfghjkl;'zxcvbnm,.](color:white-black-yellow-red)&{lang:test}(lang:arg Test)"
                 },
                 {
                         "<rainbow>qwertyuiopasdfghjkl<white>;'zxcvbnm,.</rainbow>",

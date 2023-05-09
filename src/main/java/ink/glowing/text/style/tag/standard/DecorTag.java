@@ -16,7 +16,6 @@ public final class DecorTag implements StyleTag.Plain {
     public static @NotNull DecorTag decorTag() {
         return INSTANCE;
     }
-
     private DecorTag() {}
 
     @Override

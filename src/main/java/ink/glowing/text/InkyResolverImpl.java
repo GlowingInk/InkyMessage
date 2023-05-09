@@ -19,7 +19,6 @@ import java.util.Map;
 import java.util.TreeSet;
 import java.util.function.Function;
 
-import static ink.glowing.text.placeholders.internal.LangPlaceholder.langPlaceholder;
 import static ink.glowing.text.replace.StandardReplacers.urlReplacer;
 import static ink.glowing.text.style.symbolic.StandardSymbolicStyles.*;
 import static ink.glowing.text.style.tag.standard.ClickTag.clickTag;
@@ -30,10 +29,6 @@ import static ink.glowing.text.style.tag.standard.HoverTag.hoverTag;
 import static net.kyori.adventure.text.format.Style.style;
 
 final class InkyResolverImpl implements InkyMessage.Resolver {
-    private static final List<Placeholder> REQUIRED_PLACEHOLDERS = List.of(
-            langPlaceholder()
-    );
-
     static final InkyMessage.Resolver STANDARD_RESOLVER = InkyMessage.resolver()
             .addTags(colorTag(),
                     hoverTag(),
@@ -59,31 +54,28 @@ final class InkyResolverImpl implements InkyMessage.Resolver {
             @NotNull Iterable<SymbolicStyle> symbolics,
             @NotNull SymbolicStyle symbolicReset
     ) {
-        this.tags = toMap(tags, StyleTag::name, List.of());
-        this.placeholders = toMap(placeholders, Placeholder::name, REQUIRED_PLACEHOLDERS);
+        this.tags = toMap(tags, StyleTag::name);
+        this.placeholders = toMap(placeholders, Placeholder::name);
         this.replacers = replacers;
-        this.symbolics = toMap(symbolics, SymbolicStyle::symbol, List.of());
+        this.symbolics = toMap(symbolics, SymbolicStyle::symbol);
         this.symbolicReset = symbolicReset;
     }
 
-    private static <O, K> Map<K, O> toMap(Iterable<O> origin, Function<O, K> keyFunction, Iterable<O> required) {
+    private static <O, K> Map<K, O> toMap(Iterable<O> origin, Function<O, K> keyFunction) {
         Map<K, O> map = new HashMap<>();
         for (O obj : origin) {
-            map.put(keyFunction.apply(obj), obj);
-        }
-        for (O obj : required) {
             map.put(keyFunction.apply(obj), obj);
         }
         return map.isEmpty() ? Collections.emptyMap() : Collections.unmodifiableMap(map);
     }
 
     @Override
-    public @Nullable StyleTag<?> getTag(@NotNull String name) {
+    public @Nullable StyleTag<?> findTag(@NotNull String name) {
         return tags.get(name);
     }
 
     @Override
-    public @Nullable Placeholder getPlaceholder(@NotNull String name) {
+    public @Nullable Placeholder findPlaceholder(@NotNull String name) {
         return placeholders.get(name);
     }
 
@@ -105,7 +97,7 @@ final class InkyResolverImpl implements InkyMessage.Resolver {
      * @return found spots
      */
     @Override
-    public @NotNull TreeSet<Replacer.FoundSpot> findReplacements(@NotNull String input) {
+    public @NotNull TreeSet<Replacer.FoundSpot> matchReplacements(@NotNull String input) {
         TreeSet<Replacer.FoundSpot> spots = new TreeSet<>();
         for (var replacer : replacers) {
             spots.addAll(replacer.findSpots(input));

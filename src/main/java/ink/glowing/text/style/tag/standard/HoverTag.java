@@ -16,7 +16,6 @@ public final class HoverTag implements StyleTag.Complex {
     public static @NotNull HoverTag hoverTag() {
         return INSTANCE;
     }
-
     private HoverTag() {}
 
     @Override
