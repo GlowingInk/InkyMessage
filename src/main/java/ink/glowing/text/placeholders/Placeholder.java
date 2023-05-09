@@ -17,25 +17,25 @@ public sealed interface Placeholder extends Named, PlaceholderGetter, TagGetter 
     }
 
     static @NotNull Placeholder placeholder(@NotNull String name,
-                                            @NotNull Supplier<@NotNull Component> result) {
-        return placeholder(name, (v) -> result.get());
-    }
-
-    static @NotNull Placeholder placeholder(@NotNull String name,
-                                            @NotNull Function<@NotNull String, @NotNull Component> resultFunct) {
-        return placeholder(name, resultFunct, (s) -> null);
-    }
-
-    static @NotNull Placeholder placeholder(@NotNull String name,
                                             @NotNull Component result,
                                             @NotNull TagGetter localTags) {
         return placeholder(name, (v) -> result, localTags);
     }
 
     static @NotNull Placeholder placeholder(@NotNull String name,
+                                            @NotNull Supplier<@NotNull Component> result) {
+        return placeholder(name, (v) -> result.get());
+    }
+
+    static @NotNull Placeholder placeholder(@NotNull String name,
                                             @NotNull Supplier<@NotNull Component> result,
                                             @NotNull TagGetter localTags) {
         return placeholder(name, (v) -> result.get(), localTags);
+    }
+
+    static @NotNull Placeholder placeholder(@NotNull String name,
+                                            @NotNull Function<@NotNull String, @NotNull Component> resultFunct) {
+        return placeholder(name, resultFunct, (s) -> null);
     }
 
     static @NotNull Placeholder placeholder(@NotNull String name,

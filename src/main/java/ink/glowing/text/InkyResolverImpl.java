@@ -1,6 +1,7 @@
 package ink.glowing.text;
 
 import ink.glowing.text.placeholders.Placeholder;
+import ink.glowing.text.placeholders.PlaceholderGetter;
 import ink.glowing.text.replace.Replacer;
 import ink.glowing.text.style.symbolic.SymbolicStyle;
 import ink.glowing.text.style.tag.StyleTag;
@@ -19,16 +20,24 @@ import java.util.Map;
 import java.util.TreeSet;
 import java.util.function.Function;
 
+import static ink.glowing.text.placeholders.Placeholder.placeholder;
+import static ink.glowing.text.placeholders.PlaceholderGetter.placeholderGetter;
 import static ink.glowing.text.replace.StandardReplacers.urlReplacer;
 import static ink.glowing.text.style.symbolic.StandardSymbolicStyles.*;
+import static ink.glowing.text.style.tag.internal.LangTag.langTag;
 import static ink.glowing.text.style.tag.standard.ClickTag.clickTag;
 import static ink.glowing.text.style.tag.standard.ColorTag.colorTag;
 import static ink.glowing.text.style.tag.standard.DecorTag.decorTag;
 import static ink.glowing.text.style.tag.standard.FontTag.fontTag;
 import static ink.glowing.text.style.tag.standard.HoverTag.hoverTag;
+import static net.kyori.adventure.text.Component.translatable;
 import static net.kyori.adventure.text.format.Style.style;
 
 final class InkyResolverImpl implements InkyMessage.Resolver {
+    private static final Placeholder LANG_PH = placeholder(
+            "lang", (value) -> translatable(value), langTag()
+    );
+
     static final InkyMessage.Resolver STANDARD_RESOLVER = InkyMessage.resolver()
             .addTags(colorTag(),
                     hoverTag(),
@@ -47,6 +56,8 @@ final class InkyResolverImpl implements InkyMessage.Resolver {
     private final Map<Character, SymbolicStyle> symbolics;
     private final SymbolicStyle symbolicReset;
 
+    private final PlaceholderGetter phGetter;
+
     InkyResolverImpl(
             @NotNull Iterable<StyleTag<?>> tags,
             @NotNull Collection<Placeholder> placeholders,
@@ -59,6 +70,8 @@ final class InkyResolverImpl implements InkyMessage.Resolver {
         this.replacers = replacers;
         this.symbolics = toMap(symbolics, SymbolicStyle::symbol);
         this.symbolicReset = symbolicReset;
+
+        phGetter = placeholders.size() == 0 ? LANG_PH : placeholderGetter(placeholders).composePlaceholder(LANG_PH);
     }
 
     private static <O, K> Map<K, O> toMap(Iterable<O> origin, Function<O, K> keyFunction) {
@@ -76,7 +89,7 @@ final class InkyResolverImpl implements InkyMessage.Resolver {
 
     @Override
     public @Nullable Placeholder findPlaceholder(@NotNull String name) {
-        return placeholders.get(name);
+        return phGetter.findPlaceholder(name);
     }
 
     /**
@@ -139,9 +152,10 @@ final class InkyResolverImpl implements InkyMessage.Resolver {
     @Override
     public @NotNull InkyMessage.ResolverBuilder toBuilder() {
         return new InkyMessage.ResolverBuilder()
-                .addTags(tags.values())
                 .symbolicReset(symbolicReset)
-                .addSymbolics(symbolics.values());
+                .addSymbolics(symbolics.values())
+                .addPlaceholders(placeholders.values())
+                .addTags(tags.values());
     }
 
     private record HexSymbolicStyle(@NotNull TextColor color) implements SymbolicStyle {
