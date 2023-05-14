@@ -15,18 +15,20 @@ public interface PlaceholderGetter {
     @Contract(pure = true)
     default @NotNull PlaceholderGetter composePlaceholder(@NotNull PlaceholderGetter other) {
         return (name) -> {
-            var placeholder = findPlaceholder(name);
+            var placeholder = PlaceholderGetter.this.findPlaceholder(name);
             return placeholder == null ? other.findPlaceholder(name) : placeholder;
         };
     }
 
     @Contract(pure = true)
     default @NotNull PlaceholderGetter composePlaceholder(@NotNull PlaceholderGetter... others) {
+        return this.composePlaceholder(Arrays.asList(others));
+    }
+
+    @Contract(pure = true)
+    default @NotNull PlaceholderGetter composePlaceholder(@NotNull Iterable<PlaceholderGetter> others) {
         PlaceholderGetter result = this;
-        for (var other : others) result = result.composePlaceholder((name) -> {
-            var placeholder = findPlaceholder(name);
-            return placeholder == null ? other.findPlaceholder(name) : placeholder;
-        });
+        for (var other : others) result = result.composePlaceholder(other);
         return result;
     }
 

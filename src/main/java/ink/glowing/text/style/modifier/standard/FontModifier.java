@@ -1,7 +1,7 @@
-package ink.glowing.text.style.tag.standard;
+package ink.glowing.text.style.modifier.standard;
 
 import ink.glowing.text.InkyMessage;
-import ink.glowing.text.style.tag.StyleTag;
+import ink.glowing.text.style.modifier.StyleModifier;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.Component;
 import org.jetbrains.annotations.NotNull;
@@ -9,12 +9,12 @@ import org.jetbrains.annotations.Unmodifiable;
 
 import java.util.List;
 
-public final class FontTag implements StyleTag.Plain {
-    private static final FontTag INSTANCE = new FontTag();
-    public static @NotNull FontTag fontTag() {
+public final class FontModifier implements StyleModifier.Plain {
+    private static final FontModifier INSTANCE = new FontModifier();
+    public static @NotNull FontModifier fontModifier() {
         return INSTANCE;
     }
-    private FontTag() {}
+    private FontModifier() {}
 
     @Override
     public @NotNull Component modify(@NotNull Component text, @NotNull String param, @NotNull String value) {

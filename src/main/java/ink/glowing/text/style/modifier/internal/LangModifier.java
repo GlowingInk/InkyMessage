@@ -1,7 +1,7 @@
-package ink.glowing.text.style.tag.internal;
+package ink.glowing.text.style.modifier.internal;
 
 import ink.glowing.text.InkyMessage;
-import ink.glowing.text.style.tag.StyleTag;
+import ink.glowing.text.style.modifier.StyleModifier;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TranslatableComponent;
 import net.kyori.adventure.text.flattener.ComponentFlattener;
@@ -15,12 +15,12 @@ import java.util.List;
 import static ink.glowing.text.InkyMessage.escape;
 
 @ApiStatus.Internal
-public class LangTag implements StyleTag.Complex {
-    private static final LangTag INSTANCE = new LangTag();
-    public static @NotNull LangTag langTag() {
+public class LangModifier implements StyleModifier.Complex {
+    private static final LangModifier INSTANCE = new LangModifier();
+    public static @NotNull LangModifier langModifier() {
         return INSTANCE;
     }
-    private LangTag() {}
+    private LangModifier() {}
 
     @Override
     public @NotNull Component modify(@NotNull Component text, @NotNull String param, @NotNull Component value) {

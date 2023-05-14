@@ -6,8 +6,8 @@ An attempt to make legacy-friendly serializer with modern features.
 InkyMessage supports legacy format codes, e.g. `&l`, `&6`, `&a`, etc.
 Besides that, we also have a special format for the modern features like interactable chat components. 
 It's very simple to follow: `&[My special text](key:value parameters)(otherkey:othervalue)`. 
-Those are its possible tags:
-## Tag formatting
+Those are its possible modifiers:
+## Modifier formatting
 | Key                | Value                                                                                                                               | Parameter                | Effect                                    | Example                                                     |
 |--------------------|-------------------------------------------------------------------------------------------------------------------------------------|--------------------------|-------------------------------------------|-------------------------------------------------------------|
 | `hover`            | Only `text` ATM                                                                                                                     | Hover text               | Add hover effect to chat component        | `Stop. &[Hover time](hover:text What a meme)!`              |
@@ -15,7 +15,7 @@ Those are its possible tags:
 | `decor`            | `bold`, `obfuscated`, `strikethrough`, `underlined`, `italic`                                                                       | `true`, `unset`, `false` | Force decorator on the text               | `&cThat's a &[bold](decor:bold) move!`                      |
 | `font`             | Namespaced key of a font                                                                                                            | None                     | Change fonts of a text                    | `Wow, &[almost HD fonts](font:minecraft:uniform)!`          |
 | `color`            | [Named color](https://jd.advntr.dev/api/4.13.1/net/kyori/adventure/text/format/NamedTextColor.html) (lower case) or hex (`#123456`) | None ATM                 | Colorize colorless text                   | `&[This text is green](color:green)`                        |
-| `color` (gradient) | `spectrum` or `color1-color2-colorN` (see the `color` tag)                                                                          | None ATM                 | Colorize colorless text with gradient     | `&aLook!&r &[Fancy!](color:spectrum)(decor:bold)`           |
+| `color` (gradient) | `spectrum` or `color1-color2-colorN` (see the `color` modifier)                                                                     | None ATM                 | Colorize colorless text with gradient     | `&aLook!&r &[Fancy!](color:spectrum)(decor:bold)`           |
 
 ## TODO (until full release)
 - Placeholders (for keybinds, selectors)

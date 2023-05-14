@@ -12,7 +12,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.TreeSet;
 
 import static ink.glowing.text.InkyMessage.escape;
-import static ink.glowing.text.style.tag.internal.LangTag.langTag;
+import static ink.glowing.text.style.modifier.internal.LangModifier.langModifier;
 
 final class Stringifier {
     private Stringifier() {}
@@ -31,8 +31,8 @@ final class Stringifier {
             @NotNull InkyMessage.Resolver resolver,
             boolean @NotNull [] previousStyled
     ) {
-        var tags = resolver.readStyleTags(text);
-        if (!tags.isEmpty()) {
+        var modifiers = resolver.readStyleModifiers(text);
+        if (!modifiers.isEmpty()) {
             builder.append("&[");
         }
         var currentStyle = resolver.readSymbolics(text);
@@ -58,10 +58,10 @@ final class Stringifier {
         for (var child : children) {
             stringify(builder, newOuterStyle, child, resolver, previousStyled);
         }
-        if (!tags.isEmpty()) {
+        if (!modifiers.isEmpty()) {
             builder.append("]");
-            for (var tag : tags) {
-                builder.append(tag);
+            for (var modifier : modifiers) {
+                builder.append(modifier);
             }
         }
     }
@@ -75,8 +75,8 @@ final class Stringifier {
             builder.append(escape(text.content()));
         } else if (component instanceof TranslatableComponent translatable) {
             builder.append("&{lang:").append(translatable.key()).append("}");
-            for (var tag : langTag().read(resolver, translatable)) {
-                builder.append(tag);
+            for (var modifier : langModifier().read(resolver, translatable)) {
+                builder.append(modifier);
             }
         } else if (component instanceof KeybindComponent keybind) {
             builder.append("&{key:").append(keybind.keybind()).append("}"); // TODO implement

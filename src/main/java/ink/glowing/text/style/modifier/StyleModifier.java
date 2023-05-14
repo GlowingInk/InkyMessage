@@ -1,4 +1,4 @@
-package ink.glowing.text.style.tag;
+package ink.glowing.text.style.modifier;
 
 import ink.glowing.text.InkyMessage;
 import ink.glowing.text.utils.Named;
@@ -12,13 +12,13 @@ import java.util.List;
 import static ink.glowing.text.InkyMessage.inkyMessage;
 
 @ApiStatus.OverrideOnly
-public sealed interface StyleTag<T> extends Named, TagGetter permits StyleTag.Complex, StyleTag.Plain {
+public sealed interface StyleModifier<T> extends Named, ModifierGetter permits StyleModifier.Complex, StyleModifier.Plain {
     @NotNull Component modify(@NotNull Component text, @NotNull String param, @NotNull T value);
 
     @NotNull @Unmodifiable List<String> read(@NotNull InkyMessage.Resolver resolver, @NotNull Component text);
 
     @Override
-    default StyleTag<T> findTag(@NotNull String name) {
+    default StyleModifier<T> findModifier(@NotNull String name) {
         return name.equals(name()) ? this : null;
     }
 
@@ -34,8 +34,8 @@ public sealed interface StyleTag<T> extends Named, TagGetter permits StyleTag.Co
     }
 
     @ApiStatus.OverrideOnly
-    non-sealed interface Plain extends StyleTag<String> {}
+    non-sealed interface Plain extends StyleModifier<String> {}
 
     @ApiStatus.OverrideOnly
-    non-sealed interface Complex extends StyleTag<Component> {}
+    non-sealed interface Complex extends StyleModifier<Component> {}
 }

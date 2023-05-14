@@ -1,7 +1,7 @@
-package ink.glowing.text.style.tag.standard;
+package ink.glowing.text.style.modifier.standard;
 
 import ink.glowing.text.InkyMessage;
-import ink.glowing.text.style.tag.StyleTag;
+import ink.glowing.text.style.modifier.StyleModifier;
 import ink.glowing.text.utils.function.FloatFunction;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
@@ -24,18 +24,18 @@ import static net.kyori.adventure.text.Component.empty;
 import static net.kyori.adventure.text.Component.text;
 import static net.kyori.adventure.text.format.TextColor.color;
 
-public final class ColorTag implements StyleTag.Plain {
+public final class ColorModifier implements StyleModifier.Plain {
     private static final Pattern PER_SYMBOL = Pattern.compile(".");
     private static final Pattern EVERYTHING = Pattern.compile(".*");
 
     private static final TextColor AVERAGE_SPECTRUM = TextColor.color(0x7F7F7F);
     private static final Map<String, NamedTextColor> NAMED_COLORS = NamedTextColor.NAMES.keyToValue();
 
-    private static final ColorTag INSTANCE = new ColorTag();
-    public static @NotNull ColorTag colorTag() {
+    private static final ColorModifier INSTANCE = new ColorModifier();
+    public static @NotNull ColorModifier colorModifier() {
         return INSTANCE;
     }
-    private ColorTag() {}
+    private ColorModifier() {}
 
     // FIXME That's really not how this should be done
     @Override
@@ -47,7 +47,7 @@ public final class ColorTag implements StyleTag.Plain {
                 int length = length(text);
                 if (length <= 1) return text.color(AVERAGE_SPECTRUM);
                 indexedLength = length;
-                colorGetter = ColorTag::colorSpectrum;
+                colorGetter = ColorModifier::colorSpectrum;
             }
             case "random" -> {
                 indexedLength = 0;

@@ -1,7 +1,7 @@
-package ink.glowing.text.style.tag.standard;
+package ink.glowing.text.style.modifier.standard;
 
 import ink.glowing.text.InkyMessage;
-import ink.glowing.text.style.tag.StyleTag;
+import ink.glowing.text.style.modifier.StyleModifier;
 import net.kyori.adventure.text.Component;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Unmodifiable;
@@ -11,12 +11,12 @@ import java.util.List;
 import static ink.glowing.text.InkyMessage.escape;
 import static net.kyori.adventure.text.event.ClickEvent.*;
 
-public final class ClickTag implements StyleTag.Plain {
-    private static final ClickTag INSTANCE = new ClickTag();
-    public static @NotNull ClickTag clickTag() {
+public final class ClickModifier implements StyleModifier.Plain {
+    private static final ClickModifier INSTANCE = new ClickModifier();
+    public static @NotNull ClickModifier clickModifier() {
         return INSTANCE;
     }
-    private ClickTag() {}
+    private ClickModifier() {}
 
     @Override
     public @NotNull Component modify(@NotNull Component text, @NotNull String param, @NotNull String value) {

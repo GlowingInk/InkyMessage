@@ -3,8 +3,8 @@ package ink.glowing.text;
 import ink.glowing.text.placeholders.Placeholder;
 import ink.glowing.text.placeholders.PlaceholderGetter;
 import ink.glowing.text.replace.Replacer;
+import ink.glowing.text.style.modifier.StyleModifier;
 import ink.glowing.text.style.symbolic.SymbolicStyle;
-import ink.glowing.text.style.tag.StyleTag;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.Style;
 import net.kyori.adventure.text.format.TextColor;
@@ -23,34 +23,34 @@ import java.util.function.Function;
 import static ink.glowing.text.placeholders.Placeholder.placeholder;
 import static ink.glowing.text.placeholders.PlaceholderGetter.placeholderGetter;
 import static ink.glowing.text.replace.StandardReplacers.urlReplacer;
+import static ink.glowing.text.style.modifier.internal.LangModifier.langModifier;
+import static ink.glowing.text.style.modifier.standard.ClickModifier.clickModifier;
+import static ink.glowing.text.style.modifier.standard.ColorModifier.colorModifier;
+import static ink.glowing.text.style.modifier.standard.DecorModifier.decorModifier;
+import static ink.glowing.text.style.modifier.standard.FontModifier.fontModifier;
+import static ink.glowing.text.style.modifier.standard.HoverModifier.hoverModifier;
 import static ink.glowing.text.style.symbolic.StandardSymbolicStyles.*;
-import static ink.glowing.text.style.tag.internal.LangTag.langTag;
-import static ink.glowing.text.style.tag.standard.ClickTag.clickTag;
-import static ink.glowing.text.style.tag.standard.ColorTag.colorTag;
-import static ink.glowing.text.style.tag.standard.DecorTag.decorTag;
-import static ink.glowing.text.style.tag.standard.FontTag.fontTag;
-import static ink.glowing.text.style.tag.standard.HoverTag.hoverTag;
 import static net.kyori.adventure.text.Component.translatable;
 import static net.kyori.adventure.text.format.Style.style;
 
 final class InkyResolverImpl implements InkyMessage.Resolver {
     private static final Placeholder LANG_PH = placeholder(
-            "lang", (value) -> translatable(value), langTag()
+            "lang", (value) -> translatable(value), langModifier()
     );
 
     static final InkyMessage.Resolver STANDARD_RESOLVER = InkyMessage.resolver()
-            .addTags(colorTag(),
-                    hoverTag(),
-                    clickTag(),
-                    fontTag(),
-                    decorTag())
+            .addModifiers(colorModifier(),
+                    hoverModifier(),
+                    clickModifier(),
+                    fontModifier(),
+                    decorModifier())
             .addSymbolics(notchianColors())
             .addSymbolics(notchianDecorations())
             .symbolicReset(notchianReset())
             .addReplacer(urlReplacer())
             .build();
 
-    private final Map<String, StyleTag<?>> tags;
+    private final Map<String, StyleModifier<?>> modifiers;
     private final Map<String, Placeholder> placeholders;
     private final Collection<Replacer> replacers;
     private final Map<Character, SymbolicStyle> symbolics;
@@ -59,13 +59,13 @@ final class InkyResolverImpl implements InkyMessage.Resolver {
     private final PlaceholderGetter phGetter;
 
     InkyResolverImpl(
-            @NotNull Iterable<StyleTag<?>> tags,
+            @NotNull Iterable<StyleModifier<?>> modifiers,
             @NotNull Collection<Placeholder> placeholders,
             @NotNull Collection<Replacer> replacers,
             @NotNull Iterable<SymbolicStyle> symbolics,
             @NotNull SymbolicStyle symbolicReset
     ) {
-        this.tags = toMap(tags, StyleTag::name);
+        this.modifiers = toMap(modifiers, StyleModifier::name);
         this.placeholders = toMap(placeholders, Placeholder::name);
         this.replacers = replacers;
         this.symbolics = toMap(symbolics, SymbolicStyle::symbol);
@@ -83,8 +83,8 @@ final class InkyResolverImpl implements InkyMessage.Resolver {
     }
 
     @Override
-    public @Nullable StyleTag<?> findTag(@NotNull String name) {
-        return tags.get(name);
+    public @Nullable StyleModifier<?> findModifier(@NotNull String name) {
+        return modifiers.get(name);
     }
 
     @Override
@@ -136,12 +136,12 @@ final class InkyResolverImpl implements InkyMessage.Resolver {
     }
 
     @Override
-    public @NotNull List<String> readStyleTags(@NotNull Component text) {
-        List<String> tags = new ArrayList<>();
-        for (var tag : this.tags.values()) {
-            tags.addAll(tag.read(this, text));
+    public @NotNull List<String> readStyleModifiers(@NotNull Component text) {
+        List<String> modifiers = new ArrayList<>();
+        for (var modifier : this.modifiers.values()) {
+            modifiers.addAll(modifier.read(this, text));
         }
-        return tags;
+        return modifiers;
     }
 
     @Override
@@ -155,7 +155,7 @@ final class InkyResolverImpl implements InkyMessage.Resolver {
                 .symbolicReset(symbolicReset)
                 .addSymbolics(symbolics.values())
                 .addPlaceholders(placeholders.values())
-                .addTags(tags.values());
+                .addModifiers(modifiers.values());
     }
 
     private record HexSymbolicStyle(@NotNull TextColor color) implements SymbolicStyle {

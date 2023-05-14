@@ -1,7 +1,7 @@
-package ink.glowing.text.style.tag.standard;
+package ink.glowing.text.style.modifier.standard;
 
 import ink.glowing.text.InkyMessage;
-import ink.glowing.text.style.tag.StyleTag;
+import ink.glowing.text.style.modifier.StyleModifier;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextDecoration;
 import org.jetbrains.annotations.NotNull;
@@ -11,12 +11,12 @@ import org.jetbrains.annotations.Unmodifiable;
 import java.util.ArrayList;
 import java.util.List;
 
-public final class DecorTag implements StyleTag.Plain {
-    private static final DecorTag INSTANCE = new DecorTag();
-    public static @NotNull DecorTag decorTag() {
+public final class DecorModifier implements StyleModifier.Plain {
+    private static final DecorModifier INSTANCE = new DecorModifier();
+    public static @NotNull DecorModifier decorModifier() {
         return INSTANCE;
     }
-    private DecorTag() {}
+    private DecorModifier() {}
 
     @Override
     public @NotNull Component modify(@NotNull Component text, @NotNull String param, @NotNull String value) {
@@ -33,13 +33,13 @@ public final class DecorTag implements StyleTag.Plain {
     public @NotNull @Unmodifiable List<String> read(@NotNull InkyMessage.Resolver resolver, @NotNull Component text) {
         var textDecors = text.decorations().entrySet();
         if (textDecors.isEmpty()) return List.of();
-        List<String> tagStr = new ArrayList<>(0);
+        List<String> modifierStr = new ArrayList<>(0);
         for (var entry : textDecors) {
             if (entry.getValue() == TextDecoration.State.FALSE) {
-                tagStr.add(asFormatted(entry.getKey().toString(), "false"));
+                modifierStr.add(asFormatted(entry.getKey().toString(), "false"));
             }
         }
-        return tagStr;
+        return modifierStr;
     }
 
     @Override

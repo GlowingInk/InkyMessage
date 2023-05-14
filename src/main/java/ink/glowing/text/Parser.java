@@ -2,8 +2,8 @@ package ink.glowing.text;
 
 import ink.glowing.text.placeholders.Placeholder;
 import ink.glowing.text.replace.Replacer;
-import ink.glowing.text.style.tag.StyleTag;
-import ink.glowing.text.style.tag.TagGetter;
+import ink.glowing.text.style.modifier.ModifierGetter;
+import ink.glowing.text.style.modifier.StyleModifier;
 import ink.glowing.text.utils.AdventureUtils;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
@@ -51,7 +51,7 @@ final class Parser {
                     builder.append(parseComponent(from, globalIndex, context));
                     builder.append(parseRecursive(globalIndex + 2, ']', context));
                     from = globalIndex--;
-                } else if (nextCh == '{') { // &{ph} | &{ph:...}
+                } else if (nextCh == '{') { // &{placeholder} | &{placeholder:...}
                     int initIndex = globalIndex;
                     if (!iterateUntil(":}")) {
                         globalIndex = initIndex;
@@ -74,13 +74,13 @@ final class Parser {
                         params = textStr.substring(paramsIndex, globalIndex);
                     }
                     builder.append(parseComponent(from, initIndex, context));
-                    builder.append(applyTags(placeholder.parse(params), context, placeholder));
+                    builder.append(applyModifiers(placeholder.parse(params), context, placeholder));
                     from = globalIndex--;
                 }
             } else if (ch == until && isUnescapedAt(textStr, globalIndex)) {
                 builder.append(parseComponent(from, globalIndex, context));
                 return until != ')'
-                        ? applyTags(builder.build(), context, resolver)
+                        ? applyModifiers(builder.build(), context, resolver)
                         : builder.build();
             }
         }
@@ -154,28 +154,28 @@ final class Parser {
         return null;
     }
 
-    private @NotNull Component applyTags(
+    private @NotNull Component applyModifiers(
             @NotNull Component comp,
             @NotNull BuildContext context,
-            @NotNull TagGetter tagGetter
+            @NotNull ModifierGetter modifierGetter
     ) {
         int from = globalIndex + 1;
         if (from >= textLength || textStr.charAt(from) != '(') {
             globalIndex = from;
             return comp;
         }
-        String tagStr = extractPlain(from + 1, ":) ");
-        StyleTag<?> tag = tagGetter.findTag(tagStr);
-        if (tag == null) {
+        String modifierStr = extractPlain(from + 1, ":) ");
+        StyleModifier<?> modifier = modifierGetter.findModifier(modifierStr);
+        if (modifier == null) {
             globalIndex = from;
             return comp;
         }
         from = globalIndex + 1;
         if (globalIndex >= textLength || textStr.charAt(globalIndex) == ')') {
-            if (tag instanceof StyleTag.Plain plainTag) {
-                comp = plainTag.modify(comp, "", "");
-            } else if (tag instanceof StyleTag.Complex complexTag) {
-                comp = complexTag.modify(comp, "", empty());
+            if (modifier instanceof StyleModifier.Plain plainModifier) {
+                comp = plainModifier.modify(comp, "", "");
+            } else if (modifier instanceof StyleModifier.Complex complexModifier) {
+                comp = complexModifier.modify(comp, "", empty());
             }
         } else {
             String params = "";
@@ -183,15 +183,15 @@ final class Parser {
                 params = extractPlain(from, " )");
                 from += params.length() + 1;
             }
-            if (tag instanceof StyleTag.Complex complexTag) {
+            if (modifier instanceof StyleModifier.Complex complexModifier) {
                 Component value = parseRecursive(from, ')', context.colorlessCopy());
-                comp = complexTag.modify(comp, params, value.compact());
-            } else if (tag instanceof StyleTag.Plain plainTag) {
-                String value = extractPlainTagValue(from);
-                comp = plainTag.modify(comp, params, unescape(value));
+                comp = complexModifier.modify(comp, params, value.compact());
+            } else if (modifier instanceof StyleModifier.Plain plainModifier) {
+                String value = extractPlainModifierValue(from);
+                comp = plainModifier.modify(comp, params, unescape(value));
             }
         }
-        return applyTags(comp, context, tagGetter);
+        return applyModifiers(comp, context, modifierGetter);
     }
 
     private @NotNull String extractPlain(int from, @NotNull String until) {
@@ -202,7 +202,7 @@ final class Parser {
         return "";
     }
 
-    private @NotNull String extractPlainTagValue(int from) {
+    private @NotNull String extractPlainModifierValue(int from) {
         if (globalIndex != textLength && textStr.charAt(globalIndex) != ')') {
             globalIndex = from;
             if (iterateUntil(')')) {

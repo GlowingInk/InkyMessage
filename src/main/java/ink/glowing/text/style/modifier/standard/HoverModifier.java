@@ -1,7 +1,7 @@
-package ink.glowing.text.style.tag.standard;
+package ink.glowing.text.style.modifier.standard;
 
 import ink.glowing.text.InkyMessage;
-import ink.glowing.text.style.tag.StyleTag;
+import ink.glowing.text.style.modifier.StyleModifier;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.event.HoverEvent;
 import org.jetbrains.annotations.NotNull;
@@ -11,12 +11,12 @@ import java.util.List;
 
 import static net.kyori.adventure.text.event.HoverEvent.showText;
 
-public final class HoverTag implements StyleTag.Complex {
-    private static final HoverTag INSTANCE = new HoverTag();
-    public static @NotNull HoverTag hoverTag() {
+public final class HoverModifier implements StyleModifier.Complex {
+    private static final HoverModifier INSTANCE = new HoverModifier();
+    public static @NotNull HoverModifier hoverModifier() {
         return INSTANCE;
     }
-    private HoverTag() {}
+    private HoverModifier() {}
 
     @Override
     public @NotNull Component modify(@NotNull Component text, @NotNull String param, @NotNull Component value) {

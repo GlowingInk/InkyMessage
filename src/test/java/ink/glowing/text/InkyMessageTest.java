@@ -85,8 +85,8 @@ public class InkyMessageTest {
                                 .append(text(".").color(RED)).build()
                 },
                 {
-                        "&[Test](fake:tag lol), &[another one].",
-                        text("Test(fake:tag lol), another one.")
+                        "&[Test](fake:modifier lol), &[another one].",
+                        text("Test(fake:modifier lol), another one.")
                 },
                 {
                         "&[Test](hover:text Hover)&[ and another](decor:cursive)",
