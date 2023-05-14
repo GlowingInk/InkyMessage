@@ -15,8 +15,10 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.TreeSet;
 import java.util.function.Function;
 
@@ -30,6 +32,7 @@ import static ink.glowing.text.style.modifier.standard.DecorModifier.decorModifi
 import static ink.glowing.text.style.modifier.standard.FontModifier.fontModifier;
 import static ink.glowing.text.style.modifier.standard.HoverModifier.hoverModifier;
 import static ink.glowing.text.style.symbolic.StandardSymbolicStyles.*;
+import static ink.glowing.text.utils.GeneralUtils.concat;
 import static net.kyori.adventure.text.Component.translatable;
 import static net.kyori.adventure.text.format.Style.style;
 
@@ -71,7 +74,12 @@ final class InkyResolverImpl implements InkyMessage.Resolver {
         this.symbolics = toMap(symbolics, SymbolicStyle::symbol);
         this.symbolicReset = symbolicReset;
 
-        phGetter = placeholders.size() == 0 ? LANG_PH : placeholderGetter(placeholders).composePlaceholder(LANG_PH);
+        if (placeholders.size() == 0) {
+            phGetter = LANG_PH;
+        } else {
+            Set<Placeholder> fullPhs = concat(HashSet::new, List.of(LANG_PH), placeholders);
+            phGetter = placeholderGetter(fullPhs);
+        }
     }
 
     private static <O, K> Map<K, O> toMap(Iterable<O> origin, Function<O, K> keyFunction) {

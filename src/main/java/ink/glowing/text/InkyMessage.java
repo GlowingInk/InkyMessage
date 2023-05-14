@@ -54,7 +54,40 @@ public final class InkyMessage implements ComponentSerializer<Component, Compone
      */
     @Override
     public @NotNull Component deserialize(@NotNull String inputText) {
-        return deserialize(inputText, standardResolver());
+        return deserialize(inputText, new BuildContext(standardResolver()));
+    }
+
+    /**
+     * Convert string into adventure text component.
+     * @param inputText input string
+     * @param resolver resolver to use
+     * @return converted text component
+     */
+    public @NotNull Component deserialize(@NotNull String inputText,
+                                          @NotNull Resolver resolver) {
+        return deserialize(inputText, new BuildContext(resolver));
+    }
+
+    /**
+     * Convert string into adventure text component.
+     * @param inputText input string
+     * @param placeholders custom placeholders
+     * @return converted text component
+     */
+    public @NotNull Component deserialize(@NotNull String inputText,
+                                          @NotNull Placeholder@NotNull ... placeholders) {
+        return deserialize(inputText, new BuildContext(standardResolver(), placeholderGetter(placeholders)));
+    }
+
+    /**
+     * Convert string into adventure text component.
+     * @param inputText input string
+     * @param placeholders custom placeholders
+     * @return converted text component
+     */
+    public @NotNull Component deserialize(@NotNull String inputText,
+                                          @NotNull PlaceholderGetter placeholders) {
+        return deserialize(inputText, new BuildContext(standardResolver(), placeholders));
     }
 
     /**
@@ -64,7 +97,9 @@ public final class InkyMessage implements ComponentSerializer<Component, Compone
      * @param placeholders custom placeholders
      * @return converted text component
      */
-    public @NotNull Component deserialize(@NotNull String inputText, @NotNull Resolver resolver, @NotNull Placeholder@NotNull ... placeholders) {
+    public @NotNull Component deserialize(@NotNull String inputText,
+                                          @NotNull Resolver resolver,
+                                          @NotNull Placeholder@NotNull ... placeholders) {
         return deserialize(inputText, new BuildContext(resolver, placeholderGetter(placeholders)));
     }
 
@@ -72,21 +107,12 @@ public final class InkyMessage implements ComponentSerializer<Component, Compone
      * Convert string into adventure text component.
      * @param inputText input string
      * @param resolver resolver to use
-     * @param placeholder custom placeholder
-     * @return converted text component
-     */
-    public @NotNull Component deserialize(@NotNull String inputText, @NotNull Resolver resolver, @NotNull Placeholder placeholder) {
-        return deserialize(inputText, new BuildContext(resolver, placeholder));
-    }
-
-    /**
-     * Convert string into adventure text component.
-     * @param inputText input string
-     * @param resolver resolver to use
      * @param placeholders custom placeholders
      * @return converted text component
      */
-    public @NotNull Component deserialize(@NotNull String inputText, @NotNull Resolver resolver, @NotNull PlaceholderGetter placeholders) {
+    public @NotNull Component deserialize(@NotNull String inputText,
+                                          @NotNull Resolver resolver,
+                                          @NotNull PlaceholderGetter placeholders) {
         return deserialize(inputText, new BuildContext(resolver, placeholders));
     }
 
@@ -96,7 +122,8 @@ public final class InkyMessage implements ComponentSerializer<Component, Compone
      * @param context context to deserialize with
      * @return converted text component
      */
-    public @NotNull Component deserialize(@NotNull String inputText, @NotNull BuildContext context) {
+    public @NotNull Component deserialize(@NotNull String inputText,
+                                          @NotNull BuildContext context) {
         return Parser.parse(inputText, context).compact();
     }
 
@@ -235,7 +262,7 @@ public final class InkyMessage implements ComponentSerializer<Component, Compone
         }
 
         @Contract("_ -> this")
-        public @NotNull InkyMessage.ResolverBuilder replacers(@NotNull Collection<@NotNull Replacer> replacers) {
+        public @NotNull InkyMessage.ResolverBuilder replacers(@NotNull Collection<? extends @NotNull Replacer> replacers) {
             this.replacers = new HashSet<>(replacers);
             return this;
         }
@@ -252,7 +279,7 @@ public final class InkyMessage implements ComponentSerializer<Component, Compone
         }
 
         @Contract("_ -> this")
-        public @NotNull InkyMessage.ResolverBuilder addReplacers(@NotNull Iterable<@NotNull Replacer> replacers) {
+        public @NotNull InkyMessage.ResolverBuilder addReplacers(@NotNull Iterable<? extends @NotNull Replacer> replacers) {
             for (var replacer : replacers) addReplacer(replacer);
             return this;
         }
@@ -263,7 +290,7 @@ public final class InkyMessage implements ComponentSerializer<Component, Compone
         }
 
         @Contract("_ -> this")
-        public @NotNull InkyMessage.ResolverBuilder placeholders(@NotNull Collection<@NotNull Placeholder> placeholders) {
+        public @NotNull InkyMessage.ResolverBuilder placeholders(@NotNull Collection<? extends @NotNull Placeholder> placeholders) {
             this.placeholders = new HashSet<>(placeholders);
             return this;
         }
@@ -280,7 +307,7 @@ public final class InkyMessage implements ComponentSerializer<Component, Compone
         }
 
         @Contract("_ -> this")
-        public @NotNull InkyMessage.ResolverBuilder addPlaceholders(@NotNull Iterable<@NotNull Placeholder> placeholders) {
+        public @NotNull InkyMessage.ResolverBuilder addPlaceholders(@NotNull Iterable<? extends @NotNull Placeholder> placeholders) {
             for (var placeholder : placeholders) addPlaceholder(placeholder);
             return this;
         }
@@ -291,7 +318,7 @@ public final class InkyMessage implements ComponentSerializer<Component, Compone
         }
 
         @Contract("_ -> this")
-        public @NotNull InkyMessage.ResolverBuilder modifiers(@NotNull Collection<@NotNull StyleModifier<?>> styleModifiers) {
+        public @NotNull InkyMessage.ResolverBuilder modifiers(@NotNull Collection<? extends @NotNull StyleModifier<?>> styleModifiers) {
             this.modifiers = new HashSet<>(styleModifiers);
             return this;
         }
@@ -308,7 +335,7 @@ public final class InkyMessage implements ComponentSerializer<Component, Compone
         }
 
         @Contract("_ -> this")
-        public @NotNull InkyMessage.ResolverBuilder addModifiers(@NotNull Iterable<@NotNull StyleModifier<?>> modifiers) {
+        public @NotNull InkyMessage.ResolverBuilder addModifiers(@NotNull Iterable<? extends @NotNull StyleModifier<?>> modifiers) {
             for (var modifier : modifiers) addModifier(modifier);
             return this;
         }
@@ -327,7 +354,7 @@ public final class InkyMessage implements ComponentSerializer<Component, Compone
         }
 
         @Contract("_ -> this")
-        public @NotNull InkyMessage.ResolverBuilder symbolics(@NotNull Collection<@NotNull SymbolicStyle> symbolics) {
+        public @NotNull InkyMessage.ResolverBuilder symbolics(@NotNull Collection<? extends @NotNull SymbolicStyle> symbolics) {
             this.symbolics = new HashSet<>(symbolics);
             return this;
         }
@@ -344,7 +371,7 @@ public final class InkyMessage implements ComponentSerializer<Component, Compone
         }
 
         @Contract("_ -> this")
-        public @NotNull InkyMessage.ResolverBuilder addSymbolics(@NotNull Iterable<@NotNull SymbolicStyle> symbolics) {
+        public @NotNull InkyMessage.ResolverBuilder addSymbolics(@NotNull Iterable<? extends @NotNull SymbolicStyle> symbolics) {
             for (var symbolic : symbolics) addSymbolic(symbolic);
             return this;
         }

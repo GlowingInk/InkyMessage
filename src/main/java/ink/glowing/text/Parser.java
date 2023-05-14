@@ -19,8 +19,6 @@ import static net.kyori.adventure.text.Component.empty;
 import static net.kyori.adventure.text.Component.text;
 
 final class Parser {
-    private static final char END = 0;
-
     private final String textStr;
     private final int textLength;
     private final InkyMessage.Resolver resolver;
@@ -37,10 +35,10 @@ final class Parser {
     public static @NotNull Component parse(@NotNull String textStr, @NotNull BuildContext context) {
         if (textStr.length() == 0) return empty();
         return new Parser(textStr, context.resolver())
-                .parseRecursive(0, END, context);
+                .parseRecursive(0, -1, context);
     }
 
-    private @NotNull Component parseRecursive(int from, char until, @NotNull BuildContext context) {
+    private @NotNull Component parseRecursive(int from, int untilCh, @NotNull BuildContext context) {
         var builder = text();
         for (globalIndex = from; globalIndex < textLength; globalIndex++) {
             char ch = textStr.charAt(globalIndex);
@@ -48,7 +46,7 @@ final class Parser {
                 if (isEscapedAt(textStr, globalIndex) || globalIndex + 1 >= textLength) continue;
                 char nextCh = textStr.charAt(globalIndex + 1);
                 if (nextCh == '[') { // &[...]
-                    builder.append(parseComponent(from, globalIndex, context));
+                    builder.append(parseSegment(from, globalIndex, context));
                     builder.append(parseRecursive(globalIndex + 2, ']', context));
                     from = globalIndex--;
                 } else if (nextCh == '{') { // &{placeholder} | &{placeholder:...}
@@ -73,30 +71,30 @@ final class Parser {
                         }
                         params = textStr.substring(paramsIndex, globalIndex);
                     }
-                    builder.append(parseComponent(from, initIndex, context));
+                    builder.append(parseSegment(from, initIndex, context));
                     builder.append(applyModifiers(placeholder.parse(params), context, placeholder));
                     from = globalIndex--;
                 }
-            } else if (ch == until && isUnescapedAt(textStr, globalIndex)) {
-                builder.append(parseComponent(from, globalIndex, context));
-                return until != ')'
+            } else if (ch == untilCh && isUnescapedAt(textStr, globalIndex)) {
+                builder.append(parseSegment(from, globalIndex, context));
+                return untilCh != ')'
                         ? applyModifiers(builder.build(), context, resolver)
                         : builder.build();
             }
         }
-        // In a case we didn't find the 'until' char
-        builder.append(parseComponent(from, textLength, context));
+        // In a case we didn't find the 'untilCh' char
+        builder.append(parseSegment(from, textLength, context));
         return builder.build();
     }
 
-    private @NotNull Component parseComponent(final int from, final int until, @NotNull BuildContext context) {
+    private @NotNull Component parseSegment(int from, int until, @NotNull BuildContext context) {
         if (from == until) return empty();
         var builder = text();
         int lastAppend = from;
         for (int index = from; index < until; index++) {
             var spot = matchSpot(index, until);
             if (spot != null) {
-                appendPrevious(textStr, builder, lastAppend, index, context);
+                appendPrevious(builder, lastAppend, index, context);
                 builder.append(empty().style(context.lastStyle()).append(spot.replacement().get()));
                 lastAppend = spot.end();
                 index = lastAppend - 1;
@@ -114,29 +112,28 @@ final class Parser {
                     String colorStr = textStr.substring(index + 1, index + charsToSkip);
                     TextColor color = AdventureUtils.parseHexColor(colorStr, quirky);
                     if (color == null) continue;
-                    appendPrevious(textStr, builder, lastAppend, index, context);
+                    appendPrevious(builder, lastAppend, index, context);
                     context.lastStyle(context.lastStyle().color(color));
                     lastAppend = (index += charsToSkip - 1) + 1;
                 }
                 default -> {
                     Style newStyle = resolver.applySymbolicStyle(styleCh, context.lastStyle());
                     if (newStyle == null) continue;
-                    appendPrevious(textStr, builder, lastAppend, index, context);
+                    appendPrevious(builder, lastAppend, index, context);
                     context.lastStyle(newStyle);
                     lastAppend = (++index) + 1;
                 }
             }
         }
         if (lastAppend < until) {
-            appendPrevious(textStr, builder, lastAppend, until, context);
+            appendPrevious(builder, lastAppend, until, context);
         }
         return builder.build();
     }
 
-    private void appendPrevious(@NotNull String piece, @NotNull TextComponent.Builder builder, int start, int end, @NotNull BuildContext context) {
+    private void appendPrevious(@NotNull TextComponent.Builder builder, int start, int end, @NotNull BuildContext context) {
         if (start == end) return;
-        String substring = unescape(piece.substring(start, end));
-        builder.append(text(substring).style(context.lastStyle()));
+        builder.append(text(unescape(textStr.substring(start, end))).style(context.lastStyle()));
     }
 
     private @Nullable Replacer.FoundSpot matchSpot(int index, int end) {

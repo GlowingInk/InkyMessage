@@ -22,8 +22,7 @@ import static net.kyori.adventure.text.minimessage.MiniMessage.miniMessage;
 import static org.testng.Assert.assertEquals;
 
 public class InkyMessageTest {
-    @SuppressWarnings("FieldCanBeLocal")
-    private final boolean debug = true;
+    private final boolean debug = false;
 
     @DataProvider
     public Object[][] deserializeData() {
@@ -228,7 +227,7 @@ public class InkyMessageTest {
         );
     }
 
-    private static final String SYMBOLS = "abcde&[](){}\\:";
+    private static final String SYMBOLS = "abcde&[](){}\\:#x";
 
     @Test(description = "Basically hoping that we'll get no exceptions while parsing a hot stinky mess")
     public void randomTest() {

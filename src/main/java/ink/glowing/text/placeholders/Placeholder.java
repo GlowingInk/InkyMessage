@@ -8,7 +8,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
-public sealed interface Placeholder extends Named, PlaceholderGetter, ModifierGetter permits PlaceholderImpl {
+public interface Placeholder extends Named, PlaceholderGetter, ModifierGetter {
     @NotNull Component parse(@NotNull String value);
 
     static @NotNull Placeholder placeholder(@NotNull String name,

@@ -15,8 +15,8 @@ import java.util.regex.Pattern;
 
 import static net.kyori.adventure.text.Component.text;
 
-public sealed interface Replacer permits Replacer.Literal, Replacer.Regex {
-    @NotNull @Unmodifiable List<FoundSpot> findSpots(@NotNull String str);
+public interface Replacer {
+    @NotNull @Unmodifiable List<@NotNull FoundSpot> findSpots(@NotNull String str);
 
     static @NotNull Replacer replacer(@NotNull String search, @NotNull String replacement) {
         return replacer(search, text(replacement));

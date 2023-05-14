@@ -1,6 +1,5 @@
 package ink.glowing.text.placeholders;
 
-import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -11,26 +10,6 @@ import java.util.Map;
 @FunctionalInterface
 public interface PlaceholderGetter {
     @Nullable Placeholder findPlaceholder(@NotNull String name);
-
-    @Contract(pure = true)
-    default @NotNull PlaceholderGetter composePlaceholder(@NotNull PlaceholderGetter other) {
-        return (name) -> {
-            var placeholder = PlaceholderGetter.this.findPlaceholder(name);
-            return placeholder == null ? other.findPlaceholder(name) : placeholder;
-        };
-    }
-
-    @Contract(pure = true)
-    default @NotNull PlaceholderGetter composePlaceholder(@NotNull PlaceholderGetter... others) {
-        return this.composePlaceholder(Arrays.asList(others));
-    }
-
-    @Contract(pure = true)
-    default @NotNull PlaceholderGetter composePlaceholder(@NotNull Iterable<PlaceholderGetter> others) {
-        PlaceholderGetter result = this;
-        for (var other : others) result = result.composePlaceholder(other);
-        return result;
-    }
 
     static @NotNull PlaceholderGetter placeholderGetter(@NotNull Placeholder placeholder) {
         return (name) -> placeholder.name().equals(name) ? placeholder : null;
@@ -44,9 +23,27 @@ public interface PlaceholderGetter {
         };
     }
 
-    static @NotNull PlaceholderGetter placeholderGetter(@NotNull Iterable<Placeholder> placeholders) {
+    static @NotNull PlaceholderGetter placeholderGetter(@NotNull Iterable<? extends @NotNull Placeholder> placeholders) {
         Map<String, Placeholder> placeholdersMap = new HashMap<>();
         for (var placeholder : placeholders) placeholdersMap.put(placeholder.name(), placeholder);
         return placeholdersMap::get;
+    }
+
+    static @NotNull PlaceholderGetter composePlaceholderGetters(@NotNull PlaceholderGetter @NotNull ... placeholderGetters) {
+        return composePlaceholderGetters(Arrays.asList(placeholderGetters));
+    }
+
+    static @NotNull PlaceholderGetter composePlaceholderGetters(@NotNull Iterable<? extends @NotNull PlaceholderGetter> placeholderGetters) {
+        var iterator = placeholderGetters.iterator();
+        PlaceholderGetter result = (name) -> null;
+        while (iterator.hasNext()) {
+            PlaceholderGetter last = result;
+            PlaceholderGetter next = iterator.next();
+            result = (name) -> {
+                Placeholder placeholder = next.findPlaceholder(name);
+                return placeholder == null ? last.findPlaceholder(name) : placeholder;
+            };
+        }
+        return result;
     }
 }

@@ -14,7 +14,7 @@ public final class GeneralUtils {
     @SafeVarargs
     public static <T, C extends Collection<T>> @NotNull C concat(
             @NotNull Supplier<C> colGetter,
-            @NotNull Collection<T> @NotNull ... collections
+            @NotNull Collection<? extends T> @NotNull ... collections
     ) {
         C col = colGetter.get();
         for (var iter : collections) col.addAll(iter);
@@ -24,7 +24,7 @@ public final class GeneralUtils {
     @SafeVarargs
     public static <T> @NotNull Collection<T> concatImmutable(
             @NotNull Supplier<Collection<T>> colGetter,
-            @NotNull Collection<T> @NotNull ... collections
+            @NotNull Collection<? extends T> @NotNull ... collections
     ) {
         return Collections.unmodifiableCollection(concat(colGetter, collections));
     }
