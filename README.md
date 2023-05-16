@@ -30,14 +30,7 @@ Add to repositories
 ```xml
 <repository>
     <id>glowing-ink</id>
-    <url>https://repo.glowing.ink/releases</url>
-</repository>
-```
-Or for latest snapshots
-```xml
-<repository>
-    <id>glowing-ink</id>
-    <url>http://repo.glowing.ink/snapshots</url>
+    <url>https://repo.glowing.ink/releases</url> <!-- https://repo.glowing.ink/snapshots for snapshots -->
 </repository>
 ```
 Add to dependencies
@@ -52,8 +45,7 @@ Add to dependencies
 ```kotlin
 repositories {
     maven {
-        url = uri("https://repo.glowing.ink/releases")
-        // url = uri("https://repo.glowing.ink/snapshots")
+        url = uri("https://repo.glowing.ink/releases") // https://repo.glowing.ink/snapshots for snapshots
     }
 }
 
