@@ -25,7 +25,9 @@ import java.util.function.Function;
 import static ink.glowing.text.placeholders.Placeholder.placeholder;
 import static ink.glowing.text.placeholders.PlaceholderGetter.placeholderGetter;
 import static ink.glowing.text.replace.StandardReplacers.urlReplacer;
-import static ink.glowing.text.style.modifier.internal.LangModifier.langModifier;
+import static ink.glowing.text.style.modifier.ModifierGetter.modifierGetter;
+import static ink.glowing.text.style.modifier.internal.LangModifiers.argModifier;
+import static ink.glowing.text.style.modifier.internal.LangModifiers.fallbackModifier;
 import static ink.glowing.text.style.modifier.standard.ClickModifier.clickModifier;
 import static ink.glowing.text.style.modifier.standard.ColorModifier.colorModifier;
 import static ink.glowing.text.style.modifier.standard.DecorModifier.decorModifier;
@@ -38,7 +40,7 @@ import static net.kyori.adventure.text.format.Style.style;
 
 final class InkyResolverImpl implements InkyMessage.Resolver {
     private static final Placeholder LANG_PH = placeholder(
-            "lang", (value) -> translatable(value), langModifier()
+            "lang", (value) -> translatable(value), modifierGetter(argModifier(), fallbackModifier())
     );
 
     static final InkyMessage.Resolver STANDARD_RESOLVER = InkyMessage.resolver()

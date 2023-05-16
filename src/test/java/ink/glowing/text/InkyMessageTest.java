@@ -92,7 +92,7 @@ public class InkyMessageTest {
                         text().append(text("Test").hoverEvent(showText(text("Hover")))).append(text(" and another").decorate(ITALIC)).build()
                 },
                 {
-                        "Test &{lang:my.cool.test}(lang:arg &aHello world)(lang:arg Yay...)(lang:fallback Falling back)&{lang:test}",
+                        "Test &{lang:my.cool.test}(arg &aHello world)(arg Yay...)(fallback Falling back)&{lang:test}",
                         text("Test ")
                                 .append(translatable("my.cool.test")
                                         .args(text("Hello world").color(GREEN), text("Yay..."))
@@ -181,7 +181,7 @@ public class InkyMessageTest {
                         text("That's so ")
                                 .append(translatable("cool", "Fallbacked", text("Arg1"), text("Arg2\\"))
                                         .append(text(" Test")).hoverEvent(showText(text("hover!").color(GREEN)))),
-                        "That's so &[&{lang:cool}(lang:arg Arg1)(lang:arg Arg2\\\\)(lang:fallback Fallbacked) Test](hover:text &ahover!)"
+                        "That's so &[&{lang:cool}(arg Arg1)(arg Arg2\\\\)(fallback Fallbacked) Test](hover:text &ahover!)"
                 }
         };
     }
@@ -295,7 +295,7 @@ public class InkyMessageTest {
                         "<red>This text is red! <hover:show_text:Cool hover text><click:run_command:test_command><red>Pressing this will <gold>run a command.</click></hover><bold><gold> It's bold yellow"
                 },
                 {
-                        "&[qwertyuiopasdfghjkl;'zxcvbnm,.](color:white-black-yellow-red)&{lang:test}(lang:arg Test)",
+                        "&[qwertyuiopasdfghjkl;'zxcvbnm,.](color:white-black-yellow-red)&{lang:test}(arg Test)",
                         "<gradient:white:black:yellow:red>qwertyuiopasdfghjkl;'zxcvbnm,.</gradient><lang:test:'Test'>"
                 },
                 {

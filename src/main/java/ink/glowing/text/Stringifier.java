@@ -12,7 +12,8 @@ import org.jetbrains.annotations.NotNull;
 import java.util.TreeSet;
 
 import static ink.glowing.text.InkyMessage.escape;
-import static ink.glowing.text.style.modifier.internal.LangModifier.langModifier;
+import static ink.glowing.text.style.modifier.internal.LangModifiers.argModifier;
+import static ink.glowing.text.style.modifier.internal.LangModifiers.fallbackModifier;
 
 final class Stringifier {
     private Stringifier() {}
@@ -75,7 +76,10 @@ final class Stringifier {
             builder.append(escape(text.content()));
         } else if (component instanceof TranslatableComponent translatable) {
             builder.append("&{lang:").append(translatable.key()).append("}");
-            for (var modifier : langModifier().read(resolver, translatable)) {
+            for (var modifier : argModifier().read(resolver, translatable)) {
+                builder.append(modifier);
+            }
+            for (var modifier : fallbackModifier().read(resolver, translatable)) {
                 builder.append(modifier);
             }
         } else if (component instanceof KeybindComponent keybind) {
