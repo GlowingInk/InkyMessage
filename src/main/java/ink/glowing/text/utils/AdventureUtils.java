@@ -1,6 +1,7 @@
 package ink.glowing.text.utils;
 
 import net.kyori.adventure.text.format.TextColor;
+import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -13,6 +14,7 @@ public final class AdventureUtils {
 
     private AdventureUtils() {}
 
+    @Contract(value = "_, _ -> new", pure = true)
     public static @Nullable TextColor parseHexColor(@NotNull String text, boolean quirky) {
         if (quirky) {
             if (text.length() != 13) return null;

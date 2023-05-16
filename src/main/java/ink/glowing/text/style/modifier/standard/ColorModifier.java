@@ -8,6 +8,7 @@ import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextColor;
 import net.kyori.adventure.util.HSVLike;
+import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Unmodifiable;
@@ -28,7 +29,7 @@ public final class ColorModifier implements StyleModifier.Plain {
     private static final Pattern PER_SYMBOL = Pattern.compile(".");
     private static final Pattern EVERYTHING = Pattern.compile(".*");
 
-    private static final TextColor AVERAGE_SPECTRUM = TextColor.color(0x7F7F7F);
+    private static final TextColor AVERAGE_SPECTRUM = TextColor.color(0x7f7f7f);
     private static final Map<String, NamedTextColor> NAMED_COLORS = NamedTextColor.NAMES.keyToValue();
 
     private static final ColorModifier INSTANCE = new ColorModifier();
@@ -42,6 +43,7 @@ public final class ColorModifier implements StyleModifier.Plain {
     public @NotNull Component modify(@NotNull Component text, @NotNull String param, @NotNull String value) {
         FloatFunction<TextColor> colorGetter;
         int indexedLength;
+        boolean pastel = value.equals("pastel");
         switch (param) {
             case "spectrum", "rainbow" -> {
                 int length = length(text);
@@ -49,7 +51,7 @@ public final class ColorModifier implements StyleModifier.Plain {
                 indexedLength = length;
                 colorGetter = ColorModifier::colorSpectrum;
             }
-            case "random" -> {
+            case "random", "rng" -> {
                 indexedLength = 0;
                 RandomGenerator rng = ThreadLocalRandom.current();
                 colorGetter = (step) -> TextColor.color(rng.nextInt());
@@ -57,40 +59,44 @@ public final class ColorModifier implements StyleModifier.Plain {
             default -> {
                 List<TextColor> colors = parseColors(param);
                 if (colors.isEmpty()) return text;
-                if (colors.size() == 1) return text.color(colors.get(0));
+                if (colors.size() == 1) return text.color(pastel ? pastel(colors.get(0)) : colors.get(0));
                 int length = length(text);
-                if (length <= 1) return text.color() == null ? text.color(averageColor(colors)) : text;
+                if (length <= 1) return text.color(pastel ? pastel(averageColor(colors)) : averageColor(colors));
                 indexedLength = length - 1;
                 colorGetter = lerpFunction(colors);
             }
         }
+        if (pastel) {
+            colorGetter = pastel(colorGetter);
+        }
         TextComponent.Builder builder = text();
-        applyGradient(builder, text, colorGetter, new int[]{0}, indexedLength);
+        applyDeep(builder, text, colorGetter, new float[]{0f}, indexedLength);
         return builder.build();
     }
 
-    private static void applyGradient(
+    private static void applyDeep(
             TextComponent.Builder outerBuilder,
             Component parent,
             FloatFunction<TextColor> colorGetter,
-            int[] step,
+            float[] step,
             int indexedLength
     ) {
         TextComponent.Builder builder = text().style(parent.style());
         for (Component child : parent.children()) {
             var childChildren = child.children();
             if (!childChildren.isEmpty()) {
-                applyGradient(builder, child, colorGetter, step, indexedLength);
+                applyDeep(builder, child, colorGetter, step, indexedLength);
             } else if (child.color() == null) {
                 builder.append(child.replaceText((replaceConfig) -> replaceConfig
                         .match(PER_SYMBOL)
-                        .replacement((match, bld) -> bld.color(colorGetter.apply((float) step[0]++ / indexedLength)))));
+                        .replacement((match, bld) -> bld.color(colorGetter.apply(step[0]++ / indexedLength)))));
             } else {
                 builder.append(child);
+                Component empty = empty();
                 //noinspection ResultOfMethodCallIgnored
                 child.replaceText((replaceConfig) -> replaceConfig.match(EVERYTHING).replacement((match, bld) -> {
                     step[0] += match.group().length();
-                    return empty();
+                    return empty;
                 }));
             }
         }
@@ -99,10 +105,11 @@ public final class ColorModifier implements StyleModifier.Plain {
 
     private static int length(@NotNull Component text) {
         int[] length = {0};
+        Component empty = empty();
         //noinspection ResultOfMethodCallIgnored
         text.replaceText((replaceConfig) -> replaceConfig.match(EVERYTHING).replacement(((match, builder) -> {
             length[0] += match.group().length();
-            return empty();
+            return empty;
         })));
         return length[0];
     }
@@ -127,7 +134,7 @@ public final class ColorModifier implements StyleModifier.Plain {
      */
     private static @NotNull TextColor colorSpectrum(float step) {
         float hue = step * 6;
-        int sector = (int) Math.floor(hue);
+        int sector = (int) hue;
         float remainder = hue - sector;
         return switch (sector) {
             case 0 ->   color(1f, remainder, 0f);
@@ -157,6 +164,20 @@ public final class ColorModifier implements StyleModifier.Plain {
                 );
             };
         }
+    }
+
+    @Contract(value = "_ -> new")
+    private static @NotNull FloatFunction<TextColor> pastel(@NotNull FloatFunction<TextColor> colorFunct) {
+        return (step) -> pastel(colorFunct.apply(step));
+    }
+
+    @Contract(value = "_ -> new", pure = true)
+    private static @NotNull TextColor pastel(@NotNull TextColor color) {
+        return color(
+                (color.red() + 255) / 2,
+                (color.green() + 255) / 2,
+                (color.blue() + 255) / 2
+        );
     }
 
     private static @NotNull List<TextColor> parseColors(@NotNull String param) {

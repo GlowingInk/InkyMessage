@@ -291,26 +291,26 @@ public class InkyMessageTest {
     public Object[][] performanceData() {
         return new Object[][] {
                 {
-                        "<red>This text is red! <hover:show_text:Cool hover text><click:run_command:test_command><red>Pressing this will <gold>run a command.</click></hover><bold><gold> It's bold yellow",
-                        "&cThis text is red! &[Pressing this will &6run a command.](click:run test_command)(hover:text Cool hover text)&l It's bold yellow"
+                        "&cThis text is red! &[Pressing this will &6run a command.](click:run test_command)(hover:text Cool hover text)&l It's bold yellow",
+                        "<red>This text is red! <hover:show_text:Cool hover text><click:run_command:test_command><red>Pressing this will <gold>run a command.</click></hover><bold><gold> It's bold yellow"
                 },
                 {
-                        "<gradient:white:black:yellow:red>qwertyuiopasdfghjkl;'zxcvbnm,.</gradient><lang:test:'Test'>",
-                        "&[qwertyuiopasdfghjkl;'zxcvbnm,.](color:white-black-yellow-red)&{lang:test}(lang:arg Test)"
+                        "&[qwertyuiopasdfghjkl;'zxcvbnm,.](color:white-black-yellow-red)&{lang:test}(lang:arg Test)",
+                        "<gradient:white:black:yellow:red>qwertyuiopasdfghjkl;'zxcvbnm,.</gradient><lang:test:'Test'>"
                 },
                 {
-                        "<rainbow>qwertyuiopasdfghjkl<white>;'zxcvbnm,.</rainbow>",
-                        "&[qwertyuiopasdfghjkl&f;'zxcvbnm,.](color:rainbow)"
+                        "&[qwertyuiopasdfghjkl;'zxcvbnm,.](color:spectrum)",
+                        "<rainbow>qwertyuiopasdfghjkl;'zxcvbnm,.</rainbow>"
                 }
         };
     }
 
     @Test(
             dataProvider = "performanceData",
-            description = "The \"test\" exists purely for getting a rough idea of deserializer performance vs MiniMessage",
+            description = "The \"test\" exists purely for getting a *rough* idea of deserializer performance vs MiniMessage",
             enabled = false
     )
-    public void performanceTest(String mini, String inky) {
+    public void performanceTest(String inky, String mini) {
         int warmup = 100000;
         int test = 10000;
 

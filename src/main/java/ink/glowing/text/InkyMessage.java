@@ -69,10 +69,11 @@ public final class InkyMessage implements ComponentSerializer<Component, Compone
     }
 
     /**
-     * Convert string into adventure text component.
+     * Convert string into adventure text component using standard resolver.
      * @param inputText input string
      * @param placeholders custom placeholders
      * @return converted text component
+     * @see InkyMessage#standardResolver()
      */
     public @NotNull Component deserialize(@NotNull String inputText,
                                           @NotNull Placeholder@NotNull ... placeholders) {
@@ -80,10 +81,11 @@ public final class InkyMessage implements ComponentSerializer<Component, Compone
     }
 
     /**
-     * Convert string into adventure text component.
+     * Convert string into adventure text component using standard resolver.
      * @param inputText input string
      * @param placeholders custom placeholders
      * @return converted text component
+     * @see InkyMessage#standardResolver()
      */
     public @NotNull Component deserialize(@NotNull String inputText,
                                           @NotNull PlaceholderGetter placeholders) {
