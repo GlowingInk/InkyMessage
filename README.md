@@ -1,11 +1,11 @@
-# [![InkyMessage](https://i.imgur.com/QTTQyml.png)](https://github.com/GlowingInk/InkyMessage)
+# [![InkyMessage](https://i.imgur.com/vC5VIyP.png)](https://github.com/GlowingInk/InkyMessage)
 Adventure API component serializer inspired by [MineDown](https://github.com/Phoenix616/MineDown/tree/kyori-adventure) 
 and [MiniMessage](https://docs.advntr.dev/minimessage/index.html) projects. 
 An attempt to make legacy-friendly serializer with modern features.
 
 InkyMessage supports legacy format codes, e.g. `&l`, `&6`, `&a`, etc.
 Besides that, we also have a special format for the modern features like interactable chat components.
-It's very simple to follow: `&[My special text](key:parameter value)(otherkey:othervalue)`.
+It's very simple to follow: `&[My special text](key:parameter value)(otherkey:otherparam)`.
 Those are its possible modifiers:
 ## Modifier formatting
 | Key                | Parameter                                                                                                                           | Value                      | Effect                                    | Example                                                     |
@@ -14,7 +14,7 @@ Those are its possible modifiers:
 | `click`            | `url`, `run`, `suggest`, `copy`, `insert` (same as `suggest`, but requires shift-click)                                             | Plain action parameters    | Add click functionality to chat component | `&[Get 100 robux!](click:url https://youtu.be/dQw4w9WgXcQ)` |
 | `decor`            | `bold`, `obfuscated`, `strikethrough`, `underlined`, `italic`                                                                       | `true`, `unset`, `false`   | Force decorator on the text               | `&cThat's a &[bold](decor:bold) move!`                      |
 | `font`             | Namespaced key of a font                                                                                                            | None                       | Change fonts of a text                    | `Wow, &[almost HD fonts](font:minecraft:uniform)!`          |
-| `color`            | [Named color](https://jd.advntr.dev/api/4.13.1/net/kyori/adventure/text/format/NamedTextColor.html) (lower case) or hex (`#123456`) | None ATM                   | Colorize colorless text                   | `&[This text is green](color:green)`                        |
+| `color`            | [Named color](https://jd.advntr.dev/api/4.13.1/net/kyori/adventure/text/format/NamedTextColor.html) (lower case) or hex (`#123456`) | `pastel` for pastel colors | Colorize colorless text                   | `&[This text is green](color:green)`                        |
 | `color` (gradient) | `spectrum` or `color1-color2-colorN` (see the original `color` modifier)                                                            | `pastel` for pastel colors | Colorize colorless text with gradient     | `&aLook!&r &[Fancy!](color:spectrum)(decor:bold)`           |
 
 ## Plans (until full release)
