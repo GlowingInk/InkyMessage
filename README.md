@@ -1,4 +1,4 @@
-# ![InkyMessage](https://i.imgur.com/QTTQyml.png)
+# [![InkyMessage](https://i.imgur.com/QTTQyml.png)](https://github.com/GlowingInk/InkyMessage)
 Adventure API component serializer inspired by [MineDown](https://github.com/Phoenix616/MineDown/tree/kyori-adventure) 
 and [MiniMessage](https://docs.advntr.dev/minimessage/index.html) projects. 
 An attempt to make legacy-friendly serializer with modern features.
