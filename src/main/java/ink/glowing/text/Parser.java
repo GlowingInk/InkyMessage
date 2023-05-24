@@ -4,7 +4,6 @@ import ink.glowing.text.placeholders.Placeholder;
 import ink.glowing.text.replace.Replacer;
 import ink.glowing.text.style.modifier.ModifierGetter;
 import ink.glowing.text.style.modifier.StyleModifier;
-import ink.glowing.text.utils.AdventureUtils;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.format.Style;
@@ -107,10 +106,10 @@ final class Parser {
             switch (styleCh) {
                 case '#', 'x' -> {
                     boolean quirky = styleCh == 'x';
-                    int charsToSkip = quirky ? 14 : 8;
+                    int charsToSkip = quirky ? 14 : 8; // &x&1&2&3&4&5&6 | &#123456
                     if (index + charsToSkip >= until) continue;
                     String colorStr = textStr.substring(index + 1, index + charsToSkip);
-                    TextColor color = AdventureUtils.parseHexColor(colorStr, quirky);
+                    TextColor color = parseHexColor(colorStr, quirky);
                     if (color == null) continue;
                     appendPrevious(builder, lastAppend, index, context);
                     context.lastStyle(context.lastStyle().color(color));
@@ -134,6 +133,17 @@ final class Parser {
     private void appendPrevious(@NotNull TextComponent.Builder builder, int start, int end, @NotNull BuildContext context) {
         if (start == end) return;
         builder.append(text(unescape(textStr.substring(start, end))).style(context.lastStyle()));
+    }
+
+    private static @Nullable TextColor parseHexColor(@NotNull String text, boolean quirky) {
+        if (quirky) {
+            if (text.length() != 13) return null;
+            return TextColor.fromHexString("#" +
+                    text.charAt(2) + text.charAt(4) + text.charAt(6) +
+                    text.charAt(8) + text.charAt(10) + text.charAt(12)
+            );
+        }
+        return TextColor.fromCSSHexString(text);
     }
 
     private @Nullable Replacer.FoundSpot matchSpot(int index, int end) {
