@@ -315,11 +315,9 @@ public class InkyMessageTest {
         int test = 10000;
 
         var inkyMessage = inkyMessage();
-        for (int i = 0; i < warmup; i++) {
-            inkyMessage.deserialize(inky);
-        }
         var miniMessage = miniMessage();
         for (int i = 0; i < warmup; i++) {
+            inkyMessage.deserialize(inky);
             miniMessage.deserialize(mini);
         }
 
