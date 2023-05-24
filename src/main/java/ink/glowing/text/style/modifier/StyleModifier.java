@@ -3,6 +3,7 @@ package ink.glowing.text.style.modifier;
 import ink.glowing.text.InkyMessage;
 import ink.glowing.text.utils.Named;
 import net.kyori.adventure.text.Component;
+import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Unmodifiable;
 
@@ -22,18 +23,22 @@ public sealed interface StyleModifier<T> extends Named, ModifierGetter permits S
         return name.equals(name()) ? this : null;
     }
 
+    @ApiStatus.Internal
     default @NotNull String asFormatted(@NotNull String param, @NotNull String value) {
-        String result = name();
-        if (!param.isEmpty()) result += ":" + param;
-        if (!value.isEmpty()) result += " " + value;
-        return "(" + result + ")";
-    }
-
-    default @NotNull String asFormatted(@NotNull String param, @NotNull Component value, @NotNull InkyMessage.Resolver resolver) {
-        return asFormatted(param, inkyMessage().serialize(value, resolver));
+        StringBuilder result = new StringBuilder();
+        result.append('(').append(name());
+        if (!param.isEmpty()) result.append(':').append(param);
+        if (!value.isEmpty()) result.append(' ').append(value);
+        result.append(')');
+        return result.toString();
     }
 
     non-sealed interface Plain extends StyleModifier<String> {}
 
-    non-sealed interface Complex extends StyleModifier<Component> {}
+    non-sealed interface Complex extends StyleModifier<Component> {
+        @ApiStatus.Internal
+        default @NotNull String asFormatted(@NotNull String param, @NotNull Component value, @NotNull InkyMessage.Resolver resolver) {
+            return asFormatted(param, inkyMessage().serialize(value, resolver));
+        }
+    }
 }

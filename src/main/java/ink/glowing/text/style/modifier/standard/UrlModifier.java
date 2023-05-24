@@ -4,13 +4,14 @@ import ink.glowing.text.style.modifier.StyleModifier;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.event.ClickEvent;
 import org.intellij.lang.annotations.Pattern;
+import org.intellij.lang.annotations.Subst;
 import org.jetbrains.annotations.NotNull;
 
 public class UrlModifier implements StyleModifier.Plain {
     private static final StyleModifier.Plain HTTP_MODIFIER = urlSchemeModifier("http");
     private static final StyleModifier.Plain HTTPS_MODIFIER = urlSchemeModifier("https");
 
-    private final String scheme;
+    private final @Subst("scheme") String scheme;
     
     private UrlModifier(@NotNull String scheme) {
         this.scheme = scheme;

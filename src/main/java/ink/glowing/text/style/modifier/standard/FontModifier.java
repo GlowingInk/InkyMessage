@@ -30,6 +30,11 @@ public final class FontModifier implements StyleModifier.Plain {
     }
 
     @Override
+    public @NotNull String asFormatted(@NotNull String param, @NotNull String value) {
+        return name() + ":" + param;
+    }
+
+    @Override
     public @NotNull String name() {
         return "font";
     }
