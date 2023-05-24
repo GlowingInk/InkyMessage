@@ -14,7 +14,7 @@ public interface PlaceholderGetter {
     static @NotNull PlaceholderGetter placeholderGetter(@NotNull Placeholder @NotNull ... placeholders) {
         return switch (placeholders.length) {
             case 0 -> (name) -> null;
-            case 1 -> placeholders[0];
+            case 1 -> (name) -> placeholders[0].name().equals(name) ? placeholders[0] : null;
             default -> placeholderGetter(Arrays.asList(placeholders));
         };
     }

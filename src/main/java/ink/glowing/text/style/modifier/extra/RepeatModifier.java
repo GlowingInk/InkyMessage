@@ -1,7 +1,6 @@
 package ink.glowing.text.style.modifier.extra;
 
 import ink.glowing.text.style.modifier.StyleModifier;
-import ink.glowing.text.utils.name.NamePattern;
 import net.kyori.adventure.text.Component;
 import org.jetbrains.annotations.NotNull;
 
@@ -28,7 +27,7 @@ public class RepeatModifier implements StyleModifier.Plain {
     }
 
     @Override
-    public @NamePattern @NotNull String name() {
+    public @NotNull String name() {
         return "repeat";
     }
 }

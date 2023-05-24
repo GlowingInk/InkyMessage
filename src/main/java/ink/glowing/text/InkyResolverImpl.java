@@ -44,6 +44,7 @@ final class InkyResolverImpl implements InkyMessage.Resolver {
     private static final Placeholder LANG_PH = placeholder(
             "lang", (value) -> translatable(value), modifierGetter(argModifier(), fallbackModifier())
     );
+    private static final PlaceholderGetter STANDARD_PLACEHOLDERS = placeholderGetter(LANG_PH);
 
     static final InkyMessage.Resolver STANDARD_RESOLVER = InkyMessage.resolver()
             .addModifiers(
@@ -82,7 +83,7 @@ final class InkyResolverImpl implements InkyMessage.Resolver {
         this.symbolicReset = symbolicReset;
 
         if (placeholders.size() == 0) {
-            phGetter = LANG_PH;
+            phGetter = STANDARD_PLACEHOLDERS;
         } else {
             Set<Placeholder> fullPhs = concat(HashSet::new, List.of(LANG_PH), placeholders);
             phGetter = placeholderGetter(fullPhs);

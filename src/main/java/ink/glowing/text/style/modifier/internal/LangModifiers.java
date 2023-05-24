@@ -2,7 +2,6 @@ package ink.glowing.text.style.modifier.internal;
 
 import ink.glowing.text.InkyMessage;
 import ink.glowing.text.style.modifier.StyleModifier;
-import ink.glowing.text.utils.name.NamePattern;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TranslatableComponent;
 import org.jetbrains.annotations.ApiStatus;
@@ -53,7 +52,7 @@ public final class LangModifiers {
         }
 
         @Override
-        public @NamePattern @NotNull String name() {
+        public @NotNull String name() {
             return "arg";
         }
     }
@@ -77,7 +76,7 @@ public final class LangModifiers {
         }
 
         @Override
-        public @NamePattern @NotNull String name() {
+        public @NotNull String name() {
             return "fallback";
         }
     }

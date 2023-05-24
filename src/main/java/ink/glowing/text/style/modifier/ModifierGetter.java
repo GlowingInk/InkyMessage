@@ -14,7 +14,7 @@ public interface ModifierGetter {
     static @NotNull ModifierGetter modifierGetter(@NotNull StyleModifier<?> @NotNull ... modifiers) {
         return switch (modifiers.length) {
             case 0 -> (name) -> null;
-            case 1 -> modifiers[0];
+            case 1 -> (name) -> modifiers[0].name().equals(name) ? modifiers[0] : null;
             default -> modifierGetter(Arrays.asList(modifiers));
         };
     }

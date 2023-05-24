@@ -1,11 +1,12 @@
-package ink.glowing.text.utils.name;
+package ink.glowing.text.utils;
 
 import org.intellij.lang.annotations.Language;
+import org.intellij.lang.annotations.Pattern;
 import org.jetbrains.annotations.NotNull;
 
 public interface Named {
     @Language("RegExp")
     String NAME_PATTERN = "^[^\\sA-Z&(){}\\[\\]:\\\\]+$";
 
-    @NamePattern @NotNull String name();
+    @Pattern(Named.NAME_PATTERN) @NotNull String name();
 }

@@ -2,7 +2,6 @@ package ink.glowing.text.style.modifier.standard;
 
 import ink.glowing.text.InkyMessage;
 import ink.glowing.text.style.modifier.StyleModifier;
-import ink.glowing.text.utils.name.NamePattern;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.Component;
 import org.jetbrains.annotations.NotNull;
@@ -36,7 +35,7 @@ public final class FontModifier implements StyleModifier.Plain {
     }
 
     @Override
-    public @NamePattern @NotNull String name() {
+    public @NotNull String name() {
         return "font";
     }
 }

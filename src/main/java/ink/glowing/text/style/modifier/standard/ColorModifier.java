@@ -2,7 +2,6 @@ package ink.glowing.text.style.modifier.standard;
 
 import ink.glowing.text.style.modifier.StyleModifier;
 import ink.glowing.text.utils.function.FloatFunction;
-import ink.glowing.text.utils.name.NamePattern;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.ComponentIteratorType;
 import net.kyori.adventure.text.TextComponent;
@@ -196,7 +195,7 @@ public final class ColorModifier implements StyleModifier.Plain {
     }
 
     @Override
-    public @NamePattern @NotNull String name() {
+    public @NotNull String name() {
         return "color";
     }
 }
