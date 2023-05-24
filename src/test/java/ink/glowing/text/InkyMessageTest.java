@@ -290,12 +290,12 @@ public class InkyMessageTest {
     public Object[][] performanceData() {
         return new Object[][] {
                 {
-                        "&cThis text is red! &[Pressing this will &6run a command.](click:run test_command)(hover:text Cool hover text)&l It's bold yellow",
-                        "<red>This text is red! <hover:show_text:Cool hover text><click:run_command:test_command><red>Pressing this will <gold>run a command.</click></hover><bold><gold> It's bold yellow"
+                        "&cThis text is red! &[Pressing this will &6run a command.](click:run test_command)(hover:text Cool hover text)&l It's bold gold",
+                        "<red>This text is red! <hover:show_text:Cool hover text><click:run_command:test_command><red>Pressing this will <gold>run a command.</click></hover><bold><gold> It's bold gold"
                 },
                 {
-                        "&[qwertyuiopasdfghjkl;'zxcvbnm,.](color:white-black-yellow-red)&{lang:test}(arg Test)",
-                        "<gradient:white:black:yellow:red>qwertyuiopasdfghjkl;'zxcvbnm,.</gradient><lang:test:'Test'>"
+                        "&[qwertyuiopasdfghjkl;&{lang:test}(arg Test)'zxcvbnm,.](color:white-black-yellow-red)",
+                        "<gradient:white:black:yellow:red>qwertyuiopasdfghjkl;<lang:test:'Test'>'zxcvbnm,.</gradient>"
                 },
                 {
                         "&[qwertyuiopasdfghjkl;'zxcvbnm,.](color:spectrum)",

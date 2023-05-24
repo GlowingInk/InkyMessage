@@ -3,6 +3,7 @@ package ink.glowing.text.style.modifier.standard;
 import ink.glowing.text.style.modifier.StyleModifier;
 import ink.glowing.text.utils.function.FloatFunction;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.ComponentIteratorType;
 import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextColor;
@@ -13,19 +14,16 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.random.RandomGenerator;
-import java.util.regex.Pattern;
 
-import static net.kyori.adventure.text.Component.empty;
 import static net.kyori.adventure.text.Component.text;
 import static net.kyori.adventure.text.format.TextColor.color;
 
 public final class ColorModifier implements StyleModifier.Plain {
-    private static final Pattern PER_SYMBOL = Pattern.compile(".");
-    private static final Pattern EVERYTHING = Pattern.compile(".*");
     private static final Map<String, NamedTextColor> NAMED_COLORS = NamedTextColor.NAMES.keyToValue();
 
     private static final ColorModifier INSTANCE = new ColorModifier();
@@ -34,7 +32,6 @@ public final class ColorModifier implements StyleModifier.Plain {
     }
     private ColorModifier() {}
 
-    // FIXME That's really not how this should be done..
     @Override
     public @NotNull Component modify(@NotNull Component text, @NotNull String param, @NotNull String value) {
         FloatFunction<TextColor> colorGetter;
@@ -70,44 +67,47 @@ public final class ColorModifier implements StyleModifier.Plain {
         return builder.build();
     }
 
+    // FIXME That's really not how this should be done..
     private static void applyDeep(
             TextComponent.Builder outerBuilder,
-            Component parent,
+            Component component,
             FloatFunction<TextColor> colorGetter,
             float[] step,
             int indexedLength
     ) {
-        TextComponent.Builder builder = text().style(parent.style());
-        for (Component child : parent.children()) {
-            var childChildren = child.children();
-            if (!childChildren.isEmpty()) {
-                applyDeep(builder, child, colorGetter, step, indexedLength);
-            } else if (child.color() == null) {
-                builder.append(child.replaceText((replaceConfig) -> replaceConfig
-                        .match(PER_SYMBOL)
-                        .replacement((match, bld) -> bld.color(colorGetter.apply(step[0]++ / indexedLength)))));
-            } else {
-                builder.append(child);
-                Component empty = empty();
-                //noinspection ResultOfMethodCallIgnored
-                child.replaceText((replaceConfig) -> replaceConfig.match(EVERYTHING).replacement((match, bld) -> {
-                    step[0] += match.group().length();
-                    return empty;
-                }));
-            }
+        if (component.color() != null) {
+            step[0] += length(component);
+            outerBuilder.append(component);
+            return;
         }
-        outerBuilder.append(builder);
+        TextComponent.Builder localBuilder = text().style(component.style());
+        if (component instanceof TextComponent text) {
+            String content = text.content();
+            for (int i = 0; i < content.length(); i++) {
+                localBuilder.append(text(content.charAt(i), colorGetter.apply(step[0]++ / indexedLength)));
+            }
+        } else {
+            localBuilder.append(component
+                    .children(Collections.emptyList()) // We'll process children ourselves
+                    .color(colorGetter.apply(step[0]++ / indexedLength))
+            );
+        }
+        for (var child : component.children()) {
+            applyDeep(localBuilder, child, colorGetter, step, indexedLength);
+        }
+        outerBuilder.append(localBuilder);
     }
 
     private static int length(@NotNull Component text) {
-        int[] length = {0};
-        Component empty = empty();
-        //noinspection ResultOfMethodCallIgnored
-        text.replaceText((replaceConfig) -> replaceConfig.match(EVERYTHING).replacement(((match, builder) -> {
-            length[0] += match.group().length();
-            return empty;
-        })));
-        return length[0];
+        int length = 0;
+        for (var child : text.iterable(ComponentIteratorType.BREADTH_FIRST, Collections.emptySet())) {
+            if (child instanceof TextComponent textChild) {
+                length += textChild.content().length();
+            } else {
+                length += 1;
+            }
+        }
+        return length;
     }
 
     private static @NotNull TextColor averageColor(@NotNull Collection<TextColor> colors) {
