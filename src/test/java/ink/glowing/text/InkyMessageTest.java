@@ -31,12 +31,12 @@ public class InkyMessageTest {
                         text().append(text("Green ").color(GREEN)).append(text("and red!\\").color(RED)).build()
                 },
                 {
-                        "&c&lRed and\\\\ bold",
+                        "&[&c&lRed and\\\\ bold]",
                         text("Red and\\ bold").color(RED).decorate(BOLD)
                 },
                 {
-                        "&lBold &cthen not",
-                        text().append(text("Bold ").decorate(BOLD)).append(text("then not").color(RED)).build()
+                        "&lBold &cthen just red",
+                        text().append(text("Bold ").decorate(BOLD)).append(text("then just red").color(RED)).build()
                 },
                 {
                         "&a&lFirst bold green &rthen&c red",
@@ -71,9 +71,9 @@ public class InkyMessageTest {
                 },
                 {
                         "&[aaa&[bbb&[ccc](decor:bold)bbb](decor:italic)&aaaa](color:red)",
-                        text("aaa").color(RED)
-                                .append(text("bbb").decorate(ITALIC).append(text("ccc").decorate(BOLD)).append(text("bbb")))
-                                .append(text("aaa").color(GREEN))
+                        text("aaa")
+                                .append(text("bbb").append(text("ccc").decorate(BOLD)).append(text("bbb")).decorate(ITALIC))
+                                .append(text("aaa").color(GREEN)).color(RED)
                 },
                 {
                         "&cSome &[hover parsing](hover:text &atest!).",
@@ -226,7 +226,7 @@ public class InkyMessageTest {
         );
     }
 
-    private static final String SYMBOLS = "abcde&[](){}\\:#x";
+    private static final String SYMBOLS = "&[](){}\\:#x";
 
     @Test(description = "Basically hoping that we'll get no exceptions while parsing a hot stinky mess")
     public void randomTest() {
