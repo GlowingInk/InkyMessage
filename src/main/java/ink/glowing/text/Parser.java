@@ -136,14 +136,11 @@ final class Parser {
     }
 
     private static @Nullable TextColor parseHexColor(@NotNull String text, boolean quirky) {
-        if (quirky) {
-            if (text.length() != 13) return null;
-            return TextColor.fromHexString("#" +
-                    text.charAt(2) + text.charAt(4) + text.charAt(6) +
-                    text.charAt(8) + text.charAt(10) + text.charAt(12)
-            );
-        }
-        return TextColor.fromCSSHexString(text);
+        return quirky
+                ? TextColor.fromHexString("#" +
+                        text.charAt(2) + text.charAt(4) + text.charAt(6) +
+                        text.charAt(8) + text.charAt(10) + text.charAt(12))
+                : TextColor.fromCSSHexString(text);
     }
 
     private @Nullable Replacer.FoundSpot matchSpot(int index, int end) {
