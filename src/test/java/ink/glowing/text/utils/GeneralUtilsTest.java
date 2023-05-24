@@ -51,9 +51,7 @@ public class GeneralUtilsTest {
     public void findEachTest(String input, String search, int[] expectedIndexes) { // TODO Some better replacement
         final int[] count = {0};
         int[] indexes = new int[5];
-        findEach(input, search, i -> {
-            indexes[count[0]++] = i;
-        });
+        findEach(input, search, i -> indexes[count[0]++] = i);
         assertEquals(
                 indexes,
                 expectedIndexes

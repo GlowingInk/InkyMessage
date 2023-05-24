@@ -13,7 +13,7 @@ import static net.kyori.adventure.text.event.HoverEvent.showText;
 
 public final class HoverModifier implements StyleModifier.Complex {
     private static final HoverModifier INSTANCE = new HoverModifier();
-    public static @NotNull HoverModifier hoverModifier() {
+    public static @NotNull StyleModifier.Complex hoverModifier() {
         return INSTANCE;
     }
     private HoverModifier() {}

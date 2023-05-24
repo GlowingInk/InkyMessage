@@ -13,7 +13,7 @@ import java.util.List;
 
 public final class DecorModifier implements StyleModifier.Plain {
     private static final DecorModifier INSTANCE = new DecorModifier();
-    public static @NotNull DecorModifier decorModifier() {
+    public static @NotNull StyleModifier.Plain decorModifier() {
         return INSTANCE;
     }
     private DecorModifier() {}
@@ -49,11 +49,11 @@ public final class DecorModifier implements StyleModifier.Plain {
 
     private static @Nullable TextDecoration decorByName(@NotNull String name) {
         return switch (name) {
-            case "bold", "large", "b" ->                TextDecoration.BOLD;
-            case "italic", "cursive", "i", "cur" ->     TextDecoration.ITALIC;
-            case "underlined", "underline", "u" ->      TextDecoration.UNDERLINED;
-            case "strikethrough", "st" ->               TextDecoration.STRIKETHROUGH;
-            case "obfuscated", "obfuscate", "obf" ->    TextDecoration.OBFUSCATED;
+            case "bold", "large", "b" ->                        TextDecoration.BOLD;
+            case "italic", "cursive", "i", "cur" ->             TextDecoration.ITALIC;
+            case "underlined", "underline", "u" ->              TextDecoration.UNDERLINED;
+            case "strikethrough", "st" ->                       TextDecoration.STRIKETHROUGH;
+            case "obfuscated", "obfuscate", "obf", "spoiler" -> TextDecoration.OBFUSCATED;
             default -> null;
         };
     }

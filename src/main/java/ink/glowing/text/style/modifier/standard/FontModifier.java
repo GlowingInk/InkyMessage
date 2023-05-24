@@ -11,7 +11,7 @@ import java.util.List;
 
 public final class FontModifier implements StyleModifier.Plain {
     private static final FontModifier INSTANCE = new FontModifier();
-    public static @NotNull FontModifier fontModifier() {
+    public static @NotNull StyleModifier.Plain fontModifier() {
         return INSTANCE;
     }
     private FontModifier() {}

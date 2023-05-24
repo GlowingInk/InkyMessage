@@ -1,16 +1,12 @@
 package ink.glowing.text.style.modifier.extra;
 
-import ink.glowing.text.InkyMessage;
 import ink.glowing.text.style.modifier.StyleModifier;
 import net.kyori.adventure.text.Component;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Unmodifiable;
-
-import java.util.List;
 
 public class RepeatModifier implements StyleModifier.Plain {
     private static final RepeatModifier INSTANCE = new RepeatModifier();
-    public static @NotNull RepeatModifier repeatModifier() {
+    public static @NotNull StyleModifier.Plain repeatModifier() {
         return INSTANCE;
     }
 
@@ -28,11 +24,6 @@ public class RepeatModifier implements StyleModifier.Plain {
             builder.append(text);
         }
         return builder.build();
-    }
-
-    @Override
-    public @NotNull @Unmodifiable List<String> read(@NotNull InkyMessage.Resolver resolver, @NotNull Component text) {
-        return List.of();
     }
 
     @Override

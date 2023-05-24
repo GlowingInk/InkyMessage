@@ -13,7 +13,7 @@ import static net.kyori.adventure.text.event.ClickEvent.*;
 
 public final class ClickModifier implements StyleModifier.Plain {
     private static final ClickModifier INSTANCE = new ClickModifier();
-    public static @NotNull ClickModifier clickModifier() {
+    public static @NotNull StyleModifier.Plain clickModifier() {
         return INSTANCE;
     }
     private ClickModifier() {}

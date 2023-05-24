@@ -13,7 +13,9 @@ import static ink.glowing.text.InkyMessage.inkyMessage;
 public sealed interface StyleModifier<T> extends Named, ModifierGetter permits StyleModifier.Complex, StyleModifier.Plain {
     @NotNull Component modify(@NotNull Component text, @NotNull String param, @NotNull T value);
 
-    @NotNull @Unmodifiable List<String> read(@NotNull InkyMessage.Resolver resolver, @NotNull Component text);
+    default @NotNull @Unmodifiable List<String> read(@NotNull InkyMessage.Resolver resolver, @NotNull Component text) {
+        return List.of();
+    }
 
     @Override
     default StyleModifier<T> findModifier(@NotNull String name) {

@@ -33,6 +33,8 @@ import static ink.glowing.text.style.modifier.standard.ColorModifier.colorModifi
 import static ink.glowing.text.style.modifier.standard.DecorModifier.decorModifier;
 import static ink.glowing.text.style.modifier.standard.FontModifier.fontModifier;
 import static ink.glowing.text.style.modifier.standard.HoverModifier.hoverModifier;
+import static ink.glowing.text.style.modifier.standard.UrlModifier.httpModifier;
+import static ink.glowing.text.style.modifier.standard.UrlModifier.httpsModifier;
 import static ink.glowing.text.style.symbolic.StandardSymbolicStyles.*;
 import static ink.glowing.text.utils.GeneralUtils.concat;
 import static net.kyori.adventure.text.Component.translatable;
@@ -44,9 +46,12 @@ final class InkyResolverImpl implements InkyMessage.Resolver {
     );
 
     static final InkyMessage.Resolver STANDARD_RESOLVER = InkyMessage.resolver()
-            .addModifiers(colorModifier(),
+            .addModifiers(
+                    colorModifier(),
                     hoverModifier(),
                     clickModifier(),
+                    httpModifier(),
+                    httpsModifier(),
                     fontModifier(),
                     decorModifier())
             .addSymbolics(notchianColors())

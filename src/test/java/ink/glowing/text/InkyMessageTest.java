@@ -23,7 +23,6 @@ import static org.testng.Assert.assertEquals;
 
 public class InkyMessageTest {
     private final boolean debug = false;
-
     @DataProvider
     public Object[][] deserializeData() {
         return new Object[][] {
@@ -234,7 +233,7 @@ public class InkyMessageTest {
         RandomGenerator rng = ThreadLocalRandom.current();
         for (int i = 0; i < 1024; i++) {
             StringBuilder builder = new StringBuilder(256);
-            for (int j = 0; j < 256; j++) {
+            for (int j = 0; j < 512; j++) {
                 builder.append(SYMBOLS.charAt(rng.nextInt(SYMBOLS.length())));
             }
             try {
@@ -305,6 +304,7 @@ public class InkyMessageTest {
         };
     }
 
+    // TODO Proper JMH
     @Test(
             dataProvider = "performanceData",
             description = "The \"test\" exists purely for getting a *rough* idea of deserializer performance vs MiniMessage",

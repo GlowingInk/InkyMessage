@@ -1,6 +1,5 @@
 package ink.glowing.text.style.modifier.standard;
 
-import ink.glowing.text.InkyMessage;
 import ink.glowing.text.style.modifier.StyleModifier;
 import ink.glowing.text.utils.function.FloatFunction;
 import net.kyori.adventure.text.Component;
@@ -11,7 +10,6 @@ import net.kyori.adventure.util.HSVLike;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.jetbrains.annotations.Unmodifiable;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -28,17 +26,15 @@ import static net.kyori.adventure.text.format.TextColor.color;
 public final class ColorModifier implements StyleModifier.Plain {
     private static final Pattern PER_SYMBOL = Pattern.compile(".");
     private static final Pattern EVERYTHING = Pattern.compile(".*");
-
-    private static final TextColor AVERAGE_SPECTRUM = TextColor.color(0x7f7f7f);
     private static final Map<String, NamedTextColor> NAMED_COLORS = NamedTextColor.NAMES.keyToValue();
 
     private static final ColorModifier INSTANCE = new ColorModifier();
-    public static @NotNull ColorModifier colorModifier() {
+    public static @NotNull StyleModifier.Plain colorModifier() {
         return INSTANCE;
     }
     private ColorModifier() {}
 
-    // FIXME That's really not how this should be done
+    // FIXME That's really not how this should be done..
     @Override
     public @NotNull Component modify(@NotNull Component text, @NotNull String param, @NotNull String value) {
         FloatFunction<TextColor> colorGetter;
@@ -47,7 +43,7 @@ public final class ColorModifier implements StyleModifier.Plain {
         switch (param) {
             case "spectrum", "rainbow" -> {
                 int length = length(text);
-                if (length <= 1) return text.color(AVERAGE_SPECTRUM);
+                if (length <= 1) return text.color(NamedTextColor.WHITE);
                 indexedLength = length;
                 colorGetter = ColorModifier::colorSpectrum;
             }
@@ -196,11 +192,6 @@ public final class ColorModifier implements StyleModifier.Plain {
         } else {
             return NAMED_COLORS.get(param);
         }
-    }
-
-    @Override
-    public @NotNull @Unmodifiable List<String> read(@NotNull InkyMessage.Resolver resolver, @NotNull Component text) {
-        return List.of();
     }
 
     @Override

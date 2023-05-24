@@ -4,24 +4,28 @@ import ink.glowing.text.InkyMessage;
 import ink.glowing.text.style.modifier.StyleModifier;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TranslatableComponent;
+import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Unmodifiable;
 
 import java.util.ArrayList;
 import java.util.List;
 
+@ApiStatus.Internal
 public final class LangModifiers {
     private LangModifiers() {}
 
+    @ApiStatus.Internal
     public static @NotNull StyleModifier.Complex argModifier() {
         return ArgModifier.INSTANCE;
     }
 
+    @ApiStatus.Internal
     public static @NotNull StyleModifier.Plain fallbackModifier() {
         return FallbackModifier.INSTANCE;
     }
 
-    public static class ArgModifier implements StyleModifier.Complex {
+    private static class ArgModifier implements StyleModifier.Complex {
         private static final ArgModifier INSTANCE = new ArgModifier();
         private ArgModifier() {}
 
@@ -53,7 +57,7 @@ public final class LangModifiers {
         }
     }
 
-    public static class FallbackModifier implements StyleModifier.Plain {
+    private static class FallbackModifier implements StyleModifier.Plain {
         private static final FallbackModifier INSTANCE = new FallbackModifier();
         private FallbackModifier() {}
 
