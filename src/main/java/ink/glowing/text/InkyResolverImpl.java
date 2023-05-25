@@ -15,14 +15,13 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.TreeSet;
 import java.util.function.Function;
 
 import static ink.glowing.text.placeholders.Placeholder.placeholder;
+import static ink.glowing.text.placeholders.PlaceholderGetter.composePlaceholderGetters;
 import static ink.glowing.text.placeholders.PlaceholderGetter.placeholderGetter;
 import static ink.glowing.text.replace.StandardReplacers.urlReplacer;
 import static ink.glowing.text.style.modifier.ModifierGetter.modifierGetter;
@@ -36,15 +35,15 @@ import static ink.glowing.text.style.modifier.standard.HoverModifier.hoverModifi
 import static ink.glowing.text.style.modifier.standard.UrlModifier.httpModifier;
 import static ink.glowing.text.style.modifier.standard.UrlModifier.httpsModifier;
 import static ink.glowing.text.style.symbolic.StandardSymbolicStyles.*;
-import static ink.glowing.text.utils.GeneralUtils.concat;
+import static net.kyori.adventure.text.Component.keybind;
 import static net.kyori.adventure.text.Component.translatable;
 import static net.kyori.adventure.text.format.Style.style;
 
 final class InkyResolverImpl implements InkyMessage.Resolver {
-    private static final Placeholder LANG_PH = placeholder(
-            "lang", (value) -> translatable(value), modifierGetter(argModifier(), fallbackModifier())
+    private static final PlaceholderGetter STANDARD_PLACEHOLDERS = placeholderGetter(
+            placeholder("lang", value -> translatable(value), modifierGetter(argModifier(), fallbackModifier())),
+            placeholder("key", value -> keybind(value))
     );
-    private static final PlaceholderGetter STANDARD_PLACEHOLDERS = placeholderGetter(LANG_PH);
 
     static final InkyMessage.Resolver STANDARD_RESOLVER = InkyMessage.resolver()
             .addModifiers(
@@ -85,8 +84,10 @@ final class InkyResolverImpl implements InkyMessage.Resolver {
         if (placeholders.size() == 0) {
             phGetter = STANDARD_PLACEHOLDERS;
         } else {
-            Set<Placeholder> fullPhs = concat(HashSet::new, List.of(LANG_PH), placeholders);
-            phGetter = placeholderGetter(fullPhs);
+            phGetter = composePlaceholderGetters(
+                    placeholderGetter(placeholders),
+                    STANDARD_PLACEHOLDERS
+            );
         }
     }
 

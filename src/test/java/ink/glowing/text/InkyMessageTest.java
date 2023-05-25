@@ -9,8 +9,7 @@ import java.util.concurrent.ThreadLocalRandom;
 import java.util.random.RandomGenerator;
 
 import static ink.glowing.text.InkyMessage.inkyMessage;
-import static net.kyori.adventure.text.Component.text;
-import static net.kyori.adventure.text.Component.translatable;
+import static net.kyori.adventure.text.Component.*;
 import static net.kyori.adventure.text.event.ClickEvent.openUrl;
 import static net.kyori.adventure.text.event.ClickEvent.runCommand;
 import static net.kyori.adventure.text.event.HoverEvent.showText;
@@ -97,6 +96,12 @@ public class InkyMessageTest {
                                         .args(text("Hello world").color(GREEN), text("Yay..."))
                                         .fallback("Falling back"))
                                 .append(translatable("test"))
+                },
+                {
+                        "Press &{key:sneak} to sneak!",
+                        text("Press ")
+                                .append(keybind("sneak"))
+                                .append(text(" to sneak!"))
                 }
         };
     }

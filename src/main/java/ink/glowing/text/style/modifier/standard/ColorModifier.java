@@ -67,7 +67,7 @@ public final class ColorModifier implements StyleModifier.Plain {
         return builder.build();
     }
 
-    // FIXME That's really not how this should be done..
+    // FIXME That's really not how this should be done...
     private static void applyDeep(
             TextComponent.Builder outerBuilder,
             Component component,
