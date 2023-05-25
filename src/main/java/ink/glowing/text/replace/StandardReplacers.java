@@ -11,7 +11,7 @@ import static net.kyori.adventure.text.event.ClickEvent.openUrl;
 public final class StandardReplacers {
     private static final Replacer URL = replacer(
             Pattern.compile("[hH][tT][tT][pP][sS]?://" +
-                    "[\\w\\-]+(?:\\.[\\w\\-]+)+(?::\\d{1,5})?" +
+                    "(?:\\.[\\w\\-]+)+(?::\\d{1,5})?" +
                     "(?:[/#]\\S*?(?=[()\\[\\].,!?]?(?=\\s|$)))?", Pattern.UNICODE_CASE),
             (match) -> {
                 String url = match.group();
