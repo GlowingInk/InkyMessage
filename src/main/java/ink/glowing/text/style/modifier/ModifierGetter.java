@@ -11,10 +11,14 @@ import java.util.Map;
 public interface ModifierGetter {
     @Nullable StyleModifier<?> findModifier(@NotNull String name);
 
+    static @NotNull ModifierGetter modifierGetter(@NotNull StyleModifier<?> modifier) {
+        return (name) -> modifier.name().equals(name) ? modifier : null;
+    }
+
     static @NotNull ModifierGetter modifierGetter(@NotNull StyleModifier<?> @NotNull ... modifiers) {
         return switch (modifiers.length) {
             case 0 -> (name) -> null;
-            case 1 -> (name) -> modifiers[0].name().equals(name) ? modifiers[0] : null;
+            case 1 -> modifierGetter(modifiers[0]);
             default -> modifierGetter(Arrays.asList(modifiers));
         };
     }

@@ -11,10 +11,14 @@ import java.util.Map;
 public interface PlaceholderGetter {
     @Nullable Placeholder findPlaceholder(@NotNull String name);
 
+    static @NotNull PlaceholderGetter placeholderGetter(@NotNull Placeholder placeholder) {
+        return (name) -> placeholder.name().equals(name) ? placeholder : null;
+    }
+
     static @NotNull PlaceholderGetter placeholderGetter(@NotNull Placeholder @NotNull ... placeholders) {
         return switch (placeholders.length) {
             case 0 -> (name) -> null;
-            case 1 -> (name) -> placeholders[0].name().equals(name) ? placeholders[0] : null;
+            case 1 -> placeholderGetter(placeholders[0]);
             default -> placeholderGetter(Arrays.asList(placeholders));
         };
     }

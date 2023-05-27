@@ -8,8 +8,8 @@ import org.intellij.lang.annotations.Subst;
 import org.jetbrains.annotations.NotNull;
 
 public class UrlModifier implements StyleModifier.Plain {
-    private static final StyleModifier.Plain HTTP_MODIFIER = urlSchemeModifier("http");
-    private static final StyleModifier.Plain HTTPS_MODIFIER = urlSchemeModifier("https");
+    private static final StyleModifier.Plain HTTP_MODIFIER = urlModifier("http");
+    private static final StyleModifier.Plain HTTPS_MODIFIER = urlModifier("https");
 
     private final @Subst("scheme") String scheme;
     
@@ -25,7 +25,7 @@ public class UrlModifier implements StyleModifier.Plain {
         return HTTPS_MODIFIER;
     }
 
-    public static @NotNull StyleModifier.Plain urlSchemeModifier(@Pattern(NAME_PATTERN) @NotNull String scheme) {
+    public static @NotNull StyleModifier.Plain urlModifier(@Pattern(NAME_PATTERN) @NotNull String scheme) {
         return new UrlModifier(scheme);
     }
     
