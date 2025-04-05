@@ -12,22 +12,14 @@ import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.TreeSet;
+import java.util.*;
 import java.util.function.Function;
 
-import static ink.glowing.text.placeholders.Placeholder.placeholder;
 import static ink.glowing.text.placeholders.PlaceholderGetter.composePlaceholderGetters;
 import static ink.glowing.text.placeholders.PlaceholderGetter.placeholderGetter;
 import static ink.glowing.text.placeholders.StandardPlaceholders.keybindPlaceholder;
 import static ink.glowing.text.placeholders.StandardPlaceholders.langPlaceholder;
 import static ink.glowing.text.replace.StandardReplacers.urlReplacer;
-import static ink.glowing.text.style.modifier.ModifierGetter.modifierGetter;
 import static ink.glowing.text.style.modifier.standard.ClickModifier.clickModifier;
 import static ink.glowing.text.style.modifier.standard.ColorModifier.colorModifier;
 import static ink.glowing.text.style.modifier.standard.DecorModifier.decorModifier;
@@ -36,8 +28,6 @@ import static ink.glowing.text.style.modifier.standard.HoverModifier.hoverModifi
 import static ink.glowing.text.style.modifier.standard.UrlModifier.httpModifier;
 import static ink.glowing.text.style.modifier.standard.UrlModifier.httpsModifier;
 import static ink.glowing.text.style.symbolic.StandardSymbolicStyles.*;
-import static net.kyori.adventure.text.Component.keybind;
-import static net.kyori.adventure.text.Component.translatable;
 import static net.kyori.adventure.text.format.Style.style;
 
 @ApiStatus.Internal

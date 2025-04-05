@@ -1,9 +1,7 @@
 package ink.glowing.text.style.modifier.extra;
 
 import ink.glowing.text.style.modifier.StyleModifier;
-import ink.glowing.text.utils.Named;
 import net.kyori.adventure.text.Component;
-import org.intellij.lang.annotations.Pattern;
 import org.jetbrains.annotations.NotNull;
 
 public class RepeatModifier implements StyleModifier.Plain {
