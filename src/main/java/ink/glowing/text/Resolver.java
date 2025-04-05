@@ -61,10 +61,10 @@ final class Resolver implements InkyMessage.Resolver {
     private final PlaceholderGetter phGetter;
 
     Resolver(
-            @NotNull Iterable<StyleModifier<?>> modifiers,
+            @NotNull Collection<StyleModifier<?>> modifiers,
             @NotNull Collection<Placeholder> placeholders,
             @NotNull Collection<Replacer> replacers,
-            @NotNull Iterable<SymbolicStyle> symbolics,
+            @NotNull Collection<SymbolicStyle> symbolics,
             @NotNull SymbolicStyle symbolicReset
     ) {
         this.modifiers = toMap(modifiers, StyleModifier::name);
@@ -72,6 +72,7 @@ final class Resolver implements InkyMessage.Resolver {
         this.replacers = replacers;
         this.symbolics = toMap(symbolics, SymbolicStyle::symbol);
         this.symbolicReset = symbolicReset;
+        this.symbolics.put(symbolicReset.symbol(), symbolicReset);
 
         if (placeholders.isEmpty()) {
             phGetter = STANDARD_PLACEHOLDERS;
@@ -83,12 +84,12 @@ final class Resolver implements InkyMessage.Resolver {
         }
     }
 
-    private static <O, K> Map<K, O> toMap(Iterable<O> origin, Function<O, K> keyFunction) {
-        Map<K, O> map = new HashMap<>();
+    private static <O, K> Map<K, O> toMap(Collection<O> origin, Function<O, K> keyFunction) {
+        Map<K, O> map = new HashMap<>(origin.size());
         for (O obj : origin) {
             map.put(keyFunction.apply(obj), obj);
         }
-        return map.isEmpty() ? Collections.emptyMap() : Collections.unmodifiableMap(map);
+        return map;
     }
 
     @Override
