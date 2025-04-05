@@ -4,6 +4,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -23,7 +24,13 @@ public interface ModifierGetter {
         };
     }
 
-    static @NotNull ModifierGetter modifierGetter(@NotNull Iterable<? extends StyleModifier<?>> modifiers) {
+    static @NotNull ModifierGetter modifierGetter(@NotNull Collection<? extends @NotNull StyleModifier<?>> modifiers) {
+        Map<String, StyleModifier<?>> modifiersMap = new HashMap<>(modifiers.size());
+        for (var modifier : modifiers) modifiersMap.put(modifier.name(), modifier);
+        return modifiersMap::get;
+    }
+
+    static @NotNull ModifierGetter modifierGetter(@NotNull Iterable<? extends @NotNull StyleModifier<?>> modifiers) {
         Map<String, StyleModifier<?>> modifiersMap = new HashMap<>();
         for (var modifier : modifiers) modifiersMap.put(modifier.name(), modifier);
         return modifiersMap::get;

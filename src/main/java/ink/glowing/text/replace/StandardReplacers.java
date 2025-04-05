@@ -15,7 +15,7 @@ public final class StandardReplacers {
                     "(?:[/#]\\S*?(?=[()\\[\\].,!?]?(?=\\s|$)))?", Pattern.UNICODE_CASE),
             (match) -> {
                 String url = match.group();
-                return text(match.group()).clickEvent(openUrl(url));
+                return text(url).clickEvent(openUrl(url));
             }
     );
 

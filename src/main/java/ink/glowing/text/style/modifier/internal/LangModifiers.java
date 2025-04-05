@@ -2,8 +2,11 @@ package ink.glowing.text.style.modifier.internal;
 
 import ink.glowing.text.InkyMessage;
 import ink.glowing.text.style.modifier.StyleModifier;
+import ink.glowing.text.utils.Named;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TranslatableComponent;
+import net.kyori.adventure.text.TranslationArgument;
+import org.intellij.lang.annotations.Pattern;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Unmodifiable;
@@ -15,12 +18,10 @@ import java.util.List;
 public final class LangModifiers {
     private LangModifiers() {}
 
-    @ApiStatus.Internal
     public static @NotNull StyleModifier.Complex argModifier() {
         return ArgModifier.INSTANCE;
     }
 
-    @ApiStatus.Internal
     public static @NotNull StyleModifier.Plain fallbackModifier() {
         return FallbackModifier.INSTANCE;
     }
@@ -32,9 +33,9 @@ public final class LangModifiers {
         @Override
         public @NotNull Component modify(@NotNull Component text, @NotNull String param, @NotNull Component value) {
             if (text instanceof TranslatableComponent lang) {
-                var args = new ArrayList<>(lang.args());
-                args.add(value);
-                return lang.args(args);
+                var args = new ArrayList<>(lang.arguments());
+                args.add(TranslationArgument.component(value));
+                return lang.arguments(args);
             }
             return text;
         }
@@ -42,9 +43,9 @@ public final class LangModifiers {
         @Override
         public @NotNull @Unmodifiable List<String> read(@NotNull InkyMessage.Resolver resolver, @NotNull Component text) {
             if (text instanceof TranslatableComponent lang) {
-                List<String> argsStr = new ArrayList<>(1);
-                for (var arg : lang.args()) {
-                    argsStr.add(asFormatted("", arg, resolver));
+                List<String> argsStr = new ArrayList<>(0);
+                for (var arg : lang.arguments()) {
+                    argsStr.add(asFormatted("", arg.asComponent(), resolver));
                 }
                 return argsStr;
             }
@@ -52,7 +53,7 @@ public final class LangModifiers {
         }
 
         @Override
-        public @NotNull String name() {
+        public @NotNull @NamePattern String name() {
             return "arg";
         }
     }
@@ -76,7 +77,7 @@ public final class LangModifiers {
         }
 
         @Override
-        public @NotNull String name() {
+        public @NotNull @NamePattern String name() {
             return "fallback";
         }
     }

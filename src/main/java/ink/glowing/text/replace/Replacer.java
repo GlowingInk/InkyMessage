@@ -2,6 +2,7 @@ package ink.glowing.text.replace;
 
 import ink.glowing.text.utils.GeneralUtils;
 import net.kyori.adventure.text.Component;
+import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Unmodifiable;
 
@@ -50,9 +51,7 @@ public interface Replacer {
         @Override
         public @NotNull List<FoundSpot> findSpots(@NotNull String text) {
             List<FoundSpot> spots = new ArrayList<>(0);
-            GeneralUtils.findEach(text, search, (index) -> {
-                spots.add(new FoundSpot(index, search.length(), replacement));
-            });
+            GeneralUtils.findEach(text, search, (index) -> spots.add(new FoundSpot(index, search.length(), replacement)));
             return spots;
         }
     }
@@ -71,6 +70,7 @@ public interface Replacer {
         }
     }
 
+    @ApiStatus.Internal
     record FoundSpot(int start, int end, Supplier<Component> replacement) implements Comparable<FoundSpot> {
         @Override
         public int compareTo(@NotNull Replacer.FoundSpot o) {

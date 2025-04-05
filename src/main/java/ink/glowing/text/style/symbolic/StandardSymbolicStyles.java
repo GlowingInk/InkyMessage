@@ -6,16 +6,13 @@ import net.kyori.adventure.text.format.TextDecoration;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Unmodifiable;
 
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.List;
+import java.util.*;
 
 import static net.kyori.adventure.text.format.NamedTextColor.*;
 import static net.kyori.adventure.text.format.TextColor.color;
 import static net.kyori.adventure.text.format.TextDecoration.*;
 
-public final class StandardSymbolicStyles {
+public final class StandardSymbolicStyles { private StandardSymbolicStyles() {}
     private static final List<SymbolicStyle> NOTCHIAN_COLORS = List.of(
             resettingColor('0', BLACK),
             resettingColor('1', DARK_BLUE),
@@ -35,8 +32,16 @@ public final class StandardSymbolicStyles {
             resettingColor('f', WHITE)
     );
 
-    private static final Collection<SymbolicStyle> BEDROCK_COLORS = GeneralUtils.concatImmutable(
-            HashSet::new,
+    private static final List<SymbolicStyle> NOTCHIAN_DECORATIONS = List.of(
+            chainedDecoration('k', OBFUSCATED),
+            chainedDecoration('l', BOLD),
+            chainedDecoration('m', STRIKETHROUGH),
+            chainedDecoration('n', UNDERLINED),
+            chainedDecoration('o', ITALIC)
+    );
+
+    private static final List<SymbolicStyle> BEDROCK_COLORS = GeneralUtils.concat(
+            ArrayList::new, Collections::unmodifiableList,
             NOTCHIAN_COLORS,
             List.of(
                     resettingColor('g', color(0xDDD605)),
@@ -53,24 +58,13 @@ public final class StandardSymbolicStyles {
             )
     );
 
-    private static final Collection<SymbolicStyle> BEDROCK_DECORATIONS = List.of(
+    private static final List<SymbolicStyle> BEDROCK_DECORATIONS = List.of(
             chainedDecoration('k', OBFUSCATED),
             chainedDecoration('l', BOLD),
             chainedDecoration('o', ITALIC)
     );
 
-    private static final Collection<SymbolicStyle> NOTCHIAN_DECORATIONS = GeneralUtils.concatImmutable(
-            HashSet::new,
-            BEDROCK_DECORATIONS,
-            Arrays.asList(
-                    chainedDecoration('m', STRIKETHROUGH),
-                    chainedDecoration('n', UNDERLINED)
-            )
-    );
-
     private static final SymbolicStyle NOTCHIAN_RESET = simpleReset('r');
-
-    private StandardSymbolicStyles() {}
 
     public static @NotNull SymbolicStyle notchianReset() {
         return NOTCHIAN_RESET;
@@ -92,11 +86,11 @@ public final class StandardSymbolicStyles {
         return BEDROCK_COLORS;
     }
 
-    public static @NotNull ChainedSymbolicDecoration chainedDecoration(char symbol, @NotNull TextDecoration decoration) {
+    public static @NotNull SymbolicStyle chainedDecoration(char symbol, @NotNull TextDecoration decoration) {
         return new ChainedSymbolicDecoration(symbol, decoration);
     }
 
-    public static @NotNull ResettingSymbolicColor resettingColor(char symbol, @NotNull TextColor color) {
+    public static @NotNull SymbolicStyle resettingColor(char symbol, @NotNull TextColor color) {
         return new ResettingSymbolicColor(symbol, color);
     }
 

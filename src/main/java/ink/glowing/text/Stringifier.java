@@ -1,12 +1,8 @@
 package ink.glowing.text;
 
 import ink.glowing.text.style.symbolic.SymbolicStyle;
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.KeybindComponent;
-import net.kyori.adventure.text.ScoreComponent;
-import net.kyori.adventure.text.SelectorComponent;
-import net.kyori.adventure.text.TextComponent;
-import net.kyori.adventure.text.TranslatableComponent;
+import net.kyori.adventure.text.*;
+import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.TreeSet;
@@ -15,9 +11,8 @@ import static ink.glowing.text.InkyMessage.escape;
 import static ink.glowing.text.style.modifier.internal.LangModifiers.argModifier;
 import static ink.glowing.text.style.modifier.internal.LangModifiers.fallbackModifier;
 
-final class Stringifier {
-    private Stringifier() {}
-
+@ApiStatus.Internal
+final class Stringifier { private Stringifier() {}
     public static @NotNull String stringify(@NotNull Component text, @NotNull InkyMessage.Resolver resolver) {
         StringBuilder builder = new StringBuilder();
         stringify(builder, new TreeSet<>(), text, resolver, new boolean[]{false});
@@ -72,24 +67,21 @@ final class Stringifier {
             @NotNull Component component,
             @NotNull InkyMessage.Resolver resolver
     ) {
-        if (component instanceof TextComponent text) {
-            builder.append(escape(text.content()));
-        } else if (component instanceof TranslatableComponent translatable) {
-            builder.append("&{lang:").append(translatable.key()).append("}");
-            for (var modifier : argModifier().read(resolver, translatable)) {
-                builder.append(modifier);
+        switch (component) {
+            case TextComponent text -> builder.append(escape(text.content()));
+            case TranslatableComponent translatable -> {
+                builder.append("&{lang:").append(escape(translatable.key())).append("}");
+                for (var modifier : argModifier().read(resolver, translatable)) {
+                    builder.append(modifier);
+                }
+                for (var modifier : fallbackModifier().read(resolver, translatable)) {
+                    builder.append(modifier);
+                }
             }
-            for (var modifier : fallbackModifier().read(resolver, translatable)) {
-                builder.append(modifier);
-            }
-        } else if (component instanceof KeybindComponent keybind) {
-            builder.append("&{key:").append(keybind.keybind()).append("}"); // TODO implement
-        } else if (component instanceof ScoreComponent score) {
-            builder.append(score.objective()); // TODO implement
-        } else if (component instanceof SelectorComponent selector) {
-            builder.append(selector.pattern()); // TODO implement
-        } else {
-            builder.append("?");
+            case KeybindComponent keybind -> builder.append("&{keybind:").append(escape(keybind.keybind())).append("}");
+            case ScoreComponent score -> builder.append(score.objective()); // TODO implement
+            case SelectorComponent selector -> builder.append(selector.pattern()); // TODO implement
+            default -> builder.append("?");
         }
     }
 }

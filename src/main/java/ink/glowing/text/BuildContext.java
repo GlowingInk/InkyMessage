@@ -26,7 +26,7 @@ public final class BuildContext implements PlaceholderGetter {
     }
 
     public @NotNull BuildContext colorlessCopy() {
-        return new BuildContext(resolver);
+        return new BuildContext(resolver, placeholderGetter);
     }
 
     public @NotNull Style lastStyle() {

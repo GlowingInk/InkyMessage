@@ -2,8 +2,10 @@ package ink.glowing.text.style.modifier.standard;
 
 import ink.glowing.text.InkyMessage;
 import ink.glowing.text.style.modifier.StyleModifier;
+import ink.glowing.text.utils.Named;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.event.HoverEvent;
+import org.intellij.lang.annotations.Pattern;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Unmodifiable;
 
@@ -31,7 +33,7 @@ public final class HoverModifier implements StyleModifier.Complex {
     }
 
     @Override
-    public @NotNull String name() {
+    public @NotNull @NamePattern String name() {
         return "hover";
     }
 }

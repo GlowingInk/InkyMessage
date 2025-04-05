@@ -28,7 +28,7 @@ record SimpleSymbolicReset(char symbol) implements SymbolicStyle {
 
     @Override
     public boolean equals(Object obj) {
-        return obj instanceof SimpleSymbolicReset ssr && ssr.symbol == symbol;
+        return obj instanceof SimpleSymbolicReset(char otherSymbol) && otherSymbol == symbol;
     }
 
     @Override

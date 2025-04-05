@@ -93,12 +93,12 @@ public class InkyMessageTest {
                         "Test &{lang:my.cool.test}(arg &aHello world)(arg Yay...)(fallback Falling back)&{lang:test}",
                         text("Test ")
                                 .append(translatable("my.cool.test")
-                                        .args(text("Hello world").color(GREEN), text("Yay..."))
+                                        .arguments(text("Hello world").color(GREEN), text("Yay..."))
                                         .fallback("Falling back"))
                                 .append(translatable("test"))
                 },
                 {
-                        "Press &{key:sneak} to sneak!",
+                        "Press &{keybind:sneak} to sneak!",
                         text("Press ")
                                 .append(keybind("sneak"))
                                 .append(text(" to sneak!"))
@@ -237,7 +237,7 @@ public class InkyMessageTest {
     public void randomTest() {
         RandomGenerator rng = ThreadLocalRandom.current();
         for (int i = 0; i < 1024; i++) {
-            StringBuilder builder = new StringBuilder(256);
+            StringBuilder builder = new StringBuilder(512);
             for (int j = 0; j < 512; j++) {
                 builder.append(SYMBOLS.charAt(rng.nextInt(SYMBOLS.length())));
             }

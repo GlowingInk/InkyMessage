@@ -5,6 +5,7 @@ import ink.glowing.text.placeholders.PlaceholderGetter;
 import ink.glowing.text.replace.Replacer;
 import ink.glowing.text.style.modifier.ModifierGetter;
 import ink.glowing.text.style.modifier.StyleModifier;
+import ink.glowing.text.style.symbolic.StandardSymbolicStyles;
 import ink.glowing.text.style.symbolic.SymbolicStyle;
 import net.kyori.adventure.builder.AbstractBuilder;
 import net.kyori.adventure.text.Component;
@@ -227,10 +228,10 @@ public final class InkyMessage implements ComponentSerializer<Component, Compone
      * @return a standard resolver
      */
     public static @NotNull InkyMessage.Resolver standardResolver() {
-        return InkyResolverImpl.STANDARD_RESOLVER;
+        return ink.glowing.text.Resolver.STANDARD_RESOLVER;
     }
 
-    public sealed interface Resolver extends ModifierGetter, PlaceholderGetter permits InkyResolverImpl {
+    public sealed interface Resolver extends ModifierGetter, PlaceholderGetter permits ink.glowing.text.Resolver {
         @Nullable Style applySymbolicStyle(char symbol, @NotNull Style currentStyle);
 
         @NotNull TreeSet<Replacer.FoundSpot> matchReplacements(@NotNull String input);
@@ -281,6 +282,12 @@ public final class InkyMessage implements ComponentSerializer<Component, Compone
         }
 
         @Contract("_ -> this")
+        public @NotNull InkyMessage.ResolverBuilder addReplacers(@NotNull Collection<? extends @NotNull Replacer> replacers) {
+            this.replacers.addAll(replacers);
+            return this;
+        }
+
+        @Contract("_ -> this")
         public @NotNull InkyMessage.ResolverBuilder addReplacers(@NotNull Iterable<? extends @NotNull Replacer> replacers) {
             for (var replacer : replacers) addReplacer(replacer);
             return this;
@@ -306,6 +313,12 @@ public final class InkyMessage implements ComponentSerializer<Component, Compone
         @Contract("_ -> this")
         public @NotNull InkyMessage.ResolverBuilder addPlaceholders(@NotNull Placeholder @NotNull ... placeholders) {
             return addPlaceholders(Arrays.asList(placeholders));
+        }
+
+        @Contract("_ -> this")
+        public @NotNull InkyMessage.ResolverBuilder addPlaceholders(@NotNull Collection<? extends @NotNull Placeholder> placeholders) {
+            this.placeholders.addAll(placeholders);
+            return this;
         }
 
         @Contract("_ -> this")
@@ -337,16 +350,20 @@ public final class InkyMessage implements ComponentSerializer<Component, Compone
         }
 
         @Contract("_ -> this")
-        public @NotNull InkyMessage.ResolverBuilder addModifiers(@NotNull Iterable<? extends @NotNull StyleModifier<?>> modifiers) {
-            for (var modifier : modifiers) addModifier(modifier);
+        public @NotNull InkyMessage.ResolverBuilder addModifiers(@NotNull Collection<? extends @NotNull StyleModifier<?>> modifiers) {
+            this.modifiers.addAll(modifiers);
             return this;
         }
 
         @Contract("_ -> this")
-        public @NotNull InkyMessage.ResolverBuilder symbolicReset(@NotNull SymbolicStyle symbolicReset) {
-            symbolics.remove(this.symbolicReset);
-            symbolics.add(symbolicReset);
-            this.symbolicReset = symbolicReset;
+        public @NotNull InkyMessage.ResolverBuilder addModifiers(@NotNull Iterable<? extends @NotNull StyleModifier<?>> modifiers) {
+            for (var modifier : modifiers) this.modifiers.add(modifier);
+            return this;
+        }
+
+        @Contract("_ -> this")
+        public @NotNull InkyMessage.ResolverBuilder symbolicReset(char symbol) {
+            this.symbolicReset = StandardSymbolicStyles.simpleReset(symbol);
             return this;
         }
 
@@ -373,6 +390,12 @@ public final class InkyMessage implements ComponentSerializer<Component, Compone
         }
 
         @Contract("_ -> this")
+        public @NotNull InkyMessage.ResolverBuilder addSymbolics(@NotNull Collection<? extends @NotNull SymbolicStyle> symbolics) {
+            this.symbolics.addAll(symbolics);
+            return this;
+        }
+
+        @Contract("_ -> this")
         public @NotNull InkyMessage.ResolverBuilder addSymbolics(@NotNull Iterable<? extends @NotNull SymbolicStyle> symbolics) {
             for (var symbolic : symbolics) addSymbolic(symbolic);
             return this;
@@ -381,10 +404,15 @@ public final class InkyMessage implements ComponentSerializer<Component, Compone
         @Override
         @Contract("-> new")
         public @NotNull InkyMessage.Resolver build() {
-            return new InkyResolverImpl(
-                    modifiers, placeholders, replacers, symbolics,
-                    Objects.requireNonNull(symbolicReset, "Resolver requires symbolic reset to be provided")
+            Objects.requireNonNull(symbolicReset, "Resolver requires symbolic reset to be provided");
+
+            symbolics.add(symbolicReset);
+            var resolver = new ink.glowing.text.Resolver(
+                    modifiers, placeholders, replacers, symbolics, symbolicReset
             );
+            symbolics.remove(symbolicReset);
+
+            return resolver;
         }
     }
 }

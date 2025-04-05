@@ -8,6 +8,7 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.format.Style;
 import net.kyori.adventure.text.format.TextColor;
+import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -17,6 +18,7 @@ import static ink.glowing.text.InkyMessage.*;
 import static net.kyori.adventure.text.Component.empty;
 import static net.kyori.adventure.text.Component.text;
 
+@ApiStatus.Internal
 final class Parser {
     private final String textStr;
     private final int textLength;
@@ -32,7 +34,7 @@ final class Parser {
     }
 
     public static @NotNull Component parse(@NotNull String textStr, @NotNull BuildContext context) {
-        if (textStr.length() == 0) return empty();
+        if (textStr.isEmpty()) return empty();
         return new Parser(textStr, context.resolver())
                 .parseRecursive(0, -1, context);
     }

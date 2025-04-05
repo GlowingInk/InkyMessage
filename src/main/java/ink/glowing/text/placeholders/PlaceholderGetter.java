@@ -4,6 +4,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -21,6 +22,12 @@ public interface PlaceholderGetter {
             case 1 -> placeholderGetter(placeholders[0]);
             default -> placeholderGetter(Arrays.asList(placeholders));
         };
+    }
+
+    static @NotNull PlaceholderGetter placeholderGetter(@NotNull Collection<? extends @NotNull Placeholder> placeholders) {
+        Map<String, Placeholder> placeholdersMap = new HashMap<>(placeholders.size());
+        for (var placeholder : placeholders) placeholdersMap.put(placeholder.name(), placeholder);
+        return placeholdersMap::get;
     }
 
     static @NotNull PlaceholderGetter placeholderGetter(@NotNull Iterable<? extends @NotNull Placeholder> placeholders) {

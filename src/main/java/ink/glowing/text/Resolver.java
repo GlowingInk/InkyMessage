@@ -8,6 +8,7 @@ import ink.glowing.text.style.symbolic.SymbolicStyle;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.Style;
 import net.kyori.adventure.text.format.TextColor;
+import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -23,10 +24,10 @@ import java.util.function.Function;
 import static ink.glowing.text.placeholders.Placeholder.placeholder;
 import static ink.glowing.text.placeholders.PlaceholderGetter.composePlaceholderGetters;
 import static ink.glowing.text.placeholders.PlaceholderGetter.placeholderGetter;
+import static ink.glowing.text.placeholders.StandardPlaceholders.keybindPlaceholder;
+import static ink.glowing.text.placeholders.StandardPlaceholders.langPlaceholder;
 import static ink.glowing.text.replace.StandardReplacers.urlReplacer;
 import static ink.glowing.text.style.modifier.ModifierGetter.modifierGetter;
-import static ink.glowing.text.style.modifier.internal.LangModifiers.argModifier;
-import static ink.glowing.text.style.modifier.internal.LangModifiers.fallbackModifier;
 import static ink.glowing.text.style.modifier.standard.ClickModifier.clickModifier;
 import static ink.glowing.text.style.modifier.standard.ColorModifier.colorModifier;
 import static ink.glowing.text.style.modifier.standard.DecorModifier.decorModifier;
@@ -39,10 +40,11 @@ import static net.kyori.adventure.text.Component.keybind;
 import static net.kyori.adventure.text.Component.translatable;
 import static net.kyori.adventure.text.format.Style.style;
 
-final class InkyResolverImpl implements InkyMessage.Resolver {
+@ApiStatus.Internal
+final class Resolver implements InkyMessage.Resolver {
     private static final PlaceholderGetter STANDARD_PLACEHOLDERS = placeholderGetter(
-            placeholder("lang", value -> translatable(value), modifierGetter(argModifier(), fallbackModifier())),
-            placeholder("key", value -> keybind(value))
+            langPlaceholder(),
+            keybindPlaceholder()
     );
 
     static final InkyMessage.Resolver STANDARD_RESOLVER = InkyMessage.resolver()
@@ -56,7 +58,7 @@ final class InkyResolverImpl implements InkyMessage.Resolver {
                     decorModifier())
             .addSymbolics(notchianColors())
             .addSymbolics(notchianDecorations())
-            .symbolicReset(notchianReset())
+            .symbolicReset(notchianReset().symbol())
             .addReplacer(urlReplacer())
             .build();
 
@@ -68,7 +70,7 @@ final class InkyResolverImpl implements InkyMessage.Resolver {
 
     private final PlaceholderGetter phGetter;
 
-    InkyResolverImpl(
+    Resolver(
             @NotNull Iterable<StyleModifier<?>> modifiers,
             @NotNull Collection<Placeholder> placeholders,
             @NotNull Collection<Replacer> replacers,
@@ -81,7 +83,7 @@ final class InkyResolverImpl implements InkyMessage.Resolver {
         this.symbolics = toMap(symbolics, SymbolicStyle::symbol);
         this.symbolicReset = symbolicReset;
 
-        if (placeholders.size() == 0) {
+        if (placeholders.isEmpty()) {
             phGetter = STANDARD_PLACEHOLDERS;
         } else {
             phGetter = composePlaceholderGetters(
@@ -169,7 +171,7 @@ final class InkyResolverImpl implements InkyMessage.Resolver {
     @Override
     public @NotNull InkyMessage.ResolverBuilder toBuilder() {
         return new InkyMessage.ResolverBuilder()
-                .symbolicReset(symbolicReset)
+                .symbolicReset(symbolicReset.symbol())
                 .addSymbolics(symbolics.values())
                 .addPlaceholders(placeholders.values())
                 .addModifiers(modifiers.values());

@@ -1,9 +1,12 @@
 package ink.glowing.text.utils;
 
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.function.Function;
 import java.util.function.IntConsumer;
 import java.util.function.IntFunction;
 import java.util.function.Supplier;
@@ -17,19 +20,26 @@ public final class GeneralUtils {
             @NotNull Collection<? extends T> @NotNull ... collections
     ) {
         C col = colGetter.get();
-        for (var iter : collections) col.addAll(iter);
+        for (var elem : collections) col.addAll(elem);
         return col;
     }
 
     @SafeVarargs
-    public static <T> @NotNull Collection<T> concatImmutable(
-            @NotNull Supplier<Collection<T>> colGetter,
+    public static <T, C extends Collection<T>, R extends Collection<T>> @NotNull R concat(
+            @NotNull Supplier<@NotNull C> colGetter,
+            @NotNull Function<@NotNull C, @NotNull R> postProcess,
             @NotNull Collection<? extends T> @NotNull ... collections
     ) {
-        return Collections.unmodifiableCollection(concat(colGetter, collections));
+        C col = colGetter.get();
+        for (var elem : collections) col.addAll(elem);
+        return postProcess.apply(col);
     }
 
-    public static @NotNull String replaceEach(@NotNull String input, @NotNull String search, @NotNull IntFunction<String> replaceSupplier) {
+    public static @NotNull String replaceEach(
+            @NotNull String input,
+            @NotNull String search,
+            @NotNull IntFunction<String> replaceSupplier
+    ) {
         int lastAppend = 0;
         StringBuilder builder = new StringBuilder();
         for (int index = input.indexOf(search); index != -1; index = input.indexOf(search, lastAppend)) {

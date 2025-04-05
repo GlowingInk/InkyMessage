@@ -1,6 +1,7 @@
 package ink.glowing.text.style.modifier.standard;
 
 import ink.glowing.text.style.modifier.StyleModifier;
+import ink.glowing.text.utils.Named;
 import ink.glowing.text.utils.function.FloatFunction;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.ComponentIteratorType;
@@ -8,6 +9,8 @@ import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextColor;
 import net.kyori.adventure.util.HSVLike;
+import org.intellij.lang.annotations.Pattern;
+import org.intellij.lang.annotations.Subst;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -18,6 +21,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ThreadLocalRandom;
+import java.util.function.BiFunction;
 import java.util.random.RandomGenerator;
 
 import static net.kyori.adventure.text.Component.text;
@@ -26,11 +30,24 @@ import static net.kyori.adventure.text.format.TextColor.color;
 public final class ColorModifier implements StyleModifier.Plain {
     private static final Map<String, NamedTextColor> NAMED_COLORS = NamedTextColor.NAMES.keyToValue();
 
-    private static final ColorModifier INSTANCE = new ColorModifier();
+    private static final ColorModifier COLOR = new ColorModifier("color", Component::color);
+    private static final ColorModifier SHADOW = new ColorModifier("shadow", Component::color);
+
     public static @NotNull StyleModifier.Plain colorModifier() {
-        return INSTANCE;
+        return COLOR;
     }
-    private ColorModifier() {}
+
+    public static @NotNull StyleModifier.Plain shadowModifier() {
+        return SHADOW;
+    }
+
+    private final @Subst("name") String name;
+    private final BiFunction<Component, TextColor, Component> applier;
+
+    private ColorModifier(String name, BiFunction<Component, TextColor, Component> applier) {
+        this.name = name;
+        this.applier = applier;
+    }
 
     @Override
     public @NotNull Component modify(@NotNull Component text, @NotNull String param, @NotNull String value) {
@@ -40,7 +57,7 @@ public final class ColorModifier implements StyleModifier.Plain {
         switch (param) {
             case "spectrum", "rainbow" -> {
                 int length = length(text);
-                if (length <= 1) return text.color(NamedTextColor.WHITE);
+                if (length <= 1) return applier.apply(text, NamedTextColor.WHITE);
                 indexedLength = length;
                 colorGetter = ColorModifier::colorSpectrum;
             }
@@ -52,9 +69,9 @@ public final class ColorModifier implements StyleModifier.Plain {
             default -> {
                 List<TextColor> colors = parseColors(param);
                 if (colors.isEmpty()) return text;
-                if (colors.size() == 1) return text.color(pastel ? pastel(colors.get(0)) : colors.get(0));
+                if (colors.size() == 1) return applier.apply(text, pastel ? pastel(colors.getFirst()) : colors.getFirst());
                 int length = length(text);
-                if (length <= 1) return text.color(pastel ? pastel(averageColor(colors)) : averageColor(colors));
+                if (length <= 1) return applier.apply(text, pastel ? pastel(averageColor(colors)) : averageColor(colors));
                 indexedLength = length - 1;
                 colorGetter = lerpFunction(colors);
             }
@@ -68,7 +85,7 @@ public final class ColorModifier implements StyleModifier.Plain {
     }
 
     // FIXME That's really not how this should be done...
-    private static void applyDeep(
+    private void applyDeep(
             TextComponent.Builder outerBuilder,
             Component component,
             FloatFunction<TextColor> colorGetter,
@@ -87,9 +104,9 @@ public final class ColorModifier implements StyleModifier.Plain {
                 localBuilder.append(text(content.charAt(i), colorGetter.apply(step[0]++ / indexedLength)));
             }
         } else {
-            localBuilder.append(component
-                    .children(Collections.emptyList()) // We'll process children ourselves
-                    .color(colorGetter.apply(step[0]++ / indexedLength))
+            localBuilder.append(applier.apply(
+                    component.children(Collections.emptyList()), // We'll process children ourselves
+                    colorGetter.apply(step[0]++ / indexedLength))
             );
         }
         for (var child : component.children()) {
@@ -195,7 +212,7 @@ public final class ColorModifier implements StyleModifier.Plain {
     }
 
     @Override
-    public @NotNull String name() {
-        return "color";
+    public @NotNull @NamePattern String name() {
+        return name;
     }
 }

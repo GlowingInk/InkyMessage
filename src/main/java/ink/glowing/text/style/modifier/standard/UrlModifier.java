@@ -1,6 +1,7 @@
 package ink.glowing.text.style.modifier.standard;
 
 import ink.glowing.text.style.modifier.StyleModifier;
+import ink.glowing.text.utils.Named;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.event.ClickEvent;
 import org.intellij.lang.annotations.Pattern;
@@ -25,7 +26,7 @@ public class UrlModifier implements StyleModifier.Plain {
         return HTTPS_MODIFIER;
     }
 
-    public static @NotNull StyleModifier.Plain urlModifier(@Pattern(NAME_PATTERN) @NotNull String scheme) {
+    public static @NotNull StyleModifier.Plain urlModifier(@NamePattern @NotNull String scheme) {
         return new UrlModifier(scheme);
     }
     
@@ -36,7 +37,7 @@ public class UrlModifier implements StyleModifier.Plain {
     }
 
     @Override
-    public @NotNull String name() {
+    public @NotNull @NamePattern String name() {
         return scheme;
     }
 }
