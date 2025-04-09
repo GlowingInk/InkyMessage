@@ -3,6 +3,7 @@ package ink.glowing.text.style.modifier.standard;
 import ink.glowing.text.style.modifier.StyleModifier;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.event.ClickEvent;
+import org.intellij.lang.annotations.Pattern;
 import org.intellij.lang.annotations.Subst;
 import org.jetbrains.annotations.NotNull;
 
@@ -10,7 +11,7 @@ public class UrlModifier implements StyleModifier.Plain {
     private static final StyleModifier.Plain HTTP_MODIFIER = urlModifier("http");
     private static final StyleModifier.Plain HTTPS_MODIFIER = urlModifier("https");
 
-    private final @Subst("scheme") String scheme;
+    private final @Subst("ms-web+lmao3") String scheme;
     
     private UrlModifier(@NotNull String scheme) {
         this.scheme = scheme;
@@ -24,7 +25,7 @@ public class UrlModifier implements StyleModifier.Plain {
         return HTTPS_MODIFIER;
     }
 
-    public static @NotNull StyleModifier.Plain urlModifier(@NamePattern @NotNull String scheme) {
+    public static @NotNull StyleModifier.Plain urlModifier(@Pattern("[a-z\\d\\+\\-]+") @NotNull String scheme) {
         return new UrlModifier(scheme);
     }
     

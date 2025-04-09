@@ -13,7 +13,7 @@ public final class GeneralUtils {
 
     @SafeVarargs
     public static <T, C extends Collection<T>> @NotNull C concat(
-            @NotNull Supplier<C> colGetter,
+            @NotNull Supplier<@NotNull C> colGetter,
             @NotNull Collection<? extends T> @NotNull ... collections
     ) {
         C col = colGetter.get();
@@ -35,7 +35,7 @@ public final class GeneralUtils {
     public static @NotNull String replaceEach(
             @NotNull String input,
             @NotNull String search,
-            @NotNull IntFunction<String> replaceSupplier
+            @NotNull IntFunction<@NotNull String> replaceSupplier
     ) {
         int lastAppend = 0;
         StringBuilder builder = new StringBuilder();
@@ -49,7 +49,11 @@ public final class GeneralUtils {
         return builder.toString();
     }
 
-    public static void findEach(@NotNull String input, @NotNull String search, @NotNull IntConsumer indexConsumer) {
+    public static void findEach(
+            @NotNull String input,
+            @NotNull String search,
+            @NotNull IntConsumer indexConsumer
+    ) {
         for (int index = input.indexOf(search); index != -1; index = input.indexOf(search, index + search.length())) {
             indexConsumer.accept(index);
         }

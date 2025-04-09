@@ -20,14 +20,38 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import static ink.glowing.text.placeholders.PlaceholderGetter.placeholderGetter;
+import static ink.glowing.text.replace.StandardReplacers.urlReplacer;
+import static ink.glowing.text.style.modifier.standard.ClickModifier.clickModifier;
+import static ink.glowing.text.style.modifier.standard.ColorModifier.colorModifier;
+import static ink.glowing.text.style.modifier.standard.DecorModifier.decorModifier;
+import static ink.glowing.text.style.modifier.standard.FontModifier.fontModifier;
+import static ink.glowing.text.style.modifier.standard.HoverModifier.hoverModifier;
+import static ink.glowing.text.style.modifier.standard.UrlModifier.httpModifier;
+import static ink.glowing.text.style.modifier.standard.UrlModifier.httpsModifier;
+import static ink.glowing.text.style.symbolic.StandardSymbolicStyles.*;
 
 /**
  * User-friendly component (de)serializer with legacy format.
  */
-public final class InkyMessage implements ComponentSerializer<Component, Component, String> {
+public final class InkyMessage implements ComponentSerializer<Component, Component, String> { private InkyMessage() {}
     private static final String ESCAPABLE_SYMBOLS = "&]()}\\";
     private static final Pattern ESCAPE_PATTERN = Pattern.compile("[&\\]()}\\\\]");
     private static final Pattern UNESCAPE_PATTERN = Pattern.compile("\\\\([&\\]()\\\\}])");
+
+    private static final InkyMessage.Resolver STANDARD_RESOLVER = InkyMessage.resolver()
+            .addModifiers(
+                    colorModifier(),
+                    hoverModifier(),
+                    clickModifier(),
+                    httpModifier(),
+                    httpsModifier(),
+                    fontModifier(),
+                    decorModifier())
+            .addSymbolics(notchianColors())
+            .addSymbolics(notchianDecorations())
+            .symbolicReset(notchianReset().symbol())
+            .addReplacer(urlReplacer())
+            .build();
 
     private static final InkyMessage INSTANCE = new InkyMessage();
 
@@ -38,8 +62,6 @@ public final class InkyMessage implements ComponentSerializer<Component, Compone
     public static @NotNull InkyMessage inkyMessage() {
         return INSTANCE;
     }
-
-    private InkyMessage() {}
 
     /**
      * Convert string into adventure text component using standard resolver.
@@ -71,7 +93,7 @@ public final class InkyMessage implements ComponentSerializer<Component, Compone
      * @see InkyMessage#standardResolver()
      */
     public @NotNull Component deserialize(@NotNull String inputText,
-                                          @NotNull Placeholder@NotNull ... placeholders) {
+                                          @NotNull Placeholder @NotNull ... placeholders) {
         return deserialize(inputText, new BuildContext(standardResolver(), placeholderGetter(placeholders)));
     }
 
@@ -222,7 +244,7 @@ public final class InkyMessage implements ComponentSerializer<Component, Compone
      * @return a standard resolver
      */
     public static @NotNull InkyMessage.Resolver standardResolver() {
-        return ink.glowing.text.Resolver.STANDARD_RESOLVER;
+        return STANDARD_RESOLVER;
     }
 
     public sealed interface Resolver extends ModifierGetter, PlaceholderGetter permits ink.glowing.text.Resolver {

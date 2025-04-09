@@ -1,10 +1,12 @@
 package ink.glowing.text.style.symbolic;
 
 import net.kyori.adventure.text.format.Style;
+import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Objects;
 
+@ApiStatus.Internal
 record SimpleSymbolicReset(char symbol) implements SymbolicStyle {
     @Override
     public boolean resets() {

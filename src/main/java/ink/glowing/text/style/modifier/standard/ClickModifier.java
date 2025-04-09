@@ -11,23 +11,23 @@ import java.util.List;
 import static ink.glowing.text.InkyMessage.escape;
 import static net.kyori.adventure.text.event.ClickEvent.*;
 
-public final class ClickModifier implements StyleModifier.Plain {
+public final class ClickModifier implements StyleModifier.Plain { private ClickModifier() {}
     private static final ClickModifier INSTANCE = new ClickModifier();
+
     public static @NotNull StyleModifier.Plain clickModifier() {
         return INSTANCE;
     }
-    private ClickModifier() {}
 
     @Override
     public @NotNull Component modify(@NotNull Component text, @NotNull String param, @NotNull String value) {
         return switch (param) {
-            case "url", "link" -> text.clickEvent(openUrl(value));
-            case "run" -> text.clickEvent(runCommand(value));
-            case "suggest" -> text.clickEvent(suggestCommand(value));
-            case "copy", "clipboard" -> text.clickEvent(copyToClipboard(value));
-            case "page" -> text.clickEvent(changePage(value));
-            case "file" -> text.clickEvent(openFile(value));
-            case "insert", "shift" -> text.insertion(value);
+            case "url", "link", "open_url" ->                   text.clickEvent(openUrl(value));
+            case "run", "run_command" ->                        text.clickEvent(runCommand(value));
+            case "suggest", "suggest_command" ->                text.clickEvent(suggestCommand(value));
+            case "copy", "clipboard", "copy_to_clipboard" ->    text.clickEvent(copyToClipboard(value));
+            case "page", "change_page" ->                       text.clickEvent(changePage(value));
+            case "file", "open_file" ->                         text.clickEvent(openFile(value));
+            case "insert", "shift", "insertion" ->              text.insertion(value);
             default -> text;
         };
     }

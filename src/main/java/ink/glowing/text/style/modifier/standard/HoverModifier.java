@@ -11,12 +11,12 @@ import java.util.List;
 
 import static net.kyori.adventure.text.event.HoverEvent.showText;
 
-public final class HoverModifier implements StyleModifier.Complex {
+public final class HoverModifier implements StyleModifier.Complex { private HoverModifier() {}
     private static final HoverModifier INSTANCE = new HoverModifier();
+
     public static @NotNull StyleModifier.Complex hoverModifier() {
         return INSTANCE;
     }
-    private HoverModifier() {}
 
     @Override
     public @NotNull Component modify(@NotNull Component text, @NotNull String param, @NotNull Component value) {
@@ -25,9 +25,10 @@ public final class HoverModifier implements StyleModifier.Complex {
 
     @Override
     public @NotNull @Unmodifiable List<String> read(@NotNull InkyMessage.Resolver resolver, @NotNull Component text) {
-        return text.hoverEvent() == null || text.hoverEvent().action() != HoverEvent.Action.SHOW_TEXT
+        var hoverEvent = text.hoverEvent();
+        return hoverEvent == null || hoverEvent.action() != HoverEvent.Action.SHOW_TEXT
                 ? List.of()
-                : List.of(asFormatted("text", (Component) text.hoverEvent().value(), resolver));
+                : List.of(asFormatted("text", (Component) hoverEvent.value(), resolver));
     }
 
     @Override

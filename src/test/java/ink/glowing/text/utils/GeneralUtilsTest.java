@@ -50,7 +50,7 @@ public class GeneralUtilsTest {
     @Test(dataProvider = "findEachData")
     public void findEachTest(String input, String search, int[] expectedIndexes) { // TODO Some better replacement
         final int[] count = {0};
-        int[] indexes = new int[5];
+        int[] indexes = new int[expectedIndexes.length];
         findEach(input, search, i -> indexes[count[0]++] = i);
         assertEquals(
                 indexes,

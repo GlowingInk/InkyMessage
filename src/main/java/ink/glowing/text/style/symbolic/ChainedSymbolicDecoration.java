@@ -2,12 +2,14 @@ package ink.glowing.text.style.symbolic;
 
 import net.kyori.adventure.text.format.Style;
 import net.kyori.adventure.text.format.TextDecoration;
+import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Objects;
 
 import static net.kyori.adventure.text.format.Style.style;
 
+@ApiStatus.Internal
 final class ChainedSymbolicDecoration implements SymbolicStyle {
     private final char symbol;
     private final TextDecoration decoration;

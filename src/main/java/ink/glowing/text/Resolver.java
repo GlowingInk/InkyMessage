@@ -19,38 +19,14 @@ import static ink.glowing.text.placeholders.PlaceholderGetter.composePlaceholder
 import static ink.glowing.text.placeholders.PlaceholderGetter.placeholderGetter;
 import static ink.glowing.text.placeholders.StandardPlaceholders.keybindPlaceholder;
 import static ink.glowing.text.placeholders.StandardPlaceholders.langPlaceholder;
-import static ink.glowing.text.replace.StandardReplacers.urlReplacer;
-import static ink.glowing.text.style.modifier.standard.ClickModifier.clickModifier;
-import static ink.glowing.text.style.modifier.standard.ColorModifier.colorModifier;
-import static ink.glowing.text.style.modifier.standard.DecorModifier.decorModifier;
-import static ink.glowing.text.style.modifier.standard.FontModifier.fontModifier;
-import static ink.glowing.text.style.modifier.standard.HoverModifier.hoverModifier;
-import static ink.glowing.text.style.modifier.standard.UrlModifier.httpModifier;
-import static ink.glowing.text.style.modifier.standard.UrlModifier.httpsModifier;
-import static ink.glowing.text.style.symbolic.StandardSymbolicStyles.*;
 import static net.kyori.adventure.text.format.Style.style;
 
 @ApiStatus.Internal
 final class Resolver implements InkyMessage.Resolver {
-    private static final PlaceholderGetter STANDARD_PLACEHOLDERS = placeholderGetter(
+    private static final PlaceholderGetter REQUIRED_PLACEHOLDERS = placeholderGetter(
             langPlaceholder(),
             keybindPlaceholder()
     );
-
-    static final InkyMessage.Resolver STANDARD_RESOLVER = InkyMessage.resolver()
-            .addModifiers(
-                    colorModifier(),
-                    hoverModifier(),
-                    clickModifier(),
-                    httpModifier(),
-                    httpsModifier(),
-                    fontModifier(),
-                    decorModifier())
-            .addSymbolics(notchianColors())
-            .addSymbolics(notchianDecorations())
-            .symbolicReset(notchianReset().symbol())
-            .addReplacer(urlReplacer())
-            .build();
 
     private final Map<String, StyleModifier<?>> modifiers;
     private final Map<String, Placeholder> placeholders;
@@ -61,10 +37,10 @@ final class Resolver implements InkyMessage.Resolver {
     private final PlaceholderGetter phGetter;
 
     Resolver(
-            @NotNull Collection<StyleModifier<?>> modifiers,
-            @NotNull Collection<Placeholder> placeholders,
-            @NotNull Collection<Replacer> replacers,
-            @NotNull Collection<SymbolicStyle> symbolics,
+            @NotNull Set<StyleModifier<?>> modifiers,
+            @NotNull Set<Placeholder> placeholders,
+            @NotNull Set<Replacer> replacers,
+            @NotNull Set<SymbolicStyle> symbolics,
             @NotNull SymbolicStyle symbolicReset
     ) {
         this.modifiers = toMap(modifiers, StyleModifier::name);
@@ -75,11 +51,11 @@ final class Resolver implements InkyMessage.Resolver {
         this.symbolics.put(symbolicReset.symbol(), symbolicReset);
 
         if (placeholders.isEmpty()) {
-            phGetter = STANDARD_PLACEHOLDERS;
+            phGetter = REQUIRED_PLACEHOLDERS;
         } else {
             phGetter = composePlaceholderGetters(
                     placeholderGetter(placeholders),
-                    STANDARD_PLACEHOLDERS
+                    REQUIRED_PLACEHOLDERS
             );
         }
     }

@@ -25,7 +25,7 @@ public final class ColorModifier implements StyleModifier.Plain {
     private static final Map<String, NamedTextColor> NAMED_COLORS = NamedTextColor.NAMES.keyToValue();
 
     private static final ColorModifier COLOR = new ColorModifier("color", Component::color);
-    private static final ColorModifier SHADOW = new ColorModifier("shadow", Component::color);
+    private static final ColorModifier SHADOW = new ColorModifier("shadow", Component::color); // TODO
 
     public static @NotNull StyleModifier.Plain colorModifier() {
         return COLOR;
