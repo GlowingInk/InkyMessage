@@ -1,6 +1,7 @@
 package ink.glowing.text.placeholders;
 
-import ink.glowing.text.style.modifier.ModifierGetter;
+import ink.glowing.text.Ink;
+import ink.glowing.text.modifier.ModifierGetter;
 import ink.glowing.text.utils.Named;
 import net.kyori.adventure.text.Component;
 import org.jetbrains.annotations.NotNull;
@@ -8,7 +9,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
-public interface Placeholder extends Named, ModifierGetter {
+public interface Placeholder extends Ink, Named, ModifierGetter {
     @NotNull Component parse(@NotNull String value);
 
     static @NotNull Placeholder placeholder(@NotNull String name,

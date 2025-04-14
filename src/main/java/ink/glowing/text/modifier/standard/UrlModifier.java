@@ -1,13 +1,13 @@
-package ink.glowing.text.style.modifier.standard;
+package ink.glowing.text.modifier.standard;
 
-import ink.glowing.text.style.modifier.StyleModifier;
+import ink.glowing.text.modifier.StyleModifier;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.event.ClickEvent;
 import org.intellij.lang.annotations.Pattern;
 import org.intellij.lang.annotations.Subst;
 import org.jetbrains.annotations.NotNull;
 
-public class UrlModifier implements StyleModifier.Plain {
+public final class UrlModifier implements StyleModifier.Plain {
     private static final StyleModifier.Plain HTTP_MODIFIER = urlModifier("http");
     private static final StyleModifier.Plain HTTPS_MODIFIER = urlModifier("https");
 

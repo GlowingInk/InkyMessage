@@ -1,7 +1,7 @@
 package ink.glowing.text.placeholders;
 
-import ink.glowing.text.style.modifier.ModifierGetter;
-import ink.glowing.text.style.modifier.StyleModifier;
+import ink.glowing.text.modifier.ModifierGetter;
+import ink.glowing.text.modifier.StyleModifier;
 import net.kyori.adventure.text.Component;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;

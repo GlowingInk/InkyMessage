@@ -1,5 +1,6 @@
-package ink.glowing.text.style.modifier;
+package ink.glowing.text.modifier;
 
+import ink.glowing.text.Ink;
 import ink.glowing.text.InkyMessage;
 import ink.glowing.text.utils.Named;
 import net.kyori.adventure.text.Component;
@@ -11,7 +12,7 @@ import java.util.List;
 
 import static ink.glowing.text.InkyMessage.inkyMessage;
 
-public sealed interface StyleModifier<T> extends Named, ModifierGetter permits StyleModifier.Complex, StyleModifier.Plain {
+public sealed interface StyleModifier<T> extends Ink, Named, ModifierGetter permits StyleModifier.Complex, StyleModifier.Plain {
     @NotNull Component modify(@NotNull Component text, @NotNull String param, @NotNull T value);
 
     default @NotNull @Unmodifiable List<String> read(@NotNull InkyMessage.Resolver resolver, @NotNull Component text) {

@@ -1,7 +1,7 @@
-package ink.glowing.text.style.modifier.standard;
+package ink.glowing.text.modifier.standard;
 
 import ink.glowing.text.InkyMessage;
-import ink.glowing.text.style.modifier.StyleModifier;
+import ink.glowing.text.modifier.StyleModifier;
 import net.kyori.adventure.text.Component;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Unmodifiable;

@@ -21,14 +21,8 @@ final class BuildContext implements PlaceholderGetter {
         this.lastStyle = Style.empty();
     }
 
-    public BuildContext(@NotNull InkyMessage.Resolver resolver, @NotNull PlaceholderGetter placeholderGetter) {
-        this.resolver = resolver;
-        this.placeholderGetter = composePlaceholderGetters(placeholderGetter, resolver);
-        this.lastStyle = Style.empty();
-    }
-
     public @NotNull BuildContext colorlessCopy() {
-        return new BuildContext(resolver, placeholderGetter);
+        return new BuildContext(resolver);
     }
 
     public @NotNull Style lastStyle() {

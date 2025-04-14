@@ -1,9 +1,10 @@
-package ink.glowing.text.style.symbolic;
+package ink.glowing.text.symbolic;
 
+import ink.glowing.text.Ink;
 import net.kyori.adventure.text.format.Style;
 import org.jetbrains.annotations.NotNull;
 
-public interface SymbolicStyle extends Comparable<SymbolicStyle> {
+public interface SymbolicStyle extends Ink, Comparable<SymbolicStyle> {
     char symbol();
 
     boolean resets();

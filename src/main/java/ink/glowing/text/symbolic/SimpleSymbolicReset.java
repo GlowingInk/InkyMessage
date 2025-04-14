@@ -1,4 +1,4 @@
-package ink.glowing.text.style.symbolic;
+package ink.glowing.text.symbolic;
 
 import net.kyori.adventure.text.format.Style;
 import org.jetbrains.annotations.ApiStatus;

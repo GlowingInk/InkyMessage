@@ -1,12 +1,12 @@
 package ink.glowing.text;
 
+import ink.glowing.text.modifier.ModifierGetter;
+import ink.glowing.text.modifier.StyleModifier;
 import ink.glowing.text.placeholders.Placeholder;
 import ink.glowing.text.placeholders.PlaceholderGetter;
 import ink.glowing.text.replace.Replacer;
-import ink.glowing.text.style.modifier.ModifierGetter;
-import ink.glowing.text.style.modifier.StyleModifier;
-import ink.glowing.text.style.symbolic.StandardSymbolicStyles;
-import ink.glowing.text.style.symbolic.SymbolicStyle;
+import ink.glowing.text.symbolic.StandardSymbolicStyles;
+import ink.glowing.text.symbolic.SymbolicStyle;
 import net.kyori.adventure.builder.AbstractBuilder;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.Style;
@@ -19,16 +19,16 @@ import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import static ink.glowing.text.placeholders.PlaceholderGetter.placeholderGetter;
+import static ink.glowing.text.Stringifier.stringify;
+import static ink.glowing.text.modifier.standard.ClickModifier.clickModifier;
+import static ink.glowing.text.modifier.standard.ColorModifier.colorModifier;
+import static ink.glowing.text.modifier.standard.DecorModifier.decorModifier;
+import static ink.glowing.text.modifier.standard.FontModifier.fontModifier;
+import static ink.glowing.text.modifier.standard.HoverModifier.hoverModifier;
+import static ink.glowing.text.modifier.standard.UrlModifier.httpModifier;
+import static ink.glowing.text.modifier.standard.UrlModifier.httpsModifier;
 import static ink.glowing.text.replace.StandardReplacers.urlReplacer;
-import static ink.glowing.text.style.modifier.standard.ClickModifier.clickModifier;
-import static ink.glowing.text.style.modifier.standard.ColorModifier.colorModifier;
-import static ink.glowing.text.style.modifier.standard.DecorModifier.decorModifier;
-import static ink.glowing.text.style.modifier.standard.FontModifier.fontModifier;
-import static ink.glowing.text.style.modifier.standard.HoverModifier.hoverModifier;
-import static ink.glowing.text.style.modifier.standard.UrlModifier.httpModifier;
-import static ink.glowing.text.style.modifier.standard.UrlModifier.httpsModifier;
-import static ink.glowing.text.style.symbolic.StandardSymbolicStyles.*;
+import static ink.glowing.text.symbolic.StandardSymbolicStyles.*;
 
 /**
  * User-friendly component (de)serializer with legacy format.
@@ -83,7 +83,6 @@ public final class InkyMessage implements ComponentSerializer<Component, Compone
      * Convert string into adventure text component.
      * @param inputText input string
      * @return converted text component
-     * @see InkyMessage#standardResolver()
      */
     @Override
     public @NotNull Component deserialize(@NotNull String inputText) {
@@ -93,25 +92,34 @@ public final class InkyMessage implements ComponentSerializer<Component, Compone
     /**
      * Convert string into adventure text component.
      * @param inputText input string
-     * @param placeholders custom placeholders
+     * @param ink additional style ink
      * @return converted text component
-     * @see InkyMessage#standardResolver()
      */
     public @NotNull Component deserialize(@NotNull String inputText,
-                                          @NotNull Placeholder @NotNull ... placeholders) {
-        return deserialize(inputText, this.resolver, placeholderGetter(placeholders));
+                                          @NotNull Ink ink) {
+        return deserialize(inputText, this.resolver, ink);
     }
 
     /**
      * Convert string into adventure text component.
      * @param inputText input string
-     * @param placeholders custom placeholders
+     * @param inks additional style inks
      * @return converted text component
-     * @see InkyMessage#standardResolver()
      */
     public @NotNull Component deserialize(@NotNull String inputText,
-                                          @NotNull PlaceholderGetter placeholders) {
-        return deserialize(inputText, this.resolver, placeholders);
+                                          @NotNull Ink @NotNull ... inks) {
+        return deserialize(inputText, this.resolver, inks);
+    }
+
+    /**
+     * Convert string into adventure text component.
+     * @param inputText input string
+     * @param inks additional style inks
+     * @return converted text component
+     */
+    public @NotNull Component deserialize(@NotNull String inputText,
+                                          @NotNull Iterable<@NotNull Ink> inks) {
+        return deserialize(inputText, this.resolver, inks);
     }
 
     /**
@@ -129,26 +137,39 @@ public final class InkyMessage implements ComponentSerializer<Component, Compone
      * Convert string into adventure text component using provided resolver.
      * @param inputText input string
      * @param resolver resolver to use
-     * @param placeholders custom placeholders
+     * @param ink additional style ink
      * @return converted text component
      */
     public @NotNull Component deserialize(@NotNull String inputText,
                                           @NotNull Resolver resolver,
-                                          @NotNull Placeholder@NotNull ... placeholders) {
-        return deserialize(inputText, new BuildContext(resolver, placeholderGetter(placeholders)));
+                                          @NotNull Ink ink) {
+        return deserialize(inputText, new BuildContext(resolver.toBuilder().addInk(ink).build()));
     }
 
     /**
      * Convert string into adventure text component using provided resolver.
      * @param inputText input string
      * @param resolver resolver to use
-     * @param placeholders custom placeholders
+     * @param inks additional style inks
      * @return converted text component
      */
     public @NotNull Component deserialize(@NotNull String inputText,
                                           @NotNull Resolver resolver,
-                                          @NotNull PlaceholderGetter placeholders) {
-        return deserialize(inputText, new BuildContext(resolver, placeholders));
+                                          @NotNull Ink @NotNull ... inks) {
+        return deserialize(inputText, resolver, Arrays.asList(inks));
+    }
+
+    /**
+     * Convert string into adventure text component using provided resolver.
+     * @param inputText input string
+     * @param resolver resolver to use
+     * @param inks additional style inks
+     * @return converted text component
+     */
+    public @NotNull Component deserialize(@NotNull String inputText,
+                                          @NotNull Resolver resolver,
+                                          @NotNull Iterable<@NotNull Ink> inks) {
+        return deserialize(inputText, new BuildContext(resolver.toBuilder().addInks(inks).build()));
     }
 
     /**
@@ -157,7 +178,8 @@ public final class InkyMessage implements ComponentSerializer<Component, Compone
      * @param context context to deserialize with
      * @return converted text component
      */
-    private @NotNull Component deserialize(@NotNull String inputText, @NotNull BuildContext context) {
+    private @NotNull Component deserialize(@NotNull String inputText,
+                                           @NotNull BuildContext context) {
         return Parser.parse(inputText, context).compact();
     }
 
@@ -168,7 +190,7 @@ public final class InkyMessage implements ComponentSerializer<Component, Compone
      */
     @Override
     public @NotNull String serialize(@NotNull Component text) {
-        return serialize(text, standardResolver());
+        return stringify(text, this.resolver);
     }
 
     /**
@@ -178,7 +200,7 @@ public final class InkyMessage implements ComponentSerializer<Component, Compone
      * @return converted string representation
      */
     public @NotNull String serialize(@NotNull Component text, @NotNull Resolver resolver) {
-        return Stringifier.stringify(text, resolver);
+        return stringify(text, resolver);
     }
 
     /**
@@ -244,10 +266,19 @@ public final class InkyMessage implements ComponentSerializer<Component, Compone
     }
 
     /**
+     * Check if character cannot be escaped.
+     * @param ch character to check
+     * @return is character unescapable
+     */
+    public static boolean isUnescapable(char ch) {
+        return ESCAPABLE_SYMBOLS.indexOf(ch) == -1;
+    }
+
+    /**
      * Creates a new resolver builder.
      * @return a builder
      */
-    public static @NotNull InkyMessage.ResolverBuilder resolver() {
+    public static @NotNull ResolverBuilder resolver() {
         return new ResolverBuilder();
     }
 
@@ -271,7 +302,7 @@ public final class InkyMessage implements ComponentSerializer<Component, Compone
 
         @NotNull SymbolicStyle symbolicReset();
 
-        @NotNull InkyMessage.ResolverBuilder toBuilder();
+        @NotNull ResolverBuilder toBuilder();
     }
 
     public static class ResolverBuilder implements AbstractBuilder<Resolver> {
@@ -287,145 +318,165 @@ public final class InkyMessage implements ComponentSerializer<Component, Compone
             this.symbolics = new HashSet<>();
             this.placeholders = new HashSet<>();
         }
+        
+        public @NotNull ResolverBuilder addInk(@NotNull Ink ink) {
+            return switch (ink) {
+                case Placeholder ph -> addPlaceholder(ph);
+                case StyleModifier<?> mod -> addModifier(mod);
+                case Replacer rp -> addReplacer(rp);
+                case SymbolicStyle sym -> addSymbolic(sym);
+                default -> throw new IllegalArgumentException("Unknown ink type: " + ink.getClass().getSimpleName());
+            };
+        }
+
+        public @NotNull ResolverBuilder addInks(@NotNull Ink @NotNull ... inks) {
+            for (var ink : inks) addInk(ink);
+            return this;
+        }
+
+        public @NotNull ResolverBuilder addInks(@NotNull Iterable<@NotNull Ink> inks) {
+            for (var ink : inks) addInk(ink);
+            return this;
+        }
 
         @Contract("_ -> this")
-        public @NotNull InkyMessage.ResolverBuilder replacers(@NotNull Replacer @NotNull ... replacers) {
+        public @NotNull ResolverBuilder replacers(@NotNull Replacer @NotNull ... replacers) {
             return replacers(Arrays.asList(replacers));
         }
 
         @Contract("_ -> this")
-        public @NotNull InkyMessage.ResolverBuilder replacers(@NotNull Collection<? extends @NotNull Replacer> replacers) {
+        public @NotNull ResolverBuilder replacers(@NotNull Collection<? extends @NotNull Replacer> replacers) {
             this.replacers = new HashSet<>(replacers);
             return this;
         }
 
         @Contract("_ -> this")
-        public @NotNull InkyMessage.ResolverBuilder addReplacer(@NotNull Replacer replacer) {
+        public @NotNull ResolverBuilder addReplacer(@NotNull Replacer replacer) {
             this.replacers.add(replacer);
             return this;
         }
 
         @Contract("_ -> this")
-        public @NotNull InkyMessage.ResolverBuilder addReplacers(@NotNull Replacer @NotNull ... replacers) {
+        public @NotNull ResolverBuilder addReplacers(@NotNull Replacer @NotNull ... replacers) {
             return addReplacers(Arrays.asList(replacers));
         }
 
         @Contract("_ -> this")
-        public @NotNull InkyMessage.ResolverBuilder addReplacers(@NotNull Collection<? extends @NotNull Replacer> replacers) {
+        public @NotNull ResolverBuilder addReplacers(@NotNull Collection<? extends @NotNull Replacer> replacers) {
             this.replacers.addAll(replacers);
             return this;
         }
 
         @Contract("_ -> this")
-        public @NotNull InkyMessage.ResolverBuilder addReplacers(@NotNull Iterable<? extends @NotNull Replacer> replacers) {
+        public @NotNull ResolverBuilder addReplacers(@NotNull Iterable<? extends @NotNull Replacer> replacers) {
             for (var replacer : replacers) addReplacer(replacer);
             return this;
         }
 
         @Contract("_ -> this")
-        public @NotNull InkyMessage.ResolverBuilder placeholders(@NotNull Placeholder @NotNull ... placeholders) {
+        public @NotNull ResolverBuilder placeholders(@NotNull Placeholder @NotNull ... placeholders) {
             return placeholders(Arrays.asList(placeholders));
         }
 
         @Contract("_ -> this")
-        public @NotNull InkyMessage.ResolverBuilder placeholders(@NotNull Collection<? extends @NotNull Placeholder> placeholders) {
+        public @NotNull ResolverBuilder placeholders(@NotNull Collection<? extends @NotNull Placeholder> placeholders) {
             this.placeholders = new HashSet<>(placeholders);
             return this;
         }
 
         @Contract("_ -> this")
-        public @NotNull InkyMessage.ResolverBuilder addPlaceholder(@NotNull Placeholder placeholder) {
+        public @NotNull ResolverBuilder addPlaceholder(@NotNull Placeholder placeholder) {
             this.placeholders.add(placeholder);
             return this;
         }
 
         @Contract("_ -> this")
-        public @NotNull InkyMessage.ResolverBuilder addPlaceholders(@NotNull Placeholder @NotNull ... placeholders) {
+        public @NotNull ResolverBuilder addPlaceholders(@NotNull Placeholder @NotNull ... placeholders) {
             return addPlaceholders(Arrays.asList(placeholders));
         }
 
         @Contract("_ -> this")
-        public @NotNull InkyMessage.ResolverBuilder addPlaceholders(@NotNull Collection<? extends @NotNull Placeholder> placeholders) {
+        public @NotNull ResolverBuilder addPlaceholders(@NotNull Collection<? extends @NotNull Placeholder> placeholders) {
             this.placeholders.addAll(placeholders);
             return this;
         }
 
         @Contract("_ -> this")
-        public @NotNull InkyMessage.ResolverBuilder addPlaceholders(@NotNull Iterable<? extends @NotNull Placeholder> placeholders) {
+        public @NotNull ResolverBuilder addPlaceholders(@NotNull Iterable<? extends @NotNull Placeholder> placeholders) {
             for (var placeholder : placeholders) addPlaceholder(placeholder);
             return this;
         }
 
         @Contract("_ -> this")
-        public @NotNull InkyMessage.ResolverBuilder modifiers(@NotNull StyleModifier<?> @NotNull ... styleModifiers) {
+        public @NotNull ResolverBuilder modifiers(@NotNull StyleModifier<?> @NotNull ... styleModifiers) {
             return modifiers(Arrays.asList(styleModifiers));
         }
 
         @Contract("_ -> this")
-        public @NotNull InkyMessage.ResolverBuilder modifiers(@NotNull Collection<? extends @NotNull StyleModifier<?>> styleModifiers) {
+        public @NotNull ResolverBuilder modifiers(@NotNull Collection<? extends @NotNull StyleModifier<?>> styleModifiers) {
             this.modifiers = new HashSet<>(styleModifiers);
             return this;
         }
 
         @Contract("_ -> this")
-        public @NotNull InkyMessage.ResolverBuilder addModifier(@NotNull StyleModifier<?> modifier) {
+        public @NotNull ResolverBuilder addModifier(@NotNull StyleModifier<?> modifier) {
             this.modifiers.add(modifier);
             return this;
         }
 
         @Contract("_ -> this")
-        public @NotNull InkyMessage.ResolverBuilder addModifiers(@NotNull StyleModifier<?> @NotNull ... modifiers) {
+        public @NotNull ResolverBuilder addModifiers(@NotNull StyleModifier<?> @NotNull ... modifiers) {
             return addModifiers(Arrays.asList(modifiers));
         }
 
         @Contract("_ -> this")
-        public @NotNull InkyMessage.ResolverBuilder addModifiers(@NotNull Collection<? extends @NotNull StyleModifier<?>> modifiers) {
+        public @NotNull ResolverBuilder addModifiers(@NotNull Collection<? extends @NotNull StyleModifier<?>> modifiers) {
             this.modifiers.addAll(modifiers);
             return this;
         }
 
         @Contract("_ -> this")
-        public @NotNull InkyMessage.ResolverBuilder addModifiers(@NotNull Iterable<? extends @NotNull StyleModifier<?>> modifiers) {
+        public @NotNull ResolverBuilder addModifiers(@NotNull Iterable<? extends @NotNull StyleModifier<?>> modifiers) {
             for (var modifier : modifiers) this.modifiers.add(modifier);
             return this;
         }
 
         @Contract("_ -> this")
-        public @NotNull InkyMessage.ResolverBuilder symbolicReset(char symbol) {
+        public @NotNull ResolverBuilder symbolicReset(char symbol) {
             this.symbolicReset = StandardSymbolicStyles.simpleReset(symbol);
             return this;
         }
 
         @Contract("_ -> this")
-        public @NotNull InkyMessage.ResolverBuilder symbolics(@NotNull SymbolicStyle @NotNull ... symbolics) {
+        public @NotNull ResolverBuilder symbolics(@NotNull SymbolicStyle @NotNull ... symbolics) {
             return symbolics(Arrays.asList(symbolics));
         }
 
         @Contract("_ -> this")
-        public @NotNull InkyMessage.ResolverBuilder symbolics(@NotNull Collection<? extends @NotNull SymbolicStyle> symbolics) {
+        public @NotNull ResolverBuilder symbolics(@NotNull Collection<? extends @NotNull SymbolicStyle> symbolics) {
             this.symbolics = new HashSet<>(symbolics);
             return this;
         }
 
         @Contract("_ -> this")
-        public @NotNull InkyMessage.ResolverBuilder addSymbolic(@NotNull SymbolicStyle symbolics) {
+        public @NotNull ResolverBuilder addSymbolic(@NotNull SymbolicStyle symbolics) {
             this.symbolics.add(symbolics);
             return this;
         }
 
         @Contract("_ -> this")
-        public @NotNull InkyMessage.ResolverBuilder addSymbolics(@NotNull SymbolicStyle @NotNull ... symbolics) {
+        public @NotNull ResolverBuilder addSymbolics(@NotNull SymbolicStyle @NotNull ... symbolics) {
             return addSymbolics(Arrays.asList(symbolics));
         }
 
         @Contract("_ -> this")
-        public @NotNull InkyMessage.ResolverBuilder addSymbolics(@NotNull Collection<? extends @NotNull SymbolicStyle> symbolics) {
+        public @NotNull ResolverBuilder addSymbolics(@NotNull Collection<? extends @NotNull SymbolicStyle> symbolics) {
             this.symbolics.addAll(symbolics);
             return this;
         }
 
         @Contract("_ -> this")
-        public @NotNull InkyMessage.ResolverBuilder addSymbolics(@NotNull Iterable<? extends @NotNull SymbolicStyle> symbolics) {
+        public @NotNull ResolverBuilder addSymbolics(@NotNull Iterable<? extends @NotNull SymbolicStyle> symbolics) {
             for (var symbolic : symbolics) addSymbolic(symbolic);
             return this;
         }

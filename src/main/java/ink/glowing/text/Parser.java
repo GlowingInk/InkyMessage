@@ -2,8 +2,8 @@ package ink.glowing.text;
 
 import ink.glowing.text.placeholders.Placeholder;
 import ink.glowing.text.replace.Replacer;
-import ink.glowing.text.style.modifier.ModifierGetter;
-import ink.glowing.text.style.modifier.StyleModifier;
+import ink.glowing.text.modifier.ModifierGetter;
+import ink.glowing.text.modifier.StyleModifier;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.format.Style;

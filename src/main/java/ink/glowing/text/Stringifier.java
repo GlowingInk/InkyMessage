@@ -1,6 +1,6 @@
 package ink.glowing.text;
 
-import ink.glowing.text.style.symbolic.SymbolicStyle;
+import ink.glowing.text.symbolic.SymbolicStyle;
 import net.kyori.adventure.text.*;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
@@ -8,8 +8,8 @@ import org.jetbrains.annotations.NotNull;
 import java.util.TreeSet;
 
 import static ink.glowing.text.InkyMessage.escape;
-import static ink.glowing.text.style.modifier.standard.LangModifiers.argModifier;
-import static ink.glowing.text.style.modifier.standard.LangModifiers.fallbackModifier;
+import static ink.glowing.text.modifier.standard.LangModifiers.argModifier;
+import static ink.glowing.text.modifier.standard.LangModifiers.fallbackModifier;
 
 @ApiStatus.Internal
 final class Stringifier { private Stringifier() {}

@@ -1,22 +1,24 @@
-package ink.glowing.text.style.symbolic;
+package ink.glowing.text.symbolic;
 
 import net.kyori.adventure.text.format.Style;
-import net.kyori.adventure.text.format.TextColor;
+import net.kyori.adventure.text.format.TextDecoration;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Objects;
 
+import static net.kyori.adventure.text.format.Style.style;
+
 @ApiStatus.Internal
-final class ResettingSymbolicColor implements SymbolicStyle {
+final class ChainedSymbolicDecoration implements SymbolicStyle {
     private final char symbol;
-    private final TextColor color;
+    private final TextDecoration decoration;
     private final Style cleanStyle;
 
-    ResettingSymbolicColor(char symbol, @NotNull TextColor color) {
+    ChainedSymbolicDecoration(char symbol, @NotNull TextDecoration decoration) {
         this.symbol = symbol;
-        this.color = color;
-        this.cleanStyle = Style.style(color);
+        this.decoration = decoration;
+        this.cleanStyle = style(decoration);
     }
 
     @Override
@@ -26,12 +28,12 @@ final class ResettingSymbolicColor implements SymbolicStyle {
 
     @Override
     public boolean resets() {
-        return true;
+        return false;
     }
 
     @Override
     public boolean isApplied(@NotNull Style inputStyle) {
-        return color.equals(inputStyle.color());
+        return inputStyle.hasDecoration(decoration);
     }
 
     @Override
@@ -41,26 +43,26 @@ final class ResettingSymbolicColor implements SymbolicStyle {
 
     @Override
     public @NotNull Style merge(@NotNull Style inputStyle) {
-        return cleanStyle;
+        return inputStyle.decorate(decoration);
     }
 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof ResettingSymbolicColor that)) return false;
-        return symbol == that.symbol && color.equals(that.color);
+        if (!(o instanceof ChainedSymbolicDecoration that)) return false;
+        return symbol == that.symbol && decoration == that.decoration;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(symbol, color);
+        return Objects.hash(symbol, decoration);
     }
 
     @Override
     public String toString() {
-        return "ResettingSymbolicColor{" +
+        return "ChainedSymbolicDecoration{" +
                 "symbol=" + symbol +
-                ", color=" + color +
+                ", decoration=" + decoration +
                 '}';
     }
 }

@@ -1,5 +1,6 @@
 package ink.glowing.text.placeholders;
 
+import ink.glowing.text.Ink;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 

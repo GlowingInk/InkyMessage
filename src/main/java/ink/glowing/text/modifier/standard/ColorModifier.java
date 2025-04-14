@@ -1,6 +1,6 @@
-package ink.glowing.text.style.modifier.standard;
+package ink.glowing.text.modifier.standard;
 
-import ink.glowing.text.style.modifier.StyleModifier;
+import ink.glowing.text.modifier.StyleModifier;
 import ink.glowing.text.utils.function.FloatFunction;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.ComponentIteratorType;

@@ -1,5 +1,6 @@
 package ink.glowing.text.replace;
 
+import ink.glowing.text.Ink;
 import ink.glowing.text.utils.GeneralUtils;
 import net.kyori.adventure.text.Component;
 import org.jetbrains.annotations.ApiStatus;
@@ -16,7 +17,7 @@ import java.util.regex.Pattern;
 
 import static net.kyori.adventure.text.Component.text;
 
-public interface Replacer {
+public interface Replacer extends Ink {
     @NotNull @Unmodifiable List<@NotNull FoundSpot> findSpots(@NotNull String str);
 
     static @NotNull Replacer replacer(@NotNull String search, @NotNull String replacement) {
