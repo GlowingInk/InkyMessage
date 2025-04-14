@@ -3,12 +3,14 @@ package ink.glowing.text;
 import ink.glowing.text.placeholders.Placeholder;
 import ink.glowing.text.placeholders.PlaceholderGetter;
 import net.kyori.adventure.text.format.Style;
+import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import static ink.glowing.text.placeholders.PlaceholderGetter.composePlaceholderGetters;
 
-public final class BuildContext implements PlaceholderGetter {
+@ApiStatus.Internal
+final class BuildContext implements PlaceholderGetter {
     private final InkyMessage.Resolver resolver;
     private final PlaceholderGetter placeholderGetter;
     private Style lastStyle;

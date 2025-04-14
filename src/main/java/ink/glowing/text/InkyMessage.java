@@ -33,7 +33,7 @@ import static ink.glowing.text.style.symbolic.StandardSymbolicStyles.*;
 /**
  * User-friendly component (de)serializer with legacy format.
  */
-public final class InkyMessage implements ComponentSerializer<Component, Component, String> { private InkyMessage() {}
+public final class InkyMessage implements ComponentSerializer<Component, Component, String> {
     private static final String ESCAPABLE_SYMBOLS = "&]()}\\";
     private static final Pattern ESCAPE_PATTERN = Pattern.compile("[&\\]()}\\\\]");
     private static final Pattern UNESCAPE_PATTERN = Pattern.compile("\\\\([&\\]()\\\\}])");
@@ -53,29 +53,69 @@ public final class InkyMessage implements ComponentSerializer<Component, Compone
             .addReplacer(urlReplacer())
             .build();
 
-    private static final InkyMessage INSTANCE = new InkyMessage();
+    private static final InkyMessage STANDARD_INSTANCE = new InkyMessage(STANDARD_RESOLVER);
 
-    /**
-     * Gets the instance of InkyMessage.
-     * @return the instance
-     */
-    public static @NotNull InkyMessage inkyMessage() {
-        return INSTANCE;
+    private final Resolver resolver;
+
+    private InkyMessage(@NotNull Resolver resolver) {
+        this.resolver = resolver;
     }
 
     /**
-     * Convert string into adventure text component using standard resolver.
+     * Gets the standard instance of InkyMessage.
+     * @return the instance
+     * @see InkyMessage#standardResolver()
+     */
+    public static @NotNull InkyMessage inkyMessage() {
+        return STANDARD_INSTANCE;
+    }
+
+    /**
+     * Creates an instance of InkyMessage using provided resolver.
+     * @param resolver resolver to use
+     * @return an instance
+     */
+    public static @NotNull InkyMessage inkyMessage(@NotNull Resolver resolver) {
+        return new InkyMessage(resolver);
+    }
+
+    /**
+     * Convert string into adventure text component.
      * @param inputText input string
      * @return converted text component
      * @see InkyMessage#standardResolver()
      */
     @Override
     public @NotNull Component deserialize(@NotNull String inputText) {
-        return deserialize(inputText, new BuildContext(standardResolver()));
+        return deserialize(inputText, this.resolver);
     }
 
     /**
      * Convert string into adventure text component.
+     * @param inputText input string
+     * @param placeholders custom placeholders
+     * @return converted text component
+     * @see InkyMessage#standardResolver()
+     */
+    public @NotNull Component deserialize(@NotNull String inputText,
+                                          @NotNull Placeholder @NotNull ... placeholders) {
+        return deserialize(inputText, this.resolver, placeholderGetter(placeholders));
+    }
+
+    /**
+     * Convert string into adventure text component.
+     * @param inputText input string
+     * @param placeholders custom placeholders
+     * @return converted text component
+     * @see InkyMessage#standardResolver()
+     */
+    public @NotNull Component deserialize(@NotNull String inputText,
+                                          @NotNull PlaceholderGetter placeholders) {
+        return deserialize(inputText, this.resolver, placeholders);
+    }
+
+    /**
+     * Convert string into adventure text component using provided resolver.
      * @param inputText input string
      * @param resolver resolver to use
      * @return converted text component
@@ -86,31 +126,7 @@ public final class InkyMessage implements ComponentSerializer<Component, Compone
     }
 
     /**
-     * Convert string into adventure text component using standard resolver.
-     * @param inputText input string
-     * @param placeholders custom placeholders
-     * @return converted text component
-     * @see InkyMessage#standardResolver()
-     */
-    public @NotNull Component deserialize(@NotNull String inputText,
-                                          @NotNull Placeholder @NotNull ... placeholders) {
-        return deserialize(inputText, new BuildContext(standardResolver(), placeholderGetter(placeholders)));
-    }
-
-    /**
-     * Convert string into adventure text component using standard resolver.
-     * @param inputText input string
-     * @param placeholders custom placeholders
-     * @return converted text component
-     * @see InkyMessage#standardResolver()
-     */
-    public @NotNull Component deserialize(@NotNull String inputText,
-                                          @NotNull PlaceholderGetter placeholders) {
-        return deserialize(inputText, new BuildContext(standardResolver(), placeholders));
-    }
-
-    /**
-     * Convert string into adventure text component.
+     * Convert string into adventure text component using provided resolver.
      * @param inputText input string
      * @param resolver resolver to use
      * @param placeholders custom placeholders
@@ -123,7 +139,7 @@ public final class InkyMessage implements ComponentSerializer<Component, Compone
     }
 
     /**
-     * Convert string into adventure text component.
+     * Convert string into adventure text component using provided resolver.
      * @param inputText input string
      * @param resolver resolver to use
      * @param placeholders custom placeholders
@@ -141,16 +157,14 @@ public final class InkyMessage implements ComponentSerializer<Component, Compone
      * @param context context to deserialize with
      * @return converted text component
      */
-    public @NotNull Component deserialize(@NotNull String inputText,
-                                          @NotNull BuildContext context) {
+    private @NotNull Component deserialize(@NotNull String inputText, @NotNull BuildContext context) {
         return Parser.parse(inputText, context).compact();
     }
 
     /**
-     * Convert adventure component into string using standard resolver.
+     * Convert adventure component into string.
      * @param text input component
      * @return converted string representation
-     * @see InkyMessage#standardResolver()
      */
     @Override
     public @NotNull String serialize(@NotNull Component text) {
@@ -158,11 +172,10 @@ public final class InkyMessage implements ComponentSerializer<Component, Compone
     }
 
     /**
-     * Convert adventure component into string.
+     * Convert adventure component into string using provided resolver.
      * @param text input component
      * @param resolver resolver to use
      * @return converted string representation
-     * @see InkyMessage#standardResolver()
      */
     public @NotNull String serialize(@NotNull Component text, @NotNull Resolver resolver) {
         return Stringifier.stringify(text, resolver);

@@ -1,18 +1,16 @@
-package ink.glowing.text.style.modifier.internal;
+package ink.glowing.text.style.modifier.standard;
 
 import ink.glowing.text.InkyMessage;
 import ink.glowing.text.style.modifier.StyleModifier;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TranslatableComponent;
 import net.kyori.adventure.text.TranslationArgument;
-import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Unmodifiable;
 
 import java.util.ArrayList;
 import java.util.List;
 
-@ApiStatus.Internal
 public final class LangModifiers {
     private LangModifiers() {}
 

@@ -21,6 +21,7 @@ Those are its possible modifiers:
 - Shadow color modifier
 - Selector and score placeholders
 - Reversed order formatting, e.g. `&(click:run /hello world)[This one is clickable]`
+- Better API for marking (de)serializable elements
 - Better serialization
 - More and better unit tests
 

@@ -8,8 +8,8 @@ import org.jetbrains.annotations.NotNull;
 import java.util.TreeSet;
 
 import static ink.glowing.text.InkyMessage.escape;
-import static ink.glowing.text.style.modifier.internal.LangModifiers.argModifier;
-import static ink.glowing.text.style.modifier.internal.LangModifiers.fallbackModifier;
+import static ink.glowing.text.style.modifier.standard.LangModifiers.argModifier;
+import static ink.glowing.text.style.modifier.standard.LangModifiers.fallbackModifier;
 
 @ApiStatus.Internal
 final class Stringifier { private Stringifier() {}

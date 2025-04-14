@@ -4,8 +4,8 @@ import org.jetbrains.annotations.NotNull;
 
 import static ink.glowing.text.placeholders.Placeholder.placeholder;
 import static ink.glowing.text.style.modifier.ModifierGetter.modifierGetter;
-import static ink.glowing.text.style.modifier.internal.LangModifiers.argModifier;
-import static ink.glowing.text.style.modifier.internal.LangModifiers.fallbackModifier;
+import static ink.glowing.text.style.modifier.standard.LangModifiers.argModifier;
+import static ink.glowing.text.style.modifier.standard.LangModifiers.fallbackModifier;
 import static net.kyori.adventure.text.Component.keybind;
 import static net.kyori.adventure.text.Component.translatable;
 
