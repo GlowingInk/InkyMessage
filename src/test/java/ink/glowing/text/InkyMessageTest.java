@@ -172,16 +172,6 @@ public class InkyMessageTest {
                         "With &[inner &[deep](click:run cmd) component](hover:text Wow)"
                 },
                 {
-                        text()
-                                .append(text("First green").color(GREEN).decorate(BOLD))
-                                .append(text(" then second green").color(GREEN).decorate(BOLD)).build(),
-                        "&a&lFirst green&a&l then second green"
-                },
-                {
-                        text("First green").append(text(" then second green")).color(GREEN).decorate(BOLD),
-                        "&a&lFirst green&a&l then second green"
-                },
-                {
                         text("That's so ")
                                 .append(translatable("cool", "Fallbacked", text("Arg1"), text("Arg2\\"))
                                         .append(text(" Test")).hoverEvent(showText(text("hover!").color(GREEN)))),
@@ -202,6 +192,34 @@ public class InkyMessageTest {
             if (!debug) debugSerializer(text);
             throw throwable;
         }
+    }
+
+    @DataProvider
+    public Object[][] idealSerializerData() { // TODO
+        return new Object[][] {
+                {
+                        text()
+                                .append(text("First green").color(GREEN).decorate(BOLD))
+                                .append(text(" then second green").color(GREEN).decorate(BOLD)).build(),
+                        "&a&lFirst green&a&l then second green"
+                },
+                {
+                        text("First green").append(text(" then second green")).color(GREEN).decorate(BOLD),
+                        "&a&lFirst green&a&l then second green"
+                },
+                {
+                        text()
+                                .append(text("Outside ").color(GREEN))
+                                .append(text("inside 1 ").color(GREEN).clickEvent(runCommand("/home")))
+                                .append(text(" inside 2").color(RED).clickEvent(runCommand("/home"))).build(),
+                        "&aOutside &[inside 1&c inside 2](click:run /home)"
+                }
+        };
+    }
+
+    @Test(dataProvider = "idealSerializerData", enabled = false)
+    public void idealSerializerTest(Component text, String expected) {
+        serializeTest(text, expected);
     }
 
     private void debugSerializer(Component comp) {

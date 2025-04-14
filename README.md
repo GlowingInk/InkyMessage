@@ -8,20 +8,20 @@ Besides that, we also have a special format for the modern features like interac
 It's very simple to follow: `&[My special text](key:parameter value)(otherkey:otherparam)`.
 Those are its possible modifiers:
 ## Modifier formatting
-| Key                | Parameter                                                                                                                                                                 | Value                      | Effect                                    | Example                                                     |
-|--------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------|----------------------------|-------------------------------------------|-------------------------------------------------------------|
-| `hover`            | Only `text` ATM                                                                                                                                                           | Rich hover text            | Add hover effect to chat component        | `Stop. &[Hover time](hover:text What a meme)!`              |
-| `click`            | `url`, `run`, `suggest`, `copy`, `insert` (same as `suggest`, but requires shift-click)                                                                                   | Plain action parameters    | Add click functionality to chat component | `&[Get 100 robux!](click:url https://youtu.be/dQw4w9WgXcQ)` |
-| `decor`            | `bold`, `obfuscated`, `strikethrough`, `underlined`, `italic`                                                                                                             | `true`, `unset`, `false`   | Force decorator on the text               | `&cThat's a &[bold](decor:bold) move!`                      |
-| `font`             | Namespaced key of a font                                                                                                                                                  | None                       | Change fonts of a text                    | `Wow, &[almost HD fonts](font:minecraft:uniform)!`          |
-| `color`            | [Named color](https://jd.advntr.dev/api/4.13.1/net/kyori/adventure/text/format/NamedTextColor.html) (lower case) or hex (`#123456`)                                       | `pastel` for pastel colors | Colorize colorless text                   | `&[This text is green](color:green)`                        |
-| `color` (gradient) | `spectrum` or `color1-color2-colorN` (see the original `color` modifier)                                                                                                  | `pastel` for pastel colors | Colorize colorless text with gradient     | `&aLook!&r &[Fancy!](color:spectrum)(decor:bold)`           |
+| Key                | Parameter                                                                                                                           | Value                      | Effect                                    | Example                                                     |
+|--------------------|-------------------------------------------------------------------------------------------------------------------------------------|----------------------------|-------------------------------------------|-------------------------------------------------------------|
+| `hover`            | Only `text` ATM                                                                                                                     | Rich hover text            | Add hover effect to chat component        | `Stop. &[Hover time](hover:text What a meme)!`              |
+| `click`            | `url`, `run`, `suggest`, `copy`, `insert` (same as `suggest`, but requires shift-click)                                             | Plain action parameters    | Add click functionality to chat component | `&[Get 100 robux!](click:url https://youtu.be/dQw4w9WgXcQ)` |
+| `decor`            | `bold`, `obfuscated`, `strikethrough`, `underlined`, `italic`                                                                       | `true`, `unset`, `false`   | Force decorator on the text               | `&cThat's a &[bold](decor:bold) move!`                      |
+| `font`             | Namespaced key of a font                                                                                                            | None                       | Change fonts of a text                    | `Wow, &[almost HD fonts](font:minecraft:uniform)!`          |
+| `color`            | [Named color](https://jd.advntr.dev/api/4.20.0/net/kyori/adventure/text/format/NamedTextColor.html) (lower case) or hex (`#123456`) | `pastel` for pastel colors | Colorize colorless text                   | `&[This text is green](color:green)`                        |
+| `color` (gradient) | `spectrum`, `random` or `color1-color2-colorN` (named or hex)                                                                       | `pastel` for pastel colors | Colorize colorless text with gradient     | `&aLook!&r &[Fancy!](color:spectrum)(decor:bold)`           |
 
 ## Plans (until 1.0.0 release)
-- Selector placeholders
-- Better `SymbolicStyle`s stacking on serialization
-- Use `VirtualComponent`s for better serialization
+- Shadow color modifier
+- Selector and score placeholders
 - Reversed order formatting, e.g. `&(click:run /hello world)[This one is clickable]`
+- Better serialization
 - More and better unit tests
 
 ## Get it ![Version](https://img.shields.io/github/v/tag/GlowingInk/InkyMessage?sort=semver&style=flat&label=release)
@@ -31,7 +31,8 @@ Add to repositories
 ```xml
 <repository>
     <id>glowing-ink</id>
-    <url>https://repo.glowing.ink/releases</url> <!-- https://repo.glowing.ink/snapshots for snapshots -->
+    <url>https://repo.glowing.ink/releases</url>
+    <!-- https://repo.glowing.ink/snapshots for snapshots -->
 </repository>
 ```
 Add to dependencies
@@ -46,7 +47,8 @@ Add to dependencies
 ```kotlin
 repositories {
     maven {
-        url = uri("https://repo.glowing.ink/releases") // https://repo.glowing.ink/snapshots for snapshots
+        url = uri("https://repo.glowing.ink/releases")
+        // https://repo.glowing.ink/snapshots for snapshots
     }
 }
 
