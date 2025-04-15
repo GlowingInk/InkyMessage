@@ -296,7 +296,7 @@ public final class InkyMessage implements ComponentSerializer<Component, Compone
 
         @NotNull TreeSet<Replacer.FoundSpot> matchReplacements(@NotNull String input);
 
-        @NotNull TreeSet<SymbolicStyle> readSymbolics(@NotNull Component text);
+        @NotNull TreeSet<SymbolicStyle> readSymbolics(@NotNull Style style);
 
         @NotNull List<String> readStyleModifiers(@NotNull Component text);
 

@@ -42,11 +42,6 @@ final class ChainedSymbolicDecoration implements SymbolicStyle {
     }
 
     @Override
-    public @NotNull Style merge(@NotNull Style inputStyle) {
-        return inputStyle.decorate(decoration);
-    }
-
-    @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (!(o instanceof ChainedSymbolicDecoration that)) return false;
@@ -60,9 +55,9 @@ final class ChainedSymbolicDecoration implements SymbolicStyle {
 
     @Override
     public String toString() {
-        return "ChainedSymbolicDecoration{" +
-                "symbol=" + symbol +
-                ", decoration=" + decoration +
-                '}';
+        return "ChainedSymbolicDecoration[" +
+                "symbol=" + symbol + ", " +
+                "decoration=" + decoration +
+                ']';
     }
 }

@@ -2,6 +2,7 @@ package ink.glowing.text.symbolic;
 
 import ink.glowing.text.Ink;
 import net.kyori.adventure.text.format.Style;
+import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 
 public interface SymbolicStyle extends Ink, Comparable<SymbolicStyle> {
@@ -13,10 +14,7 @@ public interface SymbolicStyle extends Ink, Comparable<SymbolicStyle> {
 
     @NotNull Style base();
 
-    default @NotNull Style merge(@NotNull Style inputStyle) {
-        return resets() ? base() : base().merge(inputStyle);
-    }
-
+    @ApiStatus.NonExtendable
     default @NotNull String asFormatted() {
         return "&" + symbol();
     }

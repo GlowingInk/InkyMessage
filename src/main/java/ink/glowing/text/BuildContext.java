@@ -13,7 +13,7 @@ final class BuildContext implements PlaceholderGetter {
     private final PlaceholderGetter placeholderGetter;
     private Style lastStyle;
 
-    public BuildContext(@NotNull InkyMessage.Resolver resolver) {
+    BuildContext(@NotNull InkyMessage.Resolver resolver) {
         this.resolver = resolver;
         this.placeholderGetter = resolver;
         this.lastStyle = Style.empty();

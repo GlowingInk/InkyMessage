@@ -24,11 +24,6 @@ record SimpleSymbolicReset(char symbol) implements SymbolicStyle {
     }
 
     @Override
-    public @NotNull Style merge(@NotNull Style inputStyle) {
-        return Style.empty();
-    }
-
-    @Override
     public boolean equals(Object obj) {
         return obj instanceof SimpleSymbolicReset(char otherSymbol) && otherSymbol == symbol;
     }
@@ -40,9 +35,9 @@ record SimpleSymbolicReset(char symbol) implements SymbolicStyle {
 
     @Override
     public String toString() {
-        return "SimpleSymbolicReset{" +
-                "symbol=" + symbol +
-                ", decoration=reset" +
-                '}';
+        return "SimpleSymbolicReset[" +
+                "symbol=" + symbol + ", " +
+                "decoration=reset" +
+                ']';
     }
 }

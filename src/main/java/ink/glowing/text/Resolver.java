@@ -88,7 +88,10 @@ final class Resolver implements InkyMessage.Resolver {
     @Override
     public @Nullable Style applySymbolicStyle(char symbol, @NotNull Style currentStyle) {
         SymbolicStyle symbolic = symbolics.get(symbol);
-        return symbolic == null ? null : symbolic.merge(currentStyle);
+        if (symbolic == null) return null;
+        return symbolic.resets()
+                ? symbolic.base()
+                : currentStyle.merge(symbolic.base());
     }
 
     /**
@@ -106,18 +109,18 @@ final class Resolver implements InkyMessage.Resolver {
     }
 
     @Override
-    public @NotNull TreeSet<SymbolicStyle> readSymbolics(@NotNull Component text) {
+    public @NotNull TreeSet<SymbolicStyle> readSymbolics(@NotNull Style style) {
+        // TODO StyleBuilder
         TreeSet<SymbolicStyle> symbolics = new TreeSet<>();
-        Style style = text.style();
-        boolean hasColor = false;
         for (var symb : this.symbolics.values()) {
             if (symb.isApplied(style)) {
-                if (symb.base().color() != null) hasColor = true;
+                style = style.unmerge(symb.base());
                 symbolics.add(symb);
+                if (style.isEmpty()) break;
             }
         }
-        if (!hasColor && text.color() != null) {
-            symbolics.add(new HexSymbolicStyle(text.color()));
+        if (style.color() != null) { // If color is still merged
+            symbolics.add(new HexSymbolicStyle(style.color()));
         }
         return symbolics;
     }
@@ -145,7 +148,15 @@ final class Resolver implements InkyMessage.Resolver {
                 .addModifiers(modifiers.values());
     }
 
-    private record HexSymbolicStyle(@NotNull TextColor color) implements SymbolicStyle {
+    private static final class HexSymbolicStyle implements SymbolicStyle {
+        private final @NotNull TextColor color;
+        private final @NotNull Style cleanStyle;
+
+        private HexSymbolicStyle(@NotNull TextColor color) {
+            this.color = color;
+            this.cleanStyle = style(color);
+        }
+
         @Override
         public char symbol() {
             return '#';
@@ -163,17 +174,34 @@ final class Resolver implements InkyMessage.Resolver {
 
         @Override
         public @NotNull Style base() {
-            return style(color);
-        }
-
-        @Override
-        public @NotNull Style merge(@NotNull Style inputStyle) {
-            return inputStyle.color(color);
+            return cleanStyle;
         }
 
         @Override
         public @NotNull String asFormatted() {
             return "&" + color.asHexString();
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (obj == this) return true;
+            if (obj == null || obj.getClass() != this.getClass()) return false;
+            var that = (HexSymbolicStyle) obj;
+            return Objects.equals(this.color, that.color) &&
+                    Objects.equals(this.cleanStyle, that.cleanStyle);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(color, cleanStyle);
+        }
+
+        @Override
+        public String toString() {
+            return "HexSymbolicStyle[" +
+                    "color=" + color + ", " +
+                    "cleanStyle=" + cleanStyle +
+                    ']';
         }
     }
 }

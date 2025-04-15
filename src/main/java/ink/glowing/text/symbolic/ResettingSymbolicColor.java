@@ -40,11 +40,6 @@ final class ResettingSymbolicColor implements SymbolicStyle {
     }
 
     @Override
-    public @NotNull Style merge(@NotNull Style inputStyle) {
-        return cleanStyle;
-    }
-
-    @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (!(o instanceof ResettingSymbolicColor that)) return false;
@@ -58,9 +53,9 @@ final class ResettingSymbolicColor implements SymbolicStyle {
 
     @Override
     public String toString() {
-        return "ResettingSymbolicColor{" +
-                "symbol=" + symbol +
-                ", color=" + color +
-                '}';
+        return "ResettingSymbolicColor[" +
+                "symbol=" + symbol + ", " +
+                "color=" + color +
+                ']';
     }
 }

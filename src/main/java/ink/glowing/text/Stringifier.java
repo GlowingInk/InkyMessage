@@ -32,7 +32,7 @@ final class Stringifier { private Stringifier() {}
         if (!modifiers.isEmpty()) {
             builder.append("&[");
         }
-        var currentStyle = resolver.readSymbolics(text);
+        var currentStyle = resolver.readSymbolics(text.style());
         if (previousStyled[0] && (currentStyle.isEmpty() || !currentStyle.first().resets())) {
             if (outerStyle.isEmpty()) {
                 builder.append(resolver.symbolicReset().asFormatted());
