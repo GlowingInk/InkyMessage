@@ -1,21 +1,16 @@
 package ink.glowing.text;
 
-import ink.glowing.text.placeholder.Placeholder;
-import ink.glowing.text.placeholder.PlaceholderGetter;
 import net.kyori.adventure.text.format.Style;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 @ApiStatus.Internal
-final class BuildContext implements PlaceholderGetter {
+final class BuildContext {
     private final InkyMessage.Resolver resolver;
-    private final PlaceholderGetter placeholderGetter;
     private Style lastStyle;
 
     BuildContext(@NotNull InkyMessage.Resolver resolver) {
         this.resolver = resolver;
-        this.placeholderGetter = resolver;
         this.lastStyle = Style.empty();
     }
 
@@ -33,10 +28,5 @@ final class BuildContext implements PlaceholderGetter {
 
     public @NotNull InkyMessage.Resolver resolver() {
         return resolver;
-    }
-
-    @Override
-    public @Nullable Placeholder findPlaceholder(@NotNull String name) {
-        return placeholderGetter.findPlaceholder(name);
     }
 }

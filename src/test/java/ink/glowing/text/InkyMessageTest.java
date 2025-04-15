@@ -254,7 +254,7 @@ public class InkyMessageTest {
         return new Object[][] {
                 {
                     "&a&[Not \\clickable](click:run /helloworld)",
-                    "\\&a\\&[Not \\\\clickable\\]\\(click:run /helloworld\\)"
+                    "\\&a\\&\\[Not \\\\clickable\\]\\(click:run /helloworld\\)"
                 }
         };
     }

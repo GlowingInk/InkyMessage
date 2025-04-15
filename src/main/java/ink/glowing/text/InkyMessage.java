@@ -1,7 +1,7 @@
 package ink.glowing.text;
 
-import ink.glowing.text.modifier.ModifierGetter;
 import ink.glowing.text.modifier.Modifier;
+import ink.glowing.text.modifier.ModifierGetter;
 import ink.glowing.text.placeholder.Placeholder;
 import ink.glowing.text.placeholder.PlaceholderGetter;
 import ink.glowing.text.replace.Replacer;
@@ -16,8 +16,6 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import static ink.glowing.text.Stringifier.stringify;
 import static ink.glowing.text.modifier.standard.ClickModifier.clickModifier;
@@ -31,14 +29,10 @@ import static ink.glowing.text.replace.StandardReplacers.urlReplacer;
 import static ink.glowing.text.symbolic.StandardSymbolicStyles.*;
 
 /**
- * User-friendly component (de)serializer with legacy format.
+ * User-friendly component (de)serializer with legacy-inspired format.
  */
 public final class InkyMessage implements ComponentSerializer<Component, Component, String> {
-    private static final String ESCAPABLE_SYMBOLS = "&]()}\\";
-    private static final Pattern ESCAPE_PATTERN = Pattern.compile("[&\\]()}\\\\]");
-    private static final Pattern UNESCAPE_PATTERN = Pattern.compile("\\\\([&\\]()\\\\}])");
-
-    private static final InkyMessage.Resolver STANDARD_RESOLVER = InkyMessage.resolver()
+    private static final InkyMessage.Resolver STANDARD_RESOLVER = resolverBuilder()
             .addModifiers(
                     colorModifier(),
                     hoverModifier(),
@@ -210,12 +204,14 @@ public final class InkyMessage implements ComponentSerializer<Component, Compone
      */
     public static @NotNull String escape(@NotNull String text) {
         StringBuilder builder = new StringBuilder(text.length());
-        Matcher matcher = ESCAPE_PATTERN.matcher(text);
-        while (matcher.find()) {
-            matcher.appendReplacement(builder, "");
-            builder.append('\\').append(matcher.group());
+        for (int index = 0; index < text.length(); index++) {
+            char ch = text.charAt(index);
+            if (isSpecial(ch)) {
+                builder.append('\\');
+            }
+            builder.append(ch);
         }
-        return matcher.appendTail(builder).toString();
+        return builder.toString();
     }
 
     /**
@@ -225,13 +221,26 @@ public final class InkyMessage implements ComponentSerializer<Component, Compone
      */
     public static @NotNull String unescape(@NotNull String text) {
         if (text.indexOf('\\') == -1) return text;
+
         StringBuilder builder = new StringBuilder(text.length());
-        Matcher matcher = UNESCAPE_PATTERN.matcher(text);
-        while (matcher.find()) {
-            matcher.appendReplacement(builder, "");
-            builder.append(matcher.group(1));
+        int length = text.length();
+
+        for (
+                int index = 0, nextIndex = text.indexOf('\\');
+                index < length;
+                index = nextIndex + 2, nextIndex = text.indexOf('\\', index)
+        ) {
+            if (nextIndex == -1 || nextIndex + 1 >= length) {
+                builder.append(text, index, length);
+                break;
+            }
+            builder.append(text, index, nextIndex);
+            char nextCh = text.charAt(nextIndex + 1);
+            if (isNotSpecial(nextCh)) builder.append('\\');
+            builder.append(nextCh);
         }
-        return matcher.appendTail(builder).toString();
+
+        return builder.toString();
     }
 
     /**
@@ -257,28 +266,39 @@ public final class InkyMessage implements ComponentSerializer<Component, Compone
     }
 
     /**
-     * Check if character can be escaped.
+     * Check if character is special and should be escaped.
      * @param ch character to check
      * @return is character escapable
      */
-    public static boolean isEscapable(char ch) {
-        return ESCAPABLE_SYMBOLS.indexOf(ch) != -1;
+    public static boolean isSpecial(char ch) {
+        return switch (ch) {
+            case '&', '[', ']', '(', ')', '}', '\\' -> true;
+            default -> false;
+        };
     }
 
     /**
-     * Check if character cannot be escaped.
+     * Check if character is not special.
      * @param ch character to check
      * @return is character unescapable
      */
-    public static boolean isUnescapable(char ch) {
-        return ESCAPABLE_SYMBOLS.indexOf(ch) == -1;
+    public static boolean isNotSpecial(char ch) {
+        return !isSpecial(ch);
+    }
+
+    /**
+     * Get currently used resolver.
+     * @return current resolver
+     */
+    public @NotNull Resolver resolver() {
+        return resolver;
     }
 
     /**
      * Creates a new resolver builder.
      * @return a builder
      */
-    public static @NotNull ResolverBuilder resolver() {
+    public static @NotNull ResolverBuilder resolverBuilder() {
         return new ResolverBuilder();
     }
 
@@ -291,9 +311,22 @@ public final class InkyMessage implements ComponentSerializer<Component, Compone
         return STANDARD_RESOLVER;
     }
 
+    // TODO Merge to InkyMessage
     public sealed interface Resolver extends ModifierGetter, PlaceholderGetter permits ink.glowing.text.Resolver {
+
+        /**
+         * Applies symbolic style to the provided one.
+         * @param symbol style symbol
+         * @param currentStyle style to be applied onto
+         * @return provided style with applied symbolic style, or null if no styles were found with such symbol
+         */
         @Nullable Style applySymbolicStyle(char symbol, @NotNull Style currentStyle);
 
+        /**
+         * Find replaceable spots in a string.
+         * @param input string to replace in
+         * @return found spots
+         */
         @NotNull TreeSet<Replacer.FoundSpot> matchReplacements(@NotNull String input);
 
         @NotNull TreeSet<SymbolicStyle> readSymbolics(@NotNull Style style);

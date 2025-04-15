@@ -79,12 +79,6 @@ final class Resolver implements InkyMessage.Resolver {
         return phGetter.findPlaceholder(name);
     }
 
-    /**
-     * Applies symbolic style to the provided one
-     * @param symbol style symbol
-     * @param currentStyle style to be applied onto
-     * @return provided style with applied symbolic style, or null if no styles were found with such symbol
-     */
     @Override
     public @Nullable Style applySymbolicStyle(char symbol, @NotNull Style currentStyle) {
         SymbolicStyle symbolic = symbolics.get(symbol);
@@ -94,11 +88,6 @@ final class Resolver implements InkyMessage.Resolver {
                 : currentStyle.merge(symbolic.base());
     }
 
-    /**
-     * Find replaceable spots in a string
-     * @param input string to replace in
-     * @return found spots
-     */
     @Override
     public @NotNull TreeSet<Replacer.FoundSpot> matchReplacements(@NotNull String input) {
         TreeSet<Replacer.FoundSpot> spots = new TreeSet<>();

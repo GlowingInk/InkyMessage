@@ -56,7 +56,7 @@ final class Stringifier { private Stringifier() {}
             stringify(builder, newOuterStyle, child, resolver, previousStyled);
         }
         if (!modifiers.isEmpty()) {
-            builder.append("]");
+            builder.append(']');
             for (var modifier : modifiers) {
                 builder.append(modifier);
             }

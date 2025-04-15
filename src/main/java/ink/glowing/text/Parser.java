@@ -1,9 +1,9 @@
 package ink.glowing.text;
 
+import ink.glowing.text.modifier.Modifier;
+import ink.glowing.text.modifier.ModifierGetter;
 import ink.glowing.text.placeholder.Placeholder;
 import ink.glowing.text.replace.Replacer;
-import ink.glowing.text.modifier.ModifierGetter;
-import ink.glowing.text.modifier.Modifier;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.format.Style;
@@ -55,7 +55,7 @@ final class Parser {
                         globalIndex = initIndex;
                         continue;
                     }
-                    Placeholder placeholder = context.findPlaceholder(textStr.substring(initIndex + 2, globalIndex));
+                    Placeholder placeholder = resolver.findPlaceholder(textStr.substring(initIndex + 2, globalIndex));
                     if (placeholder == null) {
                         globalIndex = initIndex;
                         continue;
