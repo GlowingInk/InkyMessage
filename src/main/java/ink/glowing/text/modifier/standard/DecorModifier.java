@@ -1,7 +1,7 @@
 package ink.glowing.text.modifier.standard;
 
 import ink.glowing.text.InkyMessage;
-import ink.glowing.text.modifier.StyleModifier;
+import ink.glowing.text.modifier.Modifier;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextDecoration;
 import org.jetbrains.annotations.NotNull;
@@ -11,10 +11,10 @@ import org.jetbrains.annotations.Unmodifiable;
 import java.util.ArrayList;
 import java.util.List;
 
-public final class DecorModifier implements StyleModifier.Plain { private DecorModifier() {}
+public final class DecorModifier implements Modifier.Plain { private DecorModifier() {}
     private static final DecorModifier INSTANCE = new DecorModifier();
 
-    public static @NotNull StyleModifier.Plain decorModifier() {
+    public static @NotNull Modifier.Plain decorModifier() {
         return INSTANCE;
     }
 

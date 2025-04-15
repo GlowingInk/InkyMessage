@@ -1,13 +1,9 @@
-package ink.glowing.text.placeholders;
+package ink.glowing.text.placeholder;
 
-import ink.glowing.text.Ink;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 @FunctionalInterface
 public interface PlaceholderGetter {
@@ -18,10 +14,14 @@ public interface PlaceholderGetter {
     }
 
     static @NotNull PlaceholderGetter placeholderGetter(@NotNull Placeholder @NotNull ... placeholders) {
-        return switch (placeholders.length) {
+        return placeholderGetter(Arrays.asList(placeholders));
+    }
+
+    static @NotNull PlaceholderGetter placeholderGetter(@NotNull SequencedCollection<@NotNull Placeholder> placeholders) {
+        return switch (placeholders.size()) {
             case 0 -> (name) -> null;
-            case 1 -> placeholderGetter(placeholders[0]);
-            default -> placeholderGetter(Arrays.asList(placeholders));
+            case 1 -> placeholderGetter(placeholders.getFirst());
+            default -> placeholderGetter((Collection<? extends Placeholder>) placeholders);
         };
     }
 

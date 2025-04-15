@@ -1,6 +1,6 @@
 package ink.glowing.text.modifier.standard;
 
-import ink.glowing.text.modifier.StyleModifier;
+import ink.glowing.text.modifier.Modifier;
 import ink.glowing.text.utils.function.FloatFunction;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.ComponentIteratorType;
@@ -19,12 +19,12 @@ import java.util.random.RandomGenerator;
 import static net.kyori.adventure.text.Component.text;
 import static net.kyori.adventure.text.format.TextColor.color;
 
-public final class ColorModifier implements StyleModifier.Plain { private ColorModifier() {}
+public final class ColorModifier implements Modifier.Plain { private ColorModifier() {}
     private static final Map<String, NamedTextColor> NAMED_COLORS = NamedTextColor.NAMES.keyToValue();
 
     private static final ColorModifier COLOR = new ColorModifier();
 
-    public static @NotNull StyleModifier.Plain colorModifier() {
+    public static @NotNull Modifier.Plain colorModifier() {
         return COLOR;
     }
 

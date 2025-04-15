@@ -1,9 +1,9 @@
 package ink.glowing.text;
 
-import ink.glowing.text.placeholders.Placeholder;
-import ink.glowing.text.placeholders.PlaceholderGetter;
+import ink.glowing.text.modifier.Modifier;
+import ink.glowing.text.placeholder.Placeholder;
+import ink.glowing.text.placeholder.PlaceholderGetter;
 import ink.glowing.text.replace.Replacer;
-import ink.glowing.text.modifier.StyleModifier;
 import ink.glowing.text.symbolic.SymbolicStyle;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.Style;
@@ -15,20 +15,21 @@ import org.jetbrains.annotations.Nullable;
 import java.util.*;
 import java.util.function.Function;
 
-import static ink.glowing.text.placeholders.PlaceholderGetter.composePlaceholderGetters;
-import static ink.glowing.text.placeholders.PlaceholderGetter.placeholderGetter;
-import static ink.glowing.text.placeholders.StandardPlaceholders.keybindPlaceholder;
-import static ink.glowing.text.placeholders.StandardPlaceholders.langPlaceholder;
+import static ink.glowing.text.placeholder.PlaceholderGetter.composePlaceholderGetters;
+import static ink.glowing.text.placeholder.PlaceholderGetter.placeholderGetter;
+import static ink.glowing.text.placeholder.StandardPlaceholders.*;
 import static net.kyori.adventure.text.format.Style.style;
 
 @ApiStatus.Internal
 final class Resolver implements InkyMessage.Resolver {
     private static final PlaceholderGetter REQUIRED_PLACEHOLDERS = placeholderGetter(
             langPlaceholder(),
-            keybindPlaceholder()
+            keybindPlaceholder(),
+            scorePlaceholder(),
+            selectorPlaceholder()
     );
 
-    private final Map<String, StyleModifier<?>> modifiers;
+    private final Map<String, Modifier<?>> modifiers;
     private final Map<String, Placeholder> placeholders;
     private final Collection<Replacer> replacers;
     private final Map<Character, SymbolicStyle> symbolics;
@@ -37,13 +38,13 @@ final class Resolver implements InkyMessage.Resolver {
     private final PlaceholderGetter phGetter;
 
     Resolver(
-            @NotNull Set<StyleModifier<?>> modifiers,
+            @NotNull Set<Modifier<?>> modifiers,
             @NotNull Set<Placeholder> placeholders,
             @NotNull Set<Replacer> replacers,
             @NotNull Set<SymbolicStyle> symbolics,
             @NotNull SymbolicStyle symbolicReset
     ) {
-        this.modifiers = toMap(modifiers, StyleModifier::name);
+        this.modifiers = toMap(modifiers, Modifier::name);
         this.placeholders = toMap(placeholders, Placeholder::name);
         this.replacers = replacers;
         this.symbolics = toMap(symbolics, SymbolicStyle::symbol);
@@ -69,7 +70,7 @@ final class Resolver implements InkyMessage.Resolver {
     }
 
     @Override
-    public @Nullable StyleModifier<?> findModifier(@NotNull String name) {
+    public @Nullable Modifier<?> findModifier(@NotNull String name) {
         return modifiers.get(name);
     }
 

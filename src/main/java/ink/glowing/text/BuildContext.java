@@ -1,13 +1,11 @@
 package ink.glowing.text;
 
-import ink.glowing.text.placeholders.Placeholder;
-import ink.glowing.text.placeholders.PlaceholderGetter;
+import ink.glowing.text.placeholder.Placeholder;
+import ink.glowing.text.placeholder.PlaceholderGetter;
 import net.kyori.adventure.text.format.Style;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-
-import static ink.glowing.text.placeholders.PlaceholderGetter.composePlaceholderGetters;
 
 @ApiStatus.Internal
 final class BuildContext implements PlaceholderGetter {

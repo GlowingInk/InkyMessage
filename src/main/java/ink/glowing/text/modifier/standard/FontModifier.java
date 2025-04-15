@@ -1,7 +1,7 @@
 package ink.glowing.text.modifier.standard;
 
 import ink.glowing.text.InkyMessage;
-import ink.glowing.text.modifier.StyleModifier;
+import ink.glowing.text.modifier.Modifier;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.Component;
 import org.jetbrains.annotations.NotNull;
@@ -9,10 +9,10 @@ import org.jetbrains.annotations.Unmodifiable;
 
 import java.util.List;
 
-public final class FontModifier implements StyleModifier.Plain { private FontModifier() {}
+public final class FontModifier implements Modifier.Plain { private FontModifier() {}
     private static final FontModifier INSTANCE = new FontModifier();
 
-    public static @NotNull StyleModifier.Plain fontModifier() {
+    public static @NotNull Modifier.Plain fontModifier() {
         return INSTANCE;
     }
 

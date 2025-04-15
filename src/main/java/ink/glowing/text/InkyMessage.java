@@ -1,9 +1,9 @@
 package ink.glowing.text;
 
 import ink.glowing.text.modifier.ModifierGetter;
-import ink.glowing.text.modifier.StyleModifier;
-import ink.glowing.text.placeholders.Placeholder;
-import ink.glowing.text.placeholders.PlaceholderGetter;
+import ink.glowing.text.modifier.Modifier;
+import ink.glowing.text.placeholder.Placeholder;
+import ink.glowing.text.placeholder.PlaceholderGetter;
 import ink.glowing.text.replace.Replacer;
 import ink.glowing.text.symbolic.StandardSymbolicStyles;
 import ink.glowing.text.symbolic.SymbolicStyle;
@@ -284,7 +284,7 @@ public final class InkyMessage implements ComponentSerializer<Component, Compone
 
     /**
      * Contains recommended options for a resolver.
-     * Using standard style modifiers, replacers, and notchian symbolic styles.
+     * Using standard modifiers, replacers, and notchian symbolic styles.
      * @return a standard resolver
      */
     public static @NotNull InkyMessage.Resolver standardResolver() {
@@ -306,7 +306,7 @@ public final class InkyMessage implements ComponentSerializer<Component, Compone
     }
 
     public static class ResolverBuilder implements AbstractBuilder<Resolver> {
-        private Set<StyleModifier<?>> modifiers;
+        private Set<Modifier<?>> modifiers;
         private Set<Replacer> replacers;
         private Set<SymbolicStyle> symbolics;
         private Set<Placeholder> placeholders;
@@ -322,7 +322,7 @@ public final class InkyMessage implements ComponentSerializer<Component, Compone
         public @NotNull ResolverBuilder addInk(@NotNull Ink ink) {
             return switch (ink) {
                 case Placeholder ph -> addPlaceholder(ph);
-                case StyleModifier<?> mod -> addModifier(mod);
+                case Modifier<?> mod -> addModifier(mod);
                 case Replacer rp -> addReplacer(rp);
                 case SymbolicStyle sym -> addSymbolic(sym);
                 default -> throw new IllegalArgumentException("Unknown ink type: " + ink.getClass().getSimpleName());
@@ -408,35 +408,35 @@ public final class InkyMessage implements ComponentSerializer<Component, Compone
         }
 
         @Contract("_ -> this")
-        public @NotNull ResolverBuilder modifiers(@NotNull StyleModifier<?> @NotNull ... styleModifiers) {
-            return modifiers(Arrays.asList(styleModifiers));
+        public @NotNull ResolverBuilder modifiers(@NotNull Modifier<?> @NotNull ... modifiers) {
+            return modifiers(Arrays.asList(modifiers));
         }
 
         @Contract("_ -> this")
-        public @NotNull ResolverBuilder modifiers(@NotNull Collection<? extends @NotNull StyleModifier<?>> styleModifiers) {
+        public @NotNull ResolverBuilder modifiers(@NotNull Collection<? extends @NotNull Modifier<?>> styleModifiers) {
             this.modifiers = new HashSet<>(styleModifiers);
             return this;
         }
 
         @Contract("_ -> this")
-        public @NotNull ResolverBuilder addModifier(@NotNull StyleModifier<?> modifier) {
+        public @NotNull ResolverBuilder addModifier(@NotNull Modifier<?> modifier) {
             this.modifiers.add(modifier);
             return this;
         }
 
         @Contract("_ -> this")
-        public @NotNull ResolverBuilder addModifiers(@NotNull StyleModifier<?> @NotNull ... modifiers) {
+        public @NotNull ResolverBuilder addModifiers(@NotNull Modifier<?> @NotNull ... modifiers) {
             return addModifiers(Arrays.asList(modifiers));
         }
 
         @Contract("_ -> this")
-        public @NotNull ResolverBuilder addModifiers(@NotNull Collection<? extends @NotNull StyleModifier<?>> modifiers) {
+        public @NotNull ResolverBuilder addModifiers(@NotNull Collection<? extends @NotNull Modifier<?>> modifiers) {
             this.modifiers.addAll(modifiers);
             return this;
         }
 
         @Contract("_ -> this")
-        public @NotNull ResolverBuilder addModifiers(@NotNull Iterable<? extends @NotNull StyleModifier<?>> modifiers) {
+        public @NotNull ResolverBuilder addModifiers(@NotNull Iterable<? extends @NotNull Modifier<?>> modifiers) {
             for (var modifier : modifiers) this.modifiers.add(modifier);
             return this;
         }

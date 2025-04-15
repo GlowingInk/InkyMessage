@@ -1,7 +1,7 @@
-package ink.glowing.text.placeholders;
+package ink.glowing.text.placeholder;
 
 import ink.glowing.text.modifier.ModifierGetter;
-import ink.glowing.text.modifier.StyleModifier;
+import ink.glowing.text.modifier.Modifier;
 import net.kyori.adventure.text.Component;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -19,7 +19,7 @@ record PlaceholderImpl(
     }
 
     @Override
-    public @Nullable StyleModifier<?> findModifier(@NotNull String modifierName) {
+    public @Nullable Modifier<?> findModifier(@NotNull String modifierName) {
         return modifierGetter.findModifier(modifierName);
     }
 }

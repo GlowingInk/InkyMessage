@@ -1,4 +1,4 @@
-package ink.glowing.text.placeholders;
+package ink.glowing.text.placeholder;
 
 import ink.glowing.text.Ink;
 import ink.glowing.text.modifier.ModifierGetter;

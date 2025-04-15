@@ -8,8 +8,9 @@ import org.jetbrains.annotations.NotNull;
 import java.util.TreeSet;
 
 import static ink.glowing.text.InkyMessage.escape;
-import static ink.glowing.text.modifier.standard.LangModifiers.argModifier;
-import static ink.glowing.text.modifier.standard.LangModifiers.fallbackModifier;
+import static ink.glowing.text.placeholder.StandardPlaceholders.Lang.argModifier;
+import static ink.glowing.text.placeholder.StandardPlaceholders.Lang.fallbackModifier;
+import static ink.glowing.text.placeholder.StandardPlaceholders.Selector.separatorModifier;
 
 @ApiStatus.Internal
 final class Stringifier { private Stringifier() {}
@@ -69,8 +70,12 @@ final class Stringifier { private Stringifier() {}
     ) {
         switch (component) {
             case TextComponent text -> builder.append(escape(text.content()));
+
             case TranslatableComponent translatable -> {
-                builder.append("&{lang:").append(escape(translatable.key())).append("}");
+                builder
+                        .append("&{lang:")
+                        .append(escape(translatable.key()))
+                        .append("}");
                 for (var modifier : argModifier().read(resolver, translatable)) {
                     builder.append(modifier);
                 }
@@ -78,10 +83,30 @@ final class Stringifier { private Stringifier() {}
                     builder.append(modifier);
                 }
             }
-            case KeybindComponent keybind -> builder.append("&{keybind:").append(escape(keybind.keybind())).append("}");
-            case ScoreComponent score -> builder.append(score.objective()); // TODO implement
-            case SelectorComponent selector -> builder.append(selector.pattern()); // TODO implement
-            default -> builder.append("?");
+
+            case KeybindComponent keybind -> builder
+                    .append("&{keybind:")
+                    .append(escape(keybind.keybind()))
+                    .append('}');
+
+            case ScoreComponent score -> builder
+                    .append("&{score:")
+                    .append(escape(score.name()))
+                    .append(' ')
+                    .append(escape(score.objective()))
+                    .append('}');
+
+            case SelectorComponent selector -> {
+                builder
+                        .append("&{selector:")
+                        .append(escape(selector.pattern()))
+                        .append('}');
+                for (var modifier : separatorModifier().read(resolver, selector)) {
+                    builder.append(modifier);
+                }
+            }
+
+            default -> builder.append('?');
         }
     }
 }

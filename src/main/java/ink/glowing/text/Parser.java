@@ -1,9 +1,9 @@
 package ink.glowing.text;
 
-import ink.glowing.text.placeholders.Placeholder;
+import ink.glowing.text.placeholder.Placeholder;
 import ink.glowing.text.replace.Replacer;
 import ink.glowing.text.modifier.ModifierGetter;
-import ink.glowing.text.modifier.StyleModifier;
+import ink.glowing.text.modifier.Modifier;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.format.Style;
@@ -35,8 +35,7 @@ final class Parser {
 
     public static @NotNull Component parse(@NotNull String textStr, @NotNull BuildContext context) {
         if (textStr.isEmpty()) return empty();
-        return new Parser(textStr, context.resolver())
-                .parseRecursive(0, -1, context);
+        return new Parser(textStr, context.resolver()).parseRecursive(0, -1, context);
     }
 
     private @NotNull Component parseRecursive(int from, int untilCh, @NotNull BuildContext context) {
@@ -171,16 +170,16 @@ final class Parser {
             return comp;
         }
         String modifierStr = extractPlain(from + 1, ":) ");
-        StyleModifier<?> modifier = modifierGetter.findModifier(modifierStr);
+        Modifier<?> modifier = modifierGetter.findModifier(modifierStr);
         if (modifier == null) {
             globalIndex = from;
             return comp;
         }
         from = globalIndex + 1;
         if (globalIndex >= textLength || textStr.charAt(globalIndex) == ')') {
-            if (modifier instanceof StyleModifier.Plain plainModifier) {
+            if (modifier instanceof Modifier.Plain plainModifier) {
                 comp = plainModifier.modify(comp, "", "");
-            } else if (modifier instanceof StyleModifier.Complex complexModifier) {
+            } else if (modifier instanceof Modifier.Complex complexModifier) {
                 comp = complexModifier.modify(comp, "", empty());
             }
         } else {
@@ -189,10 +188,10 @@ final class Parser {
                 params = extractPlain(from, " )");
                 from += params.length() + 1;
             }
-            if (modifier instanceof StyleModifier.Complex complexModifier) {
+            if (modifier instanceof Modifier.Complex complexModifier) {
                 Component value = parseRecursive(from, ')', context.colorlessCopy());
                 comp = complexModifier.modify(comp, params, value.compact());
-            } else if (modifier instanceof StyleModifier.Plain plainModifier) {
+            } else if (modifier instanceof Modifier.Plain plainModifier) {
                 String value = extractPlainModifierValue(from);
                 comp = plainModifier.modify(comp, params, unescape(value));
             }

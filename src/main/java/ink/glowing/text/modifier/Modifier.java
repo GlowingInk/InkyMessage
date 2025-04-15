@@ -12,7 +12,7 @@ import java.util.List;
 
 import static ink.glowing.text.InkyMessage.inkyMessage;
 
-public sealed interface StyleModifier<T> extends Ink, Named, ModifierGetter permits StyleModifier.Complex, StyleModifier.Plain {
+public sealed interface Modifier<T> extends Ink, Named, ModifierGetter permits Modifier.Complex, Modifier.Plain {
     @NotNull Component modify(@NotNull Component text, @NotNull String param, @NotNull T value);
 
     default @NotNull @Unmodifiable List<String> read(@NotNull InkyMessage.Resolver resolver, @NotNull Component text) {
@@ -20,7 +20,7 @@ public sealed interface StyleModifier<T> extends Ink, Named, ModifierGetter perm
     }
 
     @Override
-    default StyleModifier<T> findModifier(@NotNull String name) {
+    default Modifier<T> findModifier(@NotNull String name) {
         return name.equals(name()) ? this : null;
     }
 
@@ -34,9 +34,9 @@ public sealed interface StyleModifier<T> extends Ink, Named, ModifierGetter perm
         return result.toString();
     }
 
-    non-sealed interface Plain extends StyleModifier<String> {}
+    non-sealed interface Plain extends Modifier<String> {}
 
-    non-sealed interface Complex extends StyleModifier<Component> {
+    non-sealed interface Complex extends Modifier<Component> {
         @ApiStatus.Internal
         default @NotNull String asFormatted(@NotNull String param, @NotNull Component value, @NotNull InkyMessage.Resolver resolver) {
             return asFormatted(param, inkyMessage().serialize(value, resolver));

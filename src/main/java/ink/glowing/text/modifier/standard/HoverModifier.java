@@ -1,7 +1,7 @@
 package ink.glowing.text.modifier.standard;
 
 import ink.glowing.text.InkyMessage;
-import ink.glowing.text.modifier.StyleModifier;
+import ink.glowing.text.modifier.Modifier;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.event.HoverEvent;
 import org.jetbrains.annotations.NotNull;
@@ -11,10 +11,10 @@ import java.util.List;
 
 import static net.kyori.adventure.text.event.HoverEvent.showText;
 
-public final class HoverModifier implements StyleModifier.Complex { private HoverModifier() {}
+public final class HoverModifier implements Modifier.Complex { private HoverModifier() {}
     private static final HoverModifier INSTANCE = new HoverModifier();
 
-    public static @NotNull StyleModifier.Complex hoverModifier() {
+    public static @NotNull Modifier.Complex hoverModifier() {
         return INSTANCE;
     }
 
