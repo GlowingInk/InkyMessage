@@ -126,6 +126,9 @@ public class InkyMessageTest {
                 }, {
                         "&(color:red)(decor:italic)[Well, this is awkward](decor:bold)",
                         "&[Well, this is awkward](color:red)(decor:bold)(decor:italic)"
+                }, {
+                        "&(color:red)Skipped",
+                        "&(color:red)Skipped"
                 }
         };
     }

@@ -70,6 +70,7 @@ final class Parser {
                         builder.append(parseRecursive(globalIndex + 2, ']', context));
                         from = globalIndex--;
                     }
+
                     case '{' -> { // &{placeholder} | &{placeholder:...}
                         int initIndex = globalIndex;
                         if (!iterateUntil(":}")) {
@@ -96,9 +97,15 @@ final class Parser {
                         builder.append(prepareModifiers(context, placeholder).apply(placeholder.parse(params)));
                         from = globalIndex--;
                     }
+
                     case '(' -> { // &(...)
                         builder.append(parseSegment(from, globalIndex, context));
+                        int initIndex = globalIndex;
                         var modifiers = prepareModifiers(context, resolver); // Also adjusts globalIndex to last modifier
+                        if (textStr.charAt(globalIndex) != '[') {
+                            globalIndex = initIndex;
+                            continue;
+                        }
                         builder.append(modifiers.apply(parseRecursive(globalIndex + 1, ']', context)));
                         from = globalIndex--;
                     }
@@ -179,7 +186,7 @@ final class Parser {
     }
     /**
      * Attempts to parse a hexadecimal color code from text input.
-     * @param text hex color string (with or without prefix)
+     * @param text hex color string
      * @param quirky whether to use Bungee format parsing (&x&1&2&3&4&5&6)
      * @return parsed TextColor or null if invalid
      */
