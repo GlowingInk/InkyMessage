@@ -2,6 +2,7 @@ package ink.glowing.text;
 
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextColor;
+import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
@@ -21,7 +22,10 @@ import static net.kyori.adventure.text.minimessage.MiniMessage.miniMessage;
 import static org.testng.Assert.assertEquals;
 
 public class InkyMessageTest {
-    private final boolean debug = false;
+    private static final boolean DEBUG = false;
+    private static final InkyMessage INKY = inkyMessage();
+    private static final MiniMessage MINI = miniMessage();
+    
     @DataProvider
     public Object[][] deserializeData() {
         return new Object[][] {
@@ -98,29 +102,53 @@ public class InkyMessageTest {
 
     @Test(dataProvider = "deserializeData")
     public void deserializeTest(String text, Component expected) {
-        if (debug) debugDeserializer(text, expected);
+        if (DEBUG) debugDeserializer(text, expected);
         try {
             assertEquals(
-                    inkyMessage().deserialize(text),
+                    INKY.deserialize(text),
                     expected
             );
         } catch (Throwable throwable) {
-            if (!debug) debugDeserializer(text, expected);
+            if (!DEBUG) debugDeserializer(text, expected);
             throw throwable;
         }
+    }
+
+    @DataProvider
+    public Object[][] deserializerReverseData() {
+        return new Object[][] {
+                {
+                        "Plain",
+                        "Plain"
+                }, {
+                        "&(color:red)[This one is red]",
+                        "&[This one is red](color:red)"
+                }, {
+                        "&(color:red)(decor:italic)[Well, this is awkward](decor:bold)",
+                        "&[Well, this is awkward](color:red)(decor:bold)(decor:italic)"
+                }
+        };
+    }
+
+    @Test(dataProvider = "deserializerReverseData")
+    public void deserializerReverseTest(String reverse, String normal) {
+        assertEquals(
+                INKY.deserialize(reverse),
+                INKY.deserialize(normal)
+        );
     }
 
     @Test
     public void deserializeHexTest() {
         assertEquals(
-                inkyMessage().deserialize("&x&1&2&3&4&5&6Hex colors are cool"),
-                inkyMessage().deserialize("&#123456Hex colors are cool")
+                INKY.deserialize("&x&1&2&3&4&5&6Hex colors are cool"),
+                INKY.deserialize("&#123456Hex colors are cool")
         );
     }
 
     private void debugDeserializer(String text, Component comp) {
-        System.out.println("Inky: " + miniMessage().serialize(inkyMessage().deserialize(text)));
-        System.out.println("Mini: " + miniMessage().serialize(comp));
+        System.out.println("Inky: " + MINI.serialize(INKY.deserialize(text)));
+        System.out.println("Mini: " + MINI.serialize(comp));
     }
 
     @DataProvider
@@ -165,14 +193,14 @@ public class InkyMessageTest {
 
     @Test(dataProvider = "serializeData")
     public void serializeTest(Component text, String expected) {
-        if (debug) debugSerializer(text);
+        if (DEBUG) debugSerializer(text);
         try {
             assertEquals(
-                    inkyMessage().serialize(text),
+                    INKY.serialize(text),
                     expected
             );
         } catch (Throwable throwable) {
-            if (!debug) debugSerializer(text);
+            if (!DEBUG) debugSerializer(text);
             throw throwable;
         }
     }
@@ -204,8 +232,8 @@ public class InkyMessageTest {
     }
 
     private void debugSerializer(Component comp) {
-        System.out.println("Inky: " + inkyMessage().serialize(comp));
-        System.out.println("Mini: " + miniMessage().serialize(comp));
+        System.out.println("Inky: " + INKY.serialize(comp));
+        System.out.println("Mini: " + MINI.serialize(comp));
     }
 
     @DataProvider
@@ -222,10 +250,10 @@ public class InkyMessageTest {
 
     @Test(dataProvider = "serializeAndBackData")
     public void serializeAndBackTest(Component text) {
-        String ser = inkyMessage().serialize(text);
-        Component deser = inkyMessage().deserialize(ser);
+        String ser = INKY.serialize(text);
+        Component deser = INKY.deserialize(ser);
         assertEquals(
-                inkyMessage().serialize(deser),
+                INKY.serialize(deser),
                 ser
         );
     }
@@ -241,7 +269,7 @@ public class InkyMessageTest {
                 builder.append(SYMBOLS.charAt(rng.nextInt(SYMBOLS.length())));
             }
             try {
-                inkyMessage().deserialize(builder.toString());
+                INKY.deserialize(builder.toString());
             } catch (Throwable throwable) {
                 System.out.println(builder);
                 throw throwable;
@@ -316,8 +344,8 @@ public class InkyMessageTest {
         int warmup = 100000;
         int test = 10000;
 
-        var inkyMessage = inkyMessage();
-        var miniMessage = miniMessage();
+        var inkyMessage = INKY;
+        var miniMessage = MINI;
         for (int i = 0; i < warmup; i++) {
             inkyMessage.deserialize(inky);
             miniMessage.deserialize(mini);

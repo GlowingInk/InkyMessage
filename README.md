@@ -1,11 +1,14 @@
 # [![InkyMessage](/.github/assets/Logo.png)](https://github.com/GlowingInk/InkyMessage)
-Adventure API component serializer inspired by [MineDown](https://github.com/Phoenix616/MineDown) 
+> Adventure API component serializer inspired by [MineDown](https://github.com/Phoenix616/MineDown) 
 and [MiniMessage](https://docs.advntr.dev/minimessage/index.html) projects. 
 An attempt to make legacy-friendly serializer with modern features.
+
+[JavaDoc](https://repo.glowing.ink/javadoc/snapshots/ink/glowing/inkymessage/latest)
 
 InkyMessage supports legacy format codes, e.g. `&l`, `&6`, `&a`, etc.
 Besides that, InkyMessage also has a special format for the modern features like interactable chat components.
 It's very simple to follow: `&[My special text](key:parameter value)(otherkey:otherparam)`.
+
 ## Modifiers
 | Key                | Parameter                                                                                                                           | Value                      | Information                                | Example                                                     |
 |--------------------|-------------------------------------------------------------------------------------------------------------------------------------|----------------------------|--------------------------------------------|-------------------------------------------------------------|
@@ -27,11 +30,9 @@ bound to them, which are different from the default ones.
 | `selector` | Selector                 | Shows results of selection. Use `separator` (rich) modifier                   | `Mobs nearby: &{selector:@e[distance..10]}(separator &e, )`                                                 |
 
 ## Plans (until 1.0.0 release)
-- Shadow color modifier
-- Precise escaping API
-- Reversed order formatting, e.g. `&(click:run /hello world)[This one is clickable]`
-- Arbitrary type and amount of modifiers values
-- Better API for marking (de)serializable elements
+- Shadow color modifier (~0.12.x)
+- Arbitrary type and amount of modifiers values (~0.13.x)
+- Better API for marking (de)serializable elements / precise escaping API (~0.14.x)
 - Better serialization
 - More and better unit tests
 

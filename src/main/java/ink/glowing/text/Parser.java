@@ -13,8 +13,10 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.TreeSet;
+import java.util.function.Function;
 
 import static ink.glowing.text.InkyMessage.*;
+import static java.util.function.Function.identity;
 import static net.kyori.adventure.text.Component.empty;
 import static net.kyori.adventure.text.Component.text;
 
@@ -62,50 +64,59 @@ final class Parser {
             if (isSpecial(ch)) {
                 if (isEscapedAt(textStr, globalIndex) || globalIndex + 1 >= textLength) continue;
                 char nextCh = textStr.charAt(globalIndex + 1);
-                if (nextCh == '[') { // &[...]
-                    builder.append(parseSegment(from, globalIndex, context));
-                    builder.append(parseRecursive(globalIndex + 2, ']', context));
-                    from = globalIndex--;
-                } else if (nextCh == '{') { // &{placeholder} | &{placeholder:...}
-                    int initIndex = globalIndex;
-                    if (!iterateUntil(":}")) {
-                        globalIndex = initIndex;
-                        continue;
+                switch (nextCh) {
+                    case '[' -> { // &[...]
+                        builder.append(parseSegment(from, globalIndex, context));
+                        builder.append(parseRecursive(globalIndex + 2, ']', context));
+                        from = globalIndex--;
                     }
-                    Placeholder placeholder = resolver.findPlaceholder(textStr.substring(initIndex + 2, globalIndex));
-                    if (placeholder == null) {
-                        globalIndex = initIndex;
-                        continue;
-                    }
-                    String params;
-                    if (textStr.charAt(globalIndex) == '}') {
-                        params = "";
-                    } else {
-                        int paramsIndex = globalIndex += 1;
-                        if (!iterateUntil('}')) {
+                    case '{' -> { // &{placeholder} | &{placeholder:...}
+                        int initIndex = globalIndex;
+                        if (!iterateUntil(":}")) {
                             globalIndex = initIndex;
                             continue;
                         }
-                        params = textStr.substring(paramsIndex, globalIndex);
+                        Placeholder placeholder = resolver.findPlaceholder(textStr.substring(initIndex + 2, globalIndex));
+                        if (placeholder == null) {
+                            globalIndex = initIndex;
+                            continue;
+                        }
+                        String params;
+                        if (textStr.charAt(globalIndex) == '}') {
+                            params = "";
+                        } else {
+                            int paramsIndex = globalIndex += 1;
+                            if (!iterateUntil('}')) {
+                                globalIndex = initIndex;
+                                continue;
+                            }
+                            params = textStr.substring(paramsIndex, globalIndex);
+                        }
+                        builder.append(parseSegment(from, initIndex, context));
+                        builder.append(prepareModifiers(context, placeholder).apply(placeholder.parse(params)));
+                        from = globalIndex--;
                     }
-                    builder.append(parseSegment(from, initIndex, context));
-                    builder.append(applyModifiers(placeholder.parse(params), context, placeholder));
-                    from = globalIndex--;
+                    case '(' -> { // &(...)
+                        builder.append(parseSegment(from, globalIndex, context));
+                        var modifiers = prepareModifiers(context, resolver); // Also adjusts globalIndex to last modifier
+                        builder.append(modifiers.apply(parseRecursive(globalIndex + 1, ']', context)));
+                        from = globalIndex--;
+                    }
                 }
             } else if (ch == untilCh && isUnescapedAt(textStr, globalIndex)) {
                 builder.append(parseSegment(from, globalIndex, context));
                 return untilCh != ')'
-                        ? applyModifiers(builder.build(), context, resolver)
+                        ? prepareModifiers(context, resolver).apply(builder.build())
                         : builder.build();
             }
         }
-        // In a case we didn't find the 'untilCh' char
+        // In case we didn't find the 'untilCh' char
         builder.append(parseSegment(from, textLength, context));
         return builder.build();
     }
 
     /**
-     * Processes a text segment between specified indices, applying styles and replacements.
+     * Processes a text segment between specified indices, applying symbolic styles and replacements.
      * @param from start index (inclusive)
      * @param until end index (exclusive)
      * @param context current build context
@@ -156,7 +167,7 @@ final class Parser {
     }
 
     /**
-     * Appends unprocessed text between specified indices to the component builder.
+     * Helper method that appends unprocessed text between specified indices to the component builder.
      * @param builder target component builder
      * @param start start index (inclusive)
      * @param end end index (exclusive)
@@ -201,15 +212,22 @@ final class Parser {
         return null;
     }
 
+    private @NotNull Function<Component, Component> prepareModifiers(
+            @NotNull BuildContext context,
+            @NotNull ModifierGetter modifierGetter
+    ) {
+        return prepareModifiers(identity(), context, modifierGetter);
+    }
+
     /**
-     * Applies style modifiers to a component recursively.
+     * Parses and prepares style modifiers recursively.
      * @param comp component to modify
      * @param context current build context
      * @param modifierGetter source of style modifiers
      * @return modified component with all applicable styles
      */
-    private @NotNull Component applyModifiers(
-            @NotNull Component comp,
+    private @NotNull Function<Component, Component> prepareModifiers(
+            @NotNull Function<Component, Component> comp,
             @NotNull BuildContext context,
             @NotNull ModifierGetter modifierGetter
     ) {
@@ -227,9 +245,9 @@ final class Parser {
         from = globalIndex + 1;
         if (globalIndex >= textLength || textStr.charAt(globalIndex) == ')') {
             if (modifier instanceof Modifier.Plain plainModifier) {
-                comp = plainModifier.modify(comp, "", "");
+                comp = comp.andThen(prev -> plainModifier.modify(prev, "", ""));
             } else if (modifier instanceof Modifier.Complex complexModifier) {
-                comp = complexModifier.modify(comp, "", empty());
+                comp = comp.andThen(prev -> complexModifier.modify(prev, "", empty()));
             }
         } else {
             String params = "";
@@ -237,19 +255,21 @@ final class Parser {
                 params = extractPlain(from, " )");
                 from += params.length() + 1;
             }
-            if (modifier instanceof Modifier.Complex complexModifier) {
-                Component value = parseRecursive(from, ')', context.colorlessCopy());
-                comp = complexModifier.modify(comp, params, value.compact());
-            } else if (modifier instanceof Modifier.Plain plainModifier) {
+            String finalParams = params;
+            if (modifier instanceof Modifier.Plain plainModifier) {
                 String value = extractPlainModifierValue(from);
-                comp = plainModifier.modify(comp, params, unescape(value));
+                comp = comp.andThen(prev -> plainModifier.modify(prev, finalParams, unescape(value)));
+            } else if (modifier instanceof Modifier.Complex complexModifier) {
+                Component value = parseRecursive(from, ')', context.colorlessCopy());
+                comp = comp.andThen(prev -> complexModifier.modify(prev, finalParams, value.compact()));
             }
         }
-        return applyModifiers(comp, context, modifierGetter);
+        return prepareModifiers(comp, context, modifierGetter);
     }
 
     /**
      * Extracts plain text until encountering any specified delimiter.
+     * Also sets the globalIndex.
      * @param from start index for extraction
      * @param until set of stopping characters
      * @return extracted substring (excludes delimiters)
