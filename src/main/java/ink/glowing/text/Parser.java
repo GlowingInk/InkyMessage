@@ -18,6 +18,10 @@ import static ink.glowing.text.InkyMessage.*;
 import static net.kyori.adventure.text.Component.empty;
 import static net.kyori.adventure.text.Component.text;
 
+/**
+ * Internal parser class for converting formatted text strings into styled components.
+ * Handles placeholders, style modifiers, color codes, and replacement spots.
+ */
 @ApiStatus.Internal
 final class Parser {
     private final String textStr;
@@ -33,11 +37,24 @@ final class Parser {
         this.replaceSpots = resolver.matchReplacements(textStr);
     }
 
-    public static @NotNull Component parse(@NotNull String textStr, @NotNull BuildContext context) {
+    /**
+     * Parses a text string into a styled component using the provided context.
+     * @param textStr input text to parse
+     * @param context build context containing resolver and state
+     * @return component representing parsed text structure
+     */
+    static @NotNull Component parse(@NotNull String textStr, @NotNull BuildContext context) {
         if (textStr.isEmpty()) return empty();
         return new Parser(textStr, context.resolver()).parseRecursive(0, -1, context);
     }
 
+    /**
+     * Recursively parses text segments while handling nested syntax structures.
+     * @param from starting index for parsing
+     * @param untilCh stopping character
+     * @param context current build context
+     * @return component built from the parsed segment
+     */
     private @NotNull Component parseRecursive(int from, int untilCh, @NotNull BuildContext context) {
         var builder = text();
         for (globalIndex = from; globalIndex < textLength; globalIndex++) {
@@ -87,6 +104,13 @@ final class Parser {
         return builder.build();
     }
 
+    /**
+     * Processes a text segment between specified indices, applying styles and replacements.
+     * @param from start index (inclusive)
+     * @param until end index (exclusive)
+     * @param context current build context
+     * @return component representing the styled segment
+     */
     private @NotNull Component parseSegment(int from, int until, @NotNull BuildContext context) {
         if (from == until) return empty();
         var builder = text();
@@ -131,11 +155,23 @@ final class Parser {
         return builder.build();
     }
 
+    /**
+     * Appends unprocessed text between specified indices to the component builder.
+     * @param builder target component builder
+     * @param start start index (inclusive)
+     * @param end end index (exclusive)
+     * @param context current build context with style state
+     */
     private void appendPrevious(@NotNull TextComponent.Builder builder, int start, int end, @NotNull BuildContext context) {
         if (start == end) return;
         builder.append(text(unescape(textStr.substring(start, end))).style(context.lastStyle()));
     }
-
+    /**
+     * Attempts to parse a hexadecimal color code from text input.
+     * @param text hex color string (with or without prefix)
+     * @param quirky whether to use Bungee format parsing (&x&1&2&3&4&5&6)
+     * @return parsed TextColor or null if invalid
+     */
     private static @Nullable TextColor parseHexColor(@NotNull String text, boolean quirky) {
         return quirky
                 ? TextColor.fromHexString("#" +
@@ -144,6 +180,12 @@ final class Parser {
                 : TextColor.fromCSSHexString(text);
     }
 
+    /**
+     * Finds the next replacement spot at the current parsing position.
+     * @param index current text index
+     * @param end maximum allowed end index for replacement
+     * @return matching replacement spot or null if none
+     */
     private @Nullable Replacer.FoundSpot matchSpot(int index, int end) {
         while (!replaceSpots.isEmpty()) {
             var spot = replaceSpots.last();
@@ -159,6 +201,13 @@ final class Parser {
         return null;
     }
 
+    /**
+     * Applies style modifiers to a component recursively.
+     * @param comp component to modify
+     * @param context current build context
+     * @param modifierGetter source of style modifiers
+     * @return modified component with all applicable styles
+     */
     private @NotNull Component applyModifiers(
             @NotNull Component comp,
             @NotNull BuildContext context,
@@ -199,6 +248,12 @@ final class Parser {
         return applyModifiers(comp, context, modifierGetter);
     }
 
+    /**
+     * Extracts plain text until encountering any specified delimiter.
+     * @param from start index for extraction
+     * @param until set of stopping characters
+     * @return extracted substring (excludes delimiters)
+     */
     private @NotNull String extractPlain(int from, @NotNull String until) {
         globalIndex = from;
         if (iterateUntil(until)) {
@@ -207,6 +262,11 @@ final class Parser {
         return "";
     }
 
+    /**
+     * Extracts modifier value as plain text until closing parenthesis.
+     * @param from start index for extraction
+     * @return extracted value string
+     */
     private @NotNull String extractPlainModifierValue(int from) {
         if (globalIndex != textLength && textStr.charAt(globalIndex) != ')') {
             globalIndex = from;
@@ -217,6 +277,11 @@ final class Parser {
         return "";
     }
 
+    /**
+     * Advances globalIndex until specified unescaped character is found.
+     * @param until target character to find
+     * @return true if character found, false otherwise
+     */
     private boolean iterateUntil(char until) {
         for (int index = textStr.indexOf(until, globalIndex); index >= 0; index = textStr.indexOf(until, index + 1)) {
             if (isUnescapedAt(textStr, index)) {
@@ -228,6 +293,11 @@ final class Parser {
         return false;
     }
 
+    /**
+     * Advances globalIndex until any of the specified characters is found.
+     * @param until set of target characters
+     * @return true if any character found, false otherwise
+     */
     private boolean iterateUntil(@NotNull String until) {
         for (; globalIndex < textLength; globalIndex++) {
             if (until.indexOf(textStr.charAt(globalIndex)) != -1 && isUnescapedAt(textStr, globalIndex)) return true;
@@ -235,6 +305,11 @@ final class Parser {
         return false;
     }
 
+    /**
+     * Checks if a character is considered special (& or §).
+     * @param ch character to check
+     * @return true if character is part of syntax formatting
+     */
     private static boolean isSpecial(char ch) {
         return ch == '&' || ch == '§';
     }
