@@ -9,10 +9,6 @@ import java.util.*;
 public interface PlaceholderGetter {
     @Nullable Placeholder findPlaceholder(@NotNull String name);
 
-    static @NotNull PlaceholderGetter placeholderGetter(@NotNull Placeholder placeholder) {
-        return (name) -> placeholder.name().equals(name) ? placeholder : null;
-    }
-
     static @NotNull PlaceholderGetter placeholderGetter(@NotNull Placeholder @NotNull ... placeholders) {
         return placeholderGetter(Arrays.asList(placeholders));
     }

@@ -43,6 +43,11 @@ public final class StandardSymbolicStyles { private StandardSymbolicStyles() {}
             chainedDecoration('o', ITALIC)
     );
 
+    private static final List<SymbolicStyle> NOTCHIAN_FORMAT = GeneralUtils.concat(
+            ArrayList::new, Collections::unmodifiableList,
+            NOTCHIAN_COLORS, NOTCHIAN_DECORATIONS
+    );
+
     private static final List<SymbolicStyle> BEDROCK_COLORS = GeneralUtils.concat(
             ArrayList::new, Collections::unmodifiableList,
             NOTCHIAN_COLORS,
@@ -67,10 +72,13 @@ public final class StandardSymbolicStyles { private StandardSymbolicStyles() {}
             chainedDecoration('o', ITALIC)
     );
 
-    private static final SymbolicStyle NOTCHIAN_RESET = simpleReset('r');
+    private static final List<SymbolicStyle> BEDROCK_FORMAT = GeneralUtils.concat(
+            ArrayList::new, Collections::unmodifiableList,
+            BEDROCK_COLORS, BEDROCK_DECORATIONS
+    );
 
-    public static @NotNull SymbolicStyle notchianReset() {
-        return NOTCHIAN_RESET;
+    public static char notchianResetSymbol() {
+        return 'r';
     }
 
     public static @NotNull @Unmodifiable Collection<SymbolicStyle> notchianDecorations() {
@@ -81,12 +89,30 @@ public final class StandardSymbolicStyles { private StandardSymbolicStyles() {}
         return NOTCHIAN_COLORS;
     }
 
+    /**
+     * Combined decorations and colors
+     * @see StandardSymbolicStyles#notchianColors()
+     * @see StandardSymbolicStyles#notchianDecorations()
+     */
+    public static @NotNull @Unmodifiable Collection<SymbolicStyle> notchianFormat() {
+        return NOTCHIAN_FORMAT;
+    }
+
     public static @NotNull @Unmodifiable Collection<SymbolicStyle> bedrockDecorations() {
         return BEDROCK_DECORATIONS;
     }
 
     public static @NotNull @Unmodifiable Collection<SymbolicStyle> bedrockColors() {
         return BEDROCK_COLORS;
+    }
+
+    /**
+     * Combined decorations and colors
+     * @see StandardSymbolicStyles#bedrockColors()
+     * @see StandardSymbolicStyles#bedrockDecorations()
+     */
+    public static @NotNull @Unmodifiable Collection<SymbolicStyle> bedrockFormat() {
+        return BEDROCK_FORMAT;
     }
 
     public static @NotNull SymbolicStyle chainedDecoration(char symbol, @NotNull TextDecoration decoration) {

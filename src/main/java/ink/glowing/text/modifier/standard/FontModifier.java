@@ -9,12 +9,8 @@ import org.jetbrains.annotations.Unmodifiable;
 
 import java.util.List;
 
-public final class FontModifier implements Modifier.Plain { private FontModifier() {}
-    private static final FontModifier INSTANCE = new FontModifier();
-
-    public static @NotNull Modifier.Plain fontModifier() {
-        return INSTANCE;
-    }
+final class FontModifier implements Modifier.Plain { private FontModifier() {}
+    static final FontModifier INSTANCE = new FontModifier();
 
     @Override
     public @NotNull Component modify(@NotNull Component text, @NotNull String param, @NotNull String value) {

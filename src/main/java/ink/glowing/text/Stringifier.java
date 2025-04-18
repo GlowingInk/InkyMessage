@@ -8,9 +8,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.TreeSet;
 
 import static ink.glowing.text.InkyMessage.escape;
-import static ink.glowing.text.placeholder.StandardPlaceholders.Lang.argModifier;
-import static ink.glowing.text.placeholder.StandardPlaceholders.Lang.fallbackModifier;
-import static ink.glowing.text.placeholder.StandardPlaceholders.Selector.separatorModifier;
+import static ink.glowing.text.modifier.standard.StandardModifiers.*;
 
 @ApiStatus.Internal
 final class Stringifier { private Stringifier() {}
@@ -76,10 +74,10 @@ final class Stringifier { private Stringifier() {}
                         .append("&{lang:")
                         .append(escape(translatable.key()))
                         .append("}");
-                for (var modifier : argModifier().read(resolver, translatable)) {
+                for (var modifier : langArgModifier().read(resolver, translatable)) {
                     builder.append(modifier);
                 }
-                for (var modifier : fallbackModifier().read(resolver, translatable)) {
+                for (var modifier : langFallbackModifier().read(resolver, translatable)) {
                     builder.append(modifier);
                 }
             }
@@ -101,7 +99,7 @@ final class Stringifier { private Stringifier() {}
                         .append("&{selector:")
                         .append(escape(selector.pattern()))
                         .append('}');
-                for (var modifier : separatorModifier().read(resolver, selector)) {
+                for (var modifier : selectorSeparatorModifier().read(resolver, selector)) {
                     builder.append(modifier);
                 }
             }

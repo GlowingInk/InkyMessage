@@ -9,10 +9,6 @@ import java.util.*;
 public interface ModifierGetter {
     @Nullable Modifier<?> findModifier(@NotNull String name);
 
-    static @NotNull ModifierGetter modifierGetter(@NotNull Modifier<?> modifier) {
-        return (name) -> modifier.name().equals(name) ? modifier : null;
-    }
-
     static @NotNull ModifierGetter modifierGetter(@NotNull Modifier<?> @NotNull ... modifiers) {
         return modifierGetter(Arrays.asList(modifiers));
     }
@@ -48,7 +44,7 @@ public interface ModifierGetter {
             ModifierGetter last = result;
             ModifierGetter next = iterator.next();
             result = (name) -> {
-                Modifier modifier = next.findModifier(name);
+                Modifier<?> modifier = next.findModifier(name);
                 return modifier == null ? last.findModifier(name) : modifier;
             };
         }

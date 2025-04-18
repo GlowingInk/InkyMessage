@@ -30,8 +30,8 @@ final class ResettingSymbolicColor implements SymbolicStyle {
     }
 
     @Override
-    public boolean isApplied(@NotNull Style inputStyle) {
-        return color.equals(inputStyle.color());
+    public boolean isApplied(@NotNull Style at) {
+        return color.equals(at.color());
     }
 
     @Override

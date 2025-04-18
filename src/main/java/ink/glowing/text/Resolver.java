@@ -99,19 +99,19 @@ final class Resolver implements InkyMessage.Resolver {
 
     @Override
     public @NotNull TreeSet<SymbolicStyle> readSymbolics(@NotNull Style style) {
-        // TODO StyleBuilder
-        TreeSet<SymbolicStyle> symbolics = new TreeSet<>();
+        // TODO StyleBuilder?
+        TreeSet<SymbolicStyle> found = new TreeSet<>();
         for (var symb : this.symbolics.values()) {
             if (symb.isApplied(style)) {
                 style = style.unmerge(symb.base());
-                symbolics.add(symb);
-                if (style.isEmpty()) break;
+                found.add(symb);
+                if (style.isEmpty()) return found;
             }
         }
         if (style.color() != null) { // If color is still merged
-            symbolics.add(new HexSymbolicStyle(style.color()));
+            found.add(new HexSymbolicStyle(style.color()));
         }
-        return symbolics;
+        return found;
     }
 
     @Override
@@ -157,8 +157,8 @@ final class Resolver implements InkyMessage.Resolver {
         }
 
         @Override
-        public boolean isApplied(@NotNull Style inputStyle) {
-            return color.equals(inputStyle.color());
+        public boolean isApplied(@NotNull Style at) {
+            return color.equals(at.color());
         }
 
         @Override

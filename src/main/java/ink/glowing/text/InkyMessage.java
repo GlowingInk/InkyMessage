@@ -18,32 +18,19 @@ import org.jetbrains.annotations.Nullable;
 import java.util.*;
 
 import static ink.glowing.text.Stringifier.stringify;
-import static ink.glowing.text.modifier.standard.ClickModifier.clickModifier;
-import static ink.glowing.text.modifier.standard.ColorModifier.colorModifier;
-import static ink.glowing.text.modifier.standard.DecorModifier.decorModifier;
-import static ink.glowing.text.modifier.standard.FontModifier.fontModifier;
-import static ink.glowing.text.modifier.standard.HoverModifier.hoverModifier;
-import static ink.glowing.text.modifier.standard.UrlModifier.httpModifier;
-import static ink.glowing.text.modifier.standard.UrlModifier.httpsModifier;
+import static ink.glowing.text.modifier.standard.StandardModifiers.standardModifiers;
 import static ink.glowing.text.replace.StandardReplacers.urlReplacer;
-import static ink.glowing.text.symbolic.StandardSymbolicStyles.*;
+import static ink.glowing.text.symbolic.StandardSymbolicStyles.notchianFormat;
+import static ink.glowing.text.symbolic.StandardSymbolicStyles.notchianResetSymbol;
 
 /**
  * User-friendly component (de)serializer with legacy-inspired format.
  */
 public final class InkyMessage implements ComponentSerializer<Component, Component, String> {
     private static final InkyMessage.Resolver STANDARD_RESOLVER = resolverBuilder()
-            .addModifiers(
-                    colorModifier(),
-                    hoverModifier(),
-                    clickModifier(),
-                    httpModifier(),
-                    httpsModifier(),
-                    fontModifier(),
-                    decorModifier())
-            .addSymbolics(notchianColors())
-            .addSymbolics(notchianDecorations())
-            .symbolicReset(notchianReset().symbol())
+            .addModifiers(standardModifiers())
+            .addSymbolics(notchianFormat())
+            .symbolicReset(notchianResetSymbol())
             .addReplacer(urlReplacer())
             .build();
 

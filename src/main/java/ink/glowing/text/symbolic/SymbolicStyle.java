@@ -10,7 +10,7 @@ public interface SymbolicStyle extends Ink, Comparable<SymbolicStyle> {
 
     boolean resets();
 
-    boolean isApplied(@NotNull Style inputStyle);
+    boolean isApplied(@NotNull Style at);
 
     @NotNull Style base();
 

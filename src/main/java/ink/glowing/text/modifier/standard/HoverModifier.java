@@ -11,12 +11,8 @@ import java.util.List;
 
 import static net.kyori.adventure.text.event.HoverEvent.showText;
 
-public final class HoverModifier implements Modifier.Complex { private HoverModifier() {}
-    private static final HoverModifier INSTANCE = new HoverModifier();
-
-    public static @NotNull Modifier.Complex hoverModifier() {
-        return INSTANCE;
-    }
+final class HoverModifier implements Modifier.Complex { private HoverModifier() {}
+    static final HoverModifier INSTANCE = new HoverModifier();
 
     @Override
     public @NotNull Component modify(@NotNull Component text, @NotNull String param, @NotNull Component value) {

@@ -14,7 +14,7 @@ record SimpleSymbolicReset(char symbol) implements SymbolicStyle {
     }
 
     @Override
-    public boolean isApplied(@NotNull Style inputStyle) {
+    public boolean isApplied(@NotNull Style at) {
         return false;
     }
 

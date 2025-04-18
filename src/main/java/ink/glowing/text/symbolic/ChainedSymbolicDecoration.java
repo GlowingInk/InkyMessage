@@ -32,8 +32,8 @@ final class ChainedSymbolicDecoration implements SymbolicStyle {
     }
 
     @Override
-    public boolean isApplied(@NotNull Style inputStyle) {
-        return inputStyle.hasDecoration(decoration);
+    public boolean isApplied(@NotNull Style at) {
+        return at.hasDecoration(decoration);
     }
 
     @Override

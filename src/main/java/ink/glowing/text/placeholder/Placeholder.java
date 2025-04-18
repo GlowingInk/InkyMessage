@@ -5,11 +5,13 @@ import ink.glowing.text.modifier.ModifierGetter;
 import ink.glowing.text.utils.Named;
 import net.kyori.adventure.text.Component;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.function.Function;
 import java.util.function.Supplier;
 
-public interface Placeholder extends Ink, Named, ModifierGetter {
+// TODO VirtualComponent
+public interface Placeholder extends Ink, Named, ModifierGetter, PlaceholderGetter {
     @NotNull Component parse(@NotNull String value);
 
     static @NotNull Placeholder placeholder(@NotNull String name,
@@ -43,5 +45,10 @@ public interface Placeholder extends Ink, Named, ModifierGetter {
                                             @NotNull Function<@NotNull String, @NotNull Component> resultFunct,
                                             @NotNull ModifierGetter localModifiers) {
         return new PlaceholderImpl(name, resultFunct, localModifiers);
+    }
+
+    @Override
+    default @Nullable Placeholder findPlaceholder(@NotNull String name) {
+        return name.equals(name()) ? this : null;
     }
 }

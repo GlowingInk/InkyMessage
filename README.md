@@ -28,7 +28,9 @@ bound to them, which are different from the default ones.
 
 ## Plans (until 1.0.0 release)
 - Shadow color modifier
+- Precise escaping API
 - Reversed order formatting, e.g. `&(click:run /hello world)[This one is clickable]`
+- Arbitrary type and amount of modifiers values
 - Better API for marking (de)serializable elements
 - Better serialization
 - More and better unit tests

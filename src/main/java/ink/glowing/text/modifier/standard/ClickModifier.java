@@ -3,6 +3,7 @@ package ink.glowing.text.modifier.standard;
 import ink.glowing.text.InkyMessage;
 import ink.glowing.text.modifier.Modifier;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.event.ClickEvent;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Unmodifiable;
 
@@ -11,12 +12,8 @@ import java.util.List;
 import static ink.glowing.text.InkyMessage.escape;
 import static net.kyori.adventure.text.event.ClickEvent.*;
 
-public final class ClickModifier implements Modifier.Plain { private ClickModifier() {}
-    private static final ClickModifier INSTANCE = new ClickModifier();
-
-    public static @NotNull Modifier.Plain clickModifier() {
-        return INSTANCE;
-    }
+final class ClickModifier implements Modifier.Plain { private ClickModifier() {}
+    static final ClickModifier INSTANCE = new ClickModifier();
 
     @Override
     public @NotNull Component modify(@NotNull Component text, @NotNull String param, @NotNull String value) {
@@ -35,14 +32,15 @@ public final class ClickModifier implements Modifier.Plain { private ClickModifi
     @SuppressWarnings("ConstantConditions")
     @Override
     public @NotNull @Unmodifiable List<String> read(@NotNull InkyMessage.Resolver resolver, @NotNull Component text) {
-        if (text.clickEvent() != null) {
+        var click = text.clickEvent();
+        if (click != null) {
             if (text.insertion() != null) {
                 return List.of(
                         asFormatted("insert", escape(text.insertion())),
-                        asPreparedClick(text)
+                        asPreparedClick(click)
                 );
             } else {
-                return List.of(asPreparedClick(text));
+                return List.of(asPreparedClick(click));
             }
         } else if (text.insertion() != null) {
             return List.of(asFormatted("insert", escape(text.insertion())));
@@ -50,10 +48,9 @@ public final class ClickModifier implements Modifier.Plain { private ClickModifi
         return List.of();
     }
 
-    @SuppressWarnings("ConstantConditions")
-    private String asPreparedClick(@NotNull Component text) {
+    private String asPreparedClick(@NotNull ClickEvent click) {
         return asFormatted(
-                switch (text.clickEvent().action()) {
+                switch (click.action()) {
                     case OPEN_URL -> "url";
                     case OPEN_FILE -> "file";
                     case RUN_COMMAND -> "run";
@@ -62,7 +59,7 @@ public final class ClickModifier implements Modifier.Plain { private ClickModifi
                     case COPY_TO_CLIPBOARD -> "copy";
                     default -> "unknown";
                 },
-                escape(text.clickEvent().value())
+                escape(click.value())
         );
     }
 

@@ -11,12 +11,8 @@ import org.jetbrains.annotations.Unmodifiable;
 import java.util.ArrayList;
 import java.util.List;
 
-public final class DecorModifier implements Modifier.Plain { private DecorModifier() {}
-    private static final DecorModifier INSTANCE = new DecorModifier();
-
-    public static @NotNull Modifier.Plain decorModifier() {
-        return INSTANCE;
-    }
+final class DecorModifier implements Modifier.Plain { private DecorModifier() {}
+    static final DecorModifier INSTANCE = new DecorModifier();
 
     @Override
     public @NotNull Component modify(@NotNull Component text, @NotNull String param, @NotNull String value) {
