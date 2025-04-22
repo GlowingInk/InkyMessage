@@ -10,6 +10,7 @@ import ink.glowing.text.symbolic.SymbolicStyle;
 import ink.glowing.text.symbolic.SymbolicStyleFinder;
 import net.kyori.adventure.text.format.Style;
 import org.jetbrains.annotations.ApiStatus;
+import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -19,7 +20,7 @@ import static ink.glowing.text.replace.ReplacementMatcher.composeReplacementMatc
 import static ink.glowing.text.replace.ReplacementMatcher.replacementMatcher;
 
 @ApiStatus.Internal
-final class ResolverImpl implements InkyMessage.Resolver {
+final class Context implements ModifierFinder, PlaceholderFinder, SymbolicStyleFinder, ReplacementMatcher {
     private final InkyMessage inkyMessage;
 
     private final ModifierFinder modifiers;
@@ -30,7 +31,7 @@ final class ResolverImpl implements InkyMessage.Resolver {
 
     private Style lastStyle;
 
-    ResolverImpl(
+    Context(
             @NotNull InkyMessage inkyMessage,
             @NotNull ModifierFinder modifiers,
             @NotNull PlaceholderFinder placeholders,
@@ -44,6 +45,22 @@ final class ResolverImpl implements InkyMessage.Resolver {
         this.symbolics = symbolics;
         this.replacers = replacers;
         this.symbolicReset = symbolicReset;
+
+        this.lastStyle = Style.empty();
+    }
+
+    @Contract(pure = true, value = "-> new")
+    public @NotNull Context stylelessCopy() {
+        return new Context(inkyMessage, modifiers, placeholders, symbolics, replacers, symbolicReset);
+    }
+
+    @Contract(pure = true)
+    public @NotNull Style lastStyle() {
+        return lastStyle;
+    }
+
+    public void lastStyle(@NotNull Style lastStyle) {
+        this.lastStyle = lastStyle;
     }
 
     @Override
@@ -66,17 +83,17 @@ final class ResolverImpl implements InkyMessage.Resolver {
         return replacers.matchReplacements(input);
     }
 
+    @Contract(pure = true)
     public @NotNull InkyMessage inkyMessage() {
         return inkyMessage;
     }
 
-    @Override
+    @Contract(pure = true)
     public @NotNull SymbolicStyle symbolicReset() {
         return symbolicReset;
     }
 
-    @Override
-    public InkyMessage.@NotNull Resolver with(@NotNull Ink ink) {
+    public @NotNull Context with(@NotNull Ink ink) {
         var modifiers = this.modifiers;
         var placeholders = this.placeholders;
         var symbolics = this.symbolics;
@@ -90,11 +107,14 @@ final class ResolverImpl implements InkyMessage.Resolver {
             default -> throw new IllegalArgumentException("Unknown ink type: " + ink.getClass().getSimpleName());
         }
 
-        return new ResolverImpl(this.inkyMessage, modifiers, placeholders, symbolics, replacers, this.symbolicReset);
+        return new Context(this.inkyMessage, modifiers, placeholders, symbolics, replacers, this.symbolicReset);
     }
 
-    @Override
-    public InkyMessage.@NotNull Resolver with(@NotNull Iterable<@NotNull Ink> inks) {
+    public @NotNull Context with(@NotNull Ink @NotNull ... inks) {
+        return with(Arrays.asList(inks));
+    }
+
+    public @NotNull Context with(@NotNull Iterable<@NotNull Ink> inks) {
         var modifiers = this.modifiers;
         var placeholders = this.placeholders;
         var symbolics = this.symbolics;
@@ -148,6 +168,6 @@ final class ResolverImpl implements InkyMessage.Resolver {
         if (replacersSet != null) {
             replacers = composeReplacementMatchers(replacers, replacementMatcher(replacersSet));
         }
-        return new ResolverImpl(this.inkyMessage, modifiers, placeholders, symbolics, replacers, this.symbolicReset);
+        return new Context(this.inkyMessage, modifiers, placeholders, symbolics, replacers, this.symbolicReset);
     }
 }

@@ -28,26 +28,26 @@ import static net.kyori.adventure.text.Component.text;
 final class Parser {
     private final String textStr;
     private final int textLength;
-    private final InkyMessage.Resolver resolver;
+    private final Context context;
     private final TreeSet<Replacer.FoundSpot> replaceSpots;
     private int globalIndex;
 
-    private Parser(@NotNull String textStr, @NotNull InkyMessage.Resolver resolver) {
+    private Parser(@NotNull String textStr, @NotNull Context context) {
         this.textStr = textStr;
         this.textLength = textStr.length();
-        this.resolver = resolver;
-        this.replaceSpots = resolver.matchReplacements(textStr);
+        this.context = context;
+        this.replaceSpots = context.matchReplacements(textStr);
     }
 
     /**
      * Parses a text string into a styled component using the provided context.
      * @param textStr input text to parse
-     * @param context build context containing resolver and state
+     * @param context build context containing context and state
      * @return component representing parsed text structure
      */
-    static @NotNull Component parse(@NotNull String textStr, @NotNull BuildContext context) {
+    static @NotNull Component parse(@NotNull String textStr, @NotNull Context context) {
         if (textStr.isEmpty()) return empty();
-        return new Parser(textStr, context.resolver()).parseRecursive(0, -1, context);
+        return new Parser(textStr, context).parseRecursive(0, -1, context);
     }
 
     /**
@@ -57,7 +57,7 @@ final class Parser {
      * @param context current build context
      * @return component built from the parsed segment
      */
-    private @NotNull Component parseRecursive(int from, int untilCh, @NotNull BuildContext context) {
+    private @NotNull Component parseRecursive(int from, int untilCh, @NotNull Context context) {
         var builder = text();
         for (globalIndex = from; globalIndex < textLength; globalIndex++) {
             char ch = textStr.charAt(globalIndex);
@@ -77,7 +77,7 @@ final class Parser {
                             globalIndex = initIndex;
                             continue;
                         }
-                        Placeholder placeholder = resolver.findPlaceholder(textStr.substring(initIndex + 2, globalIndex));
+                        Placeholder placeholder = context.findPlaceholder(textStr.substring(initIndex + 2, globalIndex));
                         if (placeholder == null) {
                             globalIndex = initIndex;
                             continue;
@@ -101,7 +101,7 @@ final class Parser {
                     case '(' -> { // &(...)
                         builder.append(parseSegment(from, globalIndex, context));
                         int initIndex = globalIndex;
-                        var modifiers = prepareModifiers(context, resolver); // Also adjusts globalIndex to last modifier
+                        var modifiers = prepareModifiers(context, context); // Also adjusts globalIndex to last modifier
                         if (textStr.charAt(globalIndex) != '[') {
                             globalIndex = initIndex;
                             continue;
@@ -113,7 +113,7 @@ final class Parser {
             } else if (ch == untilCh && isUnescapedAt(textStr, globalIndex)) {
                 builder.append(parseSegment(from, globalIndex, context));
                 return untilCh != ')'
-                        ? prepareModifiers(context, resolver).apply(builder.build())
+                        ? prepareModifiers(context, context).apply(builder.build())
                         : builder.build();
             }
         }
@@ -129,7 +129,7 @@ final class Parser {
      * @param context current build context
      * @return component representing the styled segment
      */
-    private @NotNull Component parseSegment(int from, int until, @NotNull BuildContext context) {
+    private @NotNull Component parseSegment(int from, int until, @NotNull Context context) {
         if (from == until) return empty();
         var builder = text();
         int lastAppend = from;
@@ -159,7 +159,7 @@ final class Parser {
                     lastAppend = (index += charsToSkip - 1) + 1;
                 }
                 default -> {
-                    SymbolicStyle symbolic = resolver.findSymbolicStyle(styleCh);
+                    SymbolicStyle symbolic = context.findSymbolicStyle(styleCh);
                     if (symbolic == null) continue;
                     appendPrevious(builder, lastAppend, index, context);
                     context.lastStyle(symbolic.resets()
@@ -183,7 +183,7 @@ final class Parser {
      * @param end end index (exclusive)
      * @param context current build context with style state
      */
-    private void appendPrevious(@NotNull TextComponent.Builder builder, int start, int end, @NotNull BuildContext context) {
+    private void appendPrevious(@NotNull TextComponent.Builder builder, int start, int end, @NotNull Context context) {
         if (start == end) return;
         builder.append(text(unescape(textStr.substring(start, end))).style(context.lastStyle()));
     }
@@ -225,7 +225,7 @@ final class Parser {
     }
 
     private @NotNull Function<Component, Component> prepareModifiers(
-            @NotNull BuildContext context,
+            @NotNull Context context,
             @NotNull ModifierFinder modifierFinder
     ) {
         return prepareModifiers(identity(), context, modifierFinder);
@@ -240,7 +240,7 @@ final class Parser {
      */
     private @NotNull Function<Component, Component> prepareModifiers(
             @NotNull Function<Component, Component> comp,
-            @NotNull BuildContext context,
+            @NotNull Context context,
             @NotNull ModifierFinder modifierFinder
     ) {
         int from = globalIndex + 1;
@@ -272,7 +272,7 @@ final class Parser {
                 String value = extractPlainModifierValue(from);
                 comp = comp.andThen(prev -> plainModifier.modify(prev, finalParams, unescape(value)));
             } else if (modifier instanceof Modifier.Complex complexModifier) {
-                Component value = parseRecursive(from, ')', context.colorlessCopy());
+                Component value = parseRecursive(from, ')', context.stylelessCopy());
                 comp = comp.andThen(prev -> complexModifier.modify(prev, finalParams, value.compact()));
             }
         }

@@ -1,14 +1,10 @@
 package ink.glowing.text;
 
 import ink.glowing.text.modifier.Modifier;
-import ink.glowing.text.modifier.ModifierFinder;
 import ink.glowing.text.placeholder.Placeholder;
-import ink.glowing.text.placeholder.PlaceholderFinder;
-import ink.glowing.text.replace.ReplacementMatcher;
 import ink.glowing.text.replace.Replacer;
 import ink.glowing.text.symbolic.StandardSymbolicStyles;
 import ink.glowing.text.symbolic.SymbolicStyle;
-import ink.glowing.text.symbolic.SymbolicStyleFinder;
 import net.kyori.adventure.builder.AbstractBuilder;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.ComponentSerializer;
@@ -46,7 +42,7 @@ public final class InkyMessage implements ComponentSerializer<Component, Compone
     private final Collection<Replacer> replacers;
     private final SymbolicStyle symbolicReset;
 
-    private final Resolver baseResolver;
+    private final Context baseResolver;
 
     private InkyMessage(
             @NotNull Map<String, Modifier<?>> modifiers,
@@ -67,7 +63,7 @@ public final class InkyMessage implements ComponentSerializer<Component, Compone
         }
         Map<Character, SymbolicStyle> adjustedSymbolics = new HashMap<>(symbolics);
         adjustedSymbolics.put(symbolicReset.symbol(), symbolicReset);
-        this.baseResolver = new ResolverImpl(
+        this.baseResolver = new Context(
                 this,
                 modifiers::get,
                 adjustedPlaceholders::get,
@@ -75,14 +71,6 @@ public final class InkyMessage implements ComponentSerializer<Component, Compone
                 replacementMatcher(replacers),
                 symbolicReset
         );
-    }
-
-    /**
-     * Get currently used resolver.
-     * @return current resolver
-     */
-    public @NotNull Resolver resolver() {
-        return baseResolver;
     }
 
     public @Unmodifiable @NotNull Map<String, Modifier<?>> modifiers() {
@@ -172,12 +160,12 @@ public final class InkyMessage implements ComponentSerializer<Component, Compone
     /**
      * Convert string into adventure text component.
      * @param inputText input string
-     * @param resolver resolver to use
+     * @param context context to use
      * @return converted text component
      */
-    public static @NotNull Component deserialize(@NotNull String inputText,
-                                                  @NotNull Resolver resolver) {
-        return Parser.parse(inputText, new BuildContext(resolver)).compact();
+    private static @NotNull Component deserialize(@NotNull String inputText,
+                                                  @NotNull Context context) {
+        return Parser.parse(inputText, context.stylelessCopy()).compact();
     }
 
     /**
@@ -280,7 +268,7 @@ public final class InkyMessage implements ComponentSerializer<Component, Compone
     }
 
     /**
-     * Creates a new resolver builder.
+     * Creates a new context builder.
      * @return a builder
      */
     public static @NotNull InkyMessage.Builder builder() {
@@ -295,23 +283,6 @@ public final class InkyMessage implements ComponentSerializer<Component, Compone
                 new HashSet<>(replacers),
                 symbolicReset
         );
-    }
-
-    public interface Resolver extends ModifierFinder, PlaceholderFinder, SymbolicStyleFinder, ReplacementMatcher {
-        @Contract(pure = true)
-        @NotNull SymbolicStyle symbolicReset();
-
-        @Contract(pure = true)
-        @NotNull Resolver with(@NotNull Ink ink);
-
-        @Contract(pure = true)
-        default @NotNull Resolver with(@NotNull Ink @NotNull ... inks) {
-            return with(Arrays.asList(inks));
-        }
-
-        @NotNull Resolver with(@NotNull Iterable<@NotNull Ink> ink);
-
-        @NotNull InkyMessage inkyMessage();
     }
 
     public static class Builder implements AbstractBuilder<InkyMessage> {
