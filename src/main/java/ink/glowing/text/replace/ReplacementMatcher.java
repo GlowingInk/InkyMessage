@@ -1,6 +1,5 @@
 package ink.glowing.text.replace;
 
-import ink.glowing.text.Ink;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
@@ -9,7 +8,7 @@ import java.util.Collection;
 import java.util.SequencedCollection;
 import java.util.TreeSet;
 
-public interface ReplacementMatcher extends Ink {
+public interface ReplacementMatcher {
     /**
      * Find replaceable spots in a string.
      * @param input string to replace in

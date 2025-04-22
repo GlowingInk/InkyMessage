@@ -1,6 +1,5 @@
 package ink.glowing.text.modifier;
 
-import ink.glowing.text.Ink;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -8,7 +7,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.*;
 
 @FunctionalInterface
-public interface ModifierFinder extends Ink {
+public interface ModifierFinder {
     @Contract(pure = true)
     @Nullable Modifier<?> findModifier(@NotNull String name);
 

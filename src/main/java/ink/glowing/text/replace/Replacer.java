@@ -17,7 +17,7 @@ import java.util.regex.Pattern;
 
 import static net.kyori.adventure.text.Component.text;
 
-public interface Replacer extends Ink.Stable, ReplacementMatcher {
+public interface Replacer extends Ink, ReplacementMatcher {
     @NotNull @Unmodifiable List<@NotNull FoundSpot> findSpots(@NotNull String input);
 
     @Override

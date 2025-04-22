@@ -1,6 +1,5 @@
 package ink.glowing.text.placeholder;
 
-import ink.glowing.text.Ink;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -8,7 +7,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.*;
 
 @FunctionalInterface
-public interface PlaceholderFinder extends Ink {
+public interface PlaceholderFinder {
     @Contract(pure = true)
     @Nullable Placeholder findPlaceholder(@NotNull String name);
 

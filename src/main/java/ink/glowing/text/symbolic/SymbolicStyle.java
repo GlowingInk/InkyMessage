@@ -6,7 +6,7 @@ import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-public interface SymbolicStyle extends Ink.Stable, Comparable<SymbolicStyle>, SymbolicStyleFinder {
+public interface SymbolicStyle extends Ink, Comparable<SymbolicStyle>, SymbolicStyleFinder {
     char symbol();
 
     boolean resets();

@@ -1,13 +1,12 @@
 package ink.glowing.text.symbolic;
 
-import ink.glowing.text.Ink;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 
-public interface SymbolicStyleFinder extends Ink {
+public interface SymbolicStyleFinder {
     /**
      * Find symbolic style by its symbol.
      * @param symbol style symbol

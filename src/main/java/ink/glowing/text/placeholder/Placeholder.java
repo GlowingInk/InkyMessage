@@ -12,7 +12,7 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 
 // TODO VirtualComponent?
-public interface Placeholder extends Ink.Stable, Named, PlaceholderFinder {
+public interface Placeholder extends Ink, Named, PlaceholderFinder {
     @NotNull Component parse(@NotNull String value);
 
     @Override

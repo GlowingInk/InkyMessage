@@ -5,6 +5,7 @@ import ink.glowing.text.utils.function.FloatFunction;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.ComponentIteratorType;
 import net.kyori.adventure.text.TextComponent;
+import net.kyori.adventure.text.flattener.ComponentFlattener;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextColor;
 import net.kyori.adventure.util.HSVLike;
@@ -21,6 +22,11 @@ import static net.kyori.adventure.text.format.TextColor.color;
 
 // TODO VirtualComponent
 final class ColorModifier implements Modifier.Plain { private ColorModifier() {}
+    private static final ComponentFlattener LENGTH_CALCULATOR = ComponentFlattener.builder()
+            .mapper(TextComponent.class, TextComponent::content)
+            .unknownMapper(x -> " ")
+            .build();
+
     private static final Map<String, NamedTextColor> NAMED_COLORS = NamedTextColor.NAMES.keyToValue();
 
     static final ColorModifier INSTANCE = new ColorModifier();
@@ -61,7 +67,7 @@ final class ColorModifier implements Modifier.Plain { private ColorModifier() {}
         return builder.build();
     }
 
-    // FIXME That's really not how this should be done...
+    // FIXME That's probably not how this should be done..?
     private void applyDeep(
             TextComponent.Builder outerBuilder,
             Component component,
@@ -98,7 +104,7 @@ final class ColorModifier implements Modifier.Plain { private ColorModifier() {}
             if (child instanceof TextComponent textChild) {
                 length += textChild.content().length();
             } else {
-                length += 1;
+                length += 1; // Can't calc the length here
             }
         }
         return length;

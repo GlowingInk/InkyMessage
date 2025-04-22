@@ -100,10 +100,10 @@ final class Context implements ModifierFinder, PlaceholderFinder, SymbolicStyleF
         var replacers = this.replacers;
 
         switch (ink) {
-            case PlaceholderFinder ph     -> placeholders = placeholders.thenPlaceholderFinder(ph);
-            case ModifierFinder mod       -> modifiers = modifiers.thenModifierFinder(mod);
-            case SymbolicStyleFinder sym  -> symbolics = symbolics.thenSymbloicStyleFinder(sym);
-            case ReplacementMatcher rep   -> replacers = composeReplacementMatchers(rep, replacers);
+            case Modifier<?> mod    -> modifiers = modifiers.thenModifierFinder(mod);
+            case Placeholder ph     -> placeholders = placeholders.thenPlaceholderFinder(ph);
+            case SymbolicStyle sym  -> symbolics = symbolics.thenSymbloicStyleFinder(sym);
+            case Replacer rep       -> replacers = composeReplacementMatchers(rep, replacers);
             default -> throw new IllegalArgumentException("Unknown ink type: " + ink.getClass().getSimpleName());
         }
 
@@ -127,15 +127,6 @@ final class Context implements ModifierFinder, PlaceholderFinder, SymbolicStyleF
 
         for (var ink : inks) {
             switch (ink) {
-                case Placeholder ph -> {
-                    if (placeholdersMap == null) {
-                        placeholdersMap = new HashMap<>();
-                        placeholders = placeholders.thenPlaceholderFinder(placeholdersMap::get);
-                    }
-                    placeholdersMap.put(ph.name(), ph);
-                }
-                case PlaceholderFinder ph -> placeholders = ph.thenPlaceholderFinder(placeholders);
-
                 case Modifier<?> mod -> {
                     if (modifiersMap == null) {
                         modifiersMap = new HashMap<>();
@@ -143,7 +134,14 @@ final class Context implements ModifierFinder, PlaceholderFinder, SymbolicStyleF
                     }
                     modifiersMap.put(mod.name(), mod);
                 }
-                case ModifierFinder mod -> modifiers = mod.thenModifierFinder(modifiers);
+
+                case Placeholder ph -> {
+                    if (placeholdersMap == null) {
+                        placeholdersMap = new HashMap<>();
+                        placeholders = placeholders.thenPlaceholderFinder(placeholdersMap::get);
+                    }
+                    placeholdersMap.put(ph.name(), ph);
+                }
 
                 case SymbolicStyle sym -> {
                     if (symbolicStylesMap == null) {
@@ -152,7 +150,6 @@ final class Context implements ModifierFinder, PlaceholderFinder, SymbolicStyleF
                     }
                     symbolicStylesMap.put(sym.symbol(), sym);
                 }
-                case SymbolicStyleFinder sym -> symbolics = sym.thenSymbloicStyleFinder(symbolics);
 
                 case Replacer rep -> {
                     if (replacersSet == null) {
@@ -160,7 +157,6 @@ final class Context implements ModifierFinder, PlaceholderFinder, SymbolicStyleF
                     }
                     replacersSet.add(rep);
                 }
-                case ReplacementMatcher rep -> replacers = composeReplacementMatchers(rep, replacers);
 
                 default -> throw new IllegalArgumentException("Unknown ink type: " + ink.getClass().getSimpleName());
             }

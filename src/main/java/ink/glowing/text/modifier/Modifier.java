@@ -10,7 +10,7 @@ import org.jetbrains.annotations.Unmodifiable;
 
 import java.util.List;
 
-public sealed interface Modifier<T> extends Ink.Stable, Named, ModifierFinder permits Modifier.Complex, Modifier.Plain {
+public sealed interface Modifier<T> extends Ink, Named, ModifierFinder permits Modifier.Complex, Modifier.Plain {
     @NotNull Component modify(@NotNull Component text, @NotNull String param, @NotNull T value);
 
     default @NotNull @Unmodifiable List<String> read(@NotNull Component text, @NotNull InkyMessage inkyMessage) {

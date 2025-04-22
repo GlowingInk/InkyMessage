@@ -102,15 +102,15 @@ public final class InkyMessage implements ComponentSerializer<Component, Compone
         return STANDARD;
     }
 
-    public static @NotNull InkyMessage inkyMessage(@NotNull Ink.Stable ink) {
+    public static @NotNull InkyMessage inkyMessage(@NotNull Ink ink) {
         return builder().addInk(ink).build();
     }
 
-    public static @NotNull InkyMessage inkyMessage(@NotNull Ink.Stable @NotNull ... inks) {
+    public static @NotNull InkyMessage inkyMessage(@NotNull Ink @NotNull ... inks) {
         return builder().addInks(inks).build();
     }
 
-    public static @NotNull InkyMessage inkyMessage(@NotNull Iterable<Ink.@NotNull Stable> inks) {
+    public static @NotNull InkyMessage inkyMessage(@NotNull Iterable<@NotNull Ink> inks) {
         return builder().addInks(inks).build();
     }
 
@@ -313,7 +313,7 @@ public final class InkyMessage implements ComponentSerializer<Component, Compone
             this.symbolicReset = symbolicReset;
         }
         
-        public @NotNull InkyMessage.Builder addInk(@NotNull Ink.Stable ink) {
+        public @NotNull InkyMessage.Builder addInk(@NotNull Ink ink) {
             return switch (ink) {
                 case Placeholder ph -> addPlaceholder(ph);
                 case Modifier<?> mod -> addModifier(mod);
@@ -323,12 +323,12 @@ public final class InkyMessage implements ComponentSerializer<Component, Compone
             };
         }
 
-        public @NotNull InkyMessage.Builder addInks(@NotNull Ink.Stable @NotNull ... inks) {
+        public @NotNull InkyMessage.Builder addInks(@NotNull Ink @NotNull ... inks) {
             for (var ink : inks) addInk(ink);
             return this;
         }
 
-        public @NotNull InkyMessage.Builder addInks(@NotNull Iterable<Ink.@NotNull Stable> inks) {
+        public @NotNull InkyMessage.Builder addInks(@NotNull Iterable<@NotNull Ink> inks) {
             for (var ink : inks) addInk(ink);
             return this;
         }
