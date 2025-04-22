@@ -24,7 +24,7 @@ public final class StandardModifiers { private StandardModifiers() {}
     );
 
     /**
-     * A list of modifiers that are used by the standard resolver
+     * A list of modifiers that are used by the standard InkyMessage
      * @see StandardModifiers#clickModifier()
      * @see StandardModifiers#colorModifier()
      * @see StandardModifiers#decorModifier()

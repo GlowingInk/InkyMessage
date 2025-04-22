@@ -10,12 +10,10 @@ import org.jetbrains.annotations.Unmodifiable;
 
 import java.util.List;
 
-import static ink.glowing.text.InkyMessage.inkyMessage;
-
-public sealed interface Modifier<T> extends Ink, Named, ModifierGetter permits Modifier.Complex, Modifier.Plain {
+public sealed interface Modifier<T> extends Ink.Stable, Named, ModifierFinder permits Modifier.Complex, Modifier.Plain {
     @NotNull Component modify(@NotNull Component text, @NotNull String param, @NotNull T value);
 
-    default @NotNull @Unmodifiable List<String> read(@NotNull InkyMessage.Resolver resolver, @NotNull Component text) {
+    default @NotNull @Unmodifiable List<String> read(@NotNull Component text, @NotNull InkyMessage inkyMessage) {
         return List.of();
     }
 
@@ -38,8 +36,8 @@ public sealed interface Modifier<T> extends Ink, Named, ModifierGetter permits M
 
     non-sealed interface Complex extends Modifier<Component> {
         @ApiStatus.Internal
-        default @NotNull String asFormatted(@NotNull String param, @NotNull Component value, @NotNull InkyMessage.Resolver resolver) {
-            return asFormatted(param, inkyMessage().serialize(value, resolver));
+        default @NotNull String asFormatted(@NotNull String param, @NotNull Component value, @NotNull InkyMessage inkyMessage) {
+            return asFormatted(param, inkyMessage.serialize(value));
         }
     }
 }

@@ -20,11 +20,11 @@ final class HoverModifier implements Modifier.Complex { private HoverModifier() 
     }
 
     @Override
-    public @NotNull @Unmodifiable List<String> read(@NotNull InkyMessage.Resolver resolver, @NotNull Component text) {
+    public @NotNull @Unmodifiable List<String> read(@NotNull Component text, @NotNull InkyMessage inkyMessage) {
         var hoverEvent = text.hoverEvent();
         return hoverEvent == null || hoverEvent.action() != HoverEvent.Action.SHOW_TEXT
                 ? List.of()
-                : List.of(asFormatted("text", (Component) hoverEvent.value(), resolver));
+                : List.of(asFormatted("text", (Component) hoverEvent.value(), inkyMessage));
     }
 
     @Override

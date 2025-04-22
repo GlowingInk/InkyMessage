@@ -26,7 +26,7 @@ final class DecorModifier implements Modifier.Plain { private DecorModifier() {}
     }
 
     @Override
-    public @NotNull @Unmodifiable List<String> read(@NotNull InkyMessage.Resolver resolver, @NotNull Component text) {
+    public @NotNull @Unmodifiable List<String> read(@NotNull Component text, @NotNull InkyMessage inkyMessage) {
         var textDecors = text.decorations().entrySet();
         if (textDecors.isEmpty()) return List.of();
         List<String> modifierStr = new ArrayList<>(0);

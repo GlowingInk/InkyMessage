@@ -3,12 +3,12 @@ package ink.glowing.text.replace;
 import ink.glowing.text.Ink;
 import ink.glowing.text.utils.GeneralUtils;
 import net.kyori.adventure.text.Component;
-import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Unmodifiable;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.TreeSet;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.regex.MatchResult;
@@ -17,8 +17,13 @@ import java.util.regex.Pattern;
 
 import static net.kyori.adventure.text.Component.text;
 
-public interface Replacer extends Ink {
-    @NotNull @Unmodifiable List<@NotNull FoundSpot> findSpots(@NotNull String str);
+public interface Replacer extends Ink.Stable, ReplacementMatcher {
+    @NotNull @Unmodifiable List<@NotNull FoundSpot> findSpots(@NotNull String input);
+
+    @Override
+    default @NotNull TreeSet<FoundSpot> matchReplacements(@NotNull String input) {
+        return new TreeSet<>(findSpots(input));
+    }
 
     static @NotNull Replacer replacer(@NotNull String search, @NotNull String replacement) {
         return replacer(search, text(replacement));
@@ -50,17 +55,17 @@ public interface Replacer extends Ink {
 
     record Literal(@NotNull String search, @NotNull Supplier<Component> replacement) implements Replacer {
         @Override
-        public @NotNull List<FoundSpot> findSpots(@NotNull String text) {
+        public @NotNull List<FoundSpot> findSpots(@NotNull String input) {
             List<FoundSpot> spots = new ArrayList<>(0);
-            GeneralUtils.findEach(text, search, (index) -> spots.add(new FoundSpot(index, search.length(), replacement)));
+            GeneralUtils.findEach(input, search, (index) -> spots.add(new FoundSpot(index, search.length(), replacement)));
             return spots;
         }
     }
 
     record Regex(@NotNull Pattern pattern, @NotNull Function<MatchResult, Component> replacement) implements Replacer {
         @Override
-        public @NotNull List<FoundSpot> findSpots(@NotNull String text) {
-            Matcher matcher = pattern.matcher(text);
+        public @NotNull List<FoundSpot> findSpots(@NotNull String input) {
+            Matcher matcher = pattern.matcher(input);
             if (!matcher.find()) return List.of();
             List<FoundSpot> spots = new ArrayList<>(0);
             do {
@@ -71,8 +76,7 @@ public interface Replacer extends Ink {
         }
     }
 
-    @ApiStatus.Internal
-    record FoundSpot(int start, int end, Supplier<Component> replacement) implements Comparable<FoundSpot> {
+    record FoundSpot(int start, int end, @NotNull Supplier<Component> replacement) implements Comparable<FoundSpot> {
         @Override
         public int compareTo(@NotNull Replacer.FoundSpot o) {
             if (start == o.start) {

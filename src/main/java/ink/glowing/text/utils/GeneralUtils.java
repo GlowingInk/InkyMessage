@@ -8,9 +8,7 @@ import java.util.function.IntConsumer;
 import java.util.function.IntFunction;
 import java.util.function.Supplier;
 
-public final class GeneralUtils {
-    private GeneralUtils() {}
-
+public final class GeneralUtils { private GeneralUtils() {}
     @SafeVarargs
     public static <T, C extends Collection<T>> @NotNull C concat(
             @NotNull Supplier<@NotNull C> colGetter,

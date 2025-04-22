@@ -14,7 +14,7 @@ import java.util.List;
 import static net.kyori.adventure.text.Component.empty;
 import static net.kyori.adventure.text.TranslationArgument.component;
 
-class LangModifiers { private LangModifiers() {}
+final class LangModifiers { private LangModifiers() {}
     static class ArgModifier implements Modifier.Complex { private ArgModifier() {}
         private static final TranslationArgument EMPTY_ARG = component(empty());
         static final ArgModifier INSTANCE = new ArgModifier();
@@ -49,11 +49,11 @@ class LangModifiers { private LangModifiers() {}
         }
 
         @Override
-        public @NotNull @Unmodifiable List<String> read(InkyMessage.@NotNull Resolver resolver, @NotNull Component text) {
+        public @NotNull @Unmodifiable List<String> read(@NotNull Component text, @NotNull InkyMessage inkyMessage) {
             if (text instanceof TranslatableComponent lang) {
                 List<String> argsStr = new ArrayList<>(0);
                 for (var arg : lang.arguments()) {
-                    argsStr.add(asFormatted("", arg.asComponent(), resolver));
+                    argsStr.add(asFormatted("", arg.asComponent(), inkyMessage));
                 }
                 return argsStr;
             }
@@ -77,7 +77,7 @@ class LangModifiers { private LangModifiers() {}
         }
 
         @Override
-        public @NotNull @Unmodifiable List<String> read(InkyMessage.@NotNull Resolver resolver, @NotNull Component text) {
+        public @NotNull @Unmodifiable List<String> read(@NotNull Component text, @NotNull InkyMessage inkyMessage) {
             return text instanceof TranslatableComponent lang && lang.fallback() != null
                     ? List.of(asFormatted("", lang.fallback()))
                     : List.of();

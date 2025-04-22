@@ -2,19 +2,25 @@ package ink.glowing.text;
 
 import ink.glowing.text.symbolic.SymbolicStyle;
 import net.kyori.adventure.text.*;
+import net.kyori.adventure.text.format.Style;
+import net.kyori.adventure.text.format.TextColor;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
 import java.util.TreeSet;
 
 import static ink.glowing.text.InkyMessage.escape;
 import static ink.glowing.text.modifier.standard.StandardModifiers.*;
+import static net.kyori.adventure.text.format.Style.style;
 
 @ApiStatus.Internal
 final class Stringifier { private Stringifier() {}
-    public static @NotNull String stringify(@NotNull Component text, @NotNull InkyMessage.Resolver resolver) {
+    public static @NotNull String stringify(@NotNull Component text, @NotNull InkyMessage inkyMessage) {
         StringBuilder builder = new StringBuilder();
-        stringify(builder, new TreeSet<>(), text, resolver, new boolean[]{false});
+        stringify(builder, new TreeSet<>(), text, inkyMessage, new boolean[]{false});
         return builder.toString();
     }
 
@@ -23,17 +29,17 @@ final class Stringifier { private Stringifier() {}
             @NotNull StringBuilder builder,
             final @NotNull TreeSet<SymbolicStyle> outerStyle,
             @NotNull Component text,
-            @NotNull InkyMessage.Resolver resolver,
+            @NotNull InkyMessage inkyMessage,
             boolean @NotNull [] previousStyled
     ) {
-        var modifiers = resolver.readStyleModifiers(text);
+        var modifiers = pullModifiers(text, inkyMessage);
         if (!modifiers.isEmpty()) {
             builder.append("&[");
         }
-        var currentStyle = resolver.readSymbolics(text.style());
+        var currentStyle = pullSymbolics(text.style(), inkyMessage);
         if (previousStyled[0] && (currentStyle.isEmpty() || !currentStyle.first().resets())) {
             if (outerStyle.isEmpty()) {
-                builder.append(resolver.symbolicReset().asFormatted());
+                builder.append(inkyMessage.symbolicReset().asFormatted());
             } else for (var symb : outerStyle) {
                 builder.append(symb.asFormatted());
             }
@@ -46,12 +52,12 @@ final class Stringifier { private Stringifier() {}
                 builder.append(symb.asFormatted());
             }
         }
-        appendComponent(builder, text, resolver);
+        appendComponent(builder, text, inkyMessage);
         var children = text.children();
         var newOuterStyle = new TreeSet<>(outerStyle);
         newOuterStyle.addAll(currentStyle);
         for (var child : children) {
-            stringify(builder, newOuterStyle, child, resolver, previousStyled);
+            stringify(builder, newOuterStyle, child, inkyMessage, previousStyled);
         }
         if (!modifiers.isEmpty()) {
             builder.append(']');
@@ -64,7 +70,7 @@ final class Stringifier { private Stringifier() {}
     private static void appendComponent(
             @NotNull StringBuilder builder,
             @NotNull Component component,
-            @NotNull InkyMessage.Resolver resolver
+            @NotNull InkyMessage inkyMessage
     ) {
         switch (component) {
             case TextComponent text -> builder.append(escape(text.content()));
@@ -74,10 +80,10 @@ final class Stringifier { private Stringifier() {}
                         .append("&{lang:")
                         .append(escape(translatable.key()))
                         .append("}");
-                for (var modifier : langArgModifier().read(resolver, translatable)) {
+                for (var modifier : langArgModifier().read(translatable, inkyMessage)) {
                     builder.append(modifier);
                 }
-                for (var modifier : langFallbackModifier().read(resolver, translatable)) {
+                for (var modifier : langFallbackModifier().read(translatable, inkyMessage)) {
                     builder.append(modifier);
                 }
             }
@@ -99,12 +105,93 @@ final class Stringifier { private Stringifier() {}
                         .append("&{selector:")
                         .append(escape(selector.pattern()))
                         .append('}');
-                for (var modifier : selectorSeparatorModifier().read(resolver, selector)) {
+                for (var modifier : selectorSeparatorModifier().read(selector, inkyMessage)) {
                     builder.append(modifier);
                 }
             }
 
             default -> builder.append('?');
+        }
+    }
+
+    private static @NotNull TreeSet<SymbolicStyle> pullSymbolics(@NotNull Style style, @NotNull InkyMessage inkyMessage) {
+        // TODO StyleBuilder?
+        TreeSet<SymbolicStyle> found = new TreeSet<>();
+        for (var symb : inkyMessage.symbolics().values()) {
+            if (symb.isApplied(style)) {
+                style = style.unmerge(symb.base());
+                found.add(symb);
+                if (style.isEmpty()) return found;
+            }
+        }
+        if (style.color() != null) { // If color is still merged
+            found.add(new HexSymbolicStyle(style.color()));
+        }
+        return found;
+    }
+
+    private static @NotNull List<String> pullModifiers(@NotNull Component text, @NotNull InkyMessage inkyMessage) {
+        List<String> modifiers = new ArrayList<>();
+        for (var modifier : inkyMessage.modifiers().values()) {
+            modifiers.addAll(modifier.read(text, inkyMessage));
+        }
+        return modifiers;
+    }
+
+    private static final class HexSymbolicStyle implements SymbolicStyle {
+        private final @NotNull TextColor color;
+        private final @NotNull Style cleanStyle;
+
+        private HexSymbolicStyle(@NotNull TextColor color) {
+            this.color = color;
+            this.cleanStyle = style(color);
+        }
+
+        @Override
+        public char symbol() {
+            return '#';
+        }
+
+        @Override
+        public boolean resets() {
+            return true;
+        }
+
+        @Override
+        public boolean isApplied(@NotNull Style at) {
+            return color.equals(at.color());
+        }
+
+        @Override
+        public @NotNull Style base() {
+            return cleanStyle;
+        }
+
+        @Override
+        public @NotNull String asFormatted() {
+            return "&" + color.asHexString();
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (obj == this) return true;
+            if (obj == null || obj.getClass() != this.getClass()) return false;
+            var that = (HexSymbolicStyle) obj;
+            return Objects.equals(this.color, that.color) &&
+                    Objects.equals(this.cleanStyle, that.cleanStyle);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(color, cleanStyle);
+        }
+
+        @Override
+        public String toString() {
+            return "HexSymbolicStyle[" +
+                    "color=" + color + ", " +
+                    "cleanStyle=" + cleanStyle +
+                    ']';
         }
     }
 }

@@ -4,8 +4,9 @@ import ink.glowing.text.Ink;
 import net.kyori.adventure.text.format.Style;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
-public interface SymbolicStyle extends Ink, Comparable<SymbolicStyle> {
+public interface SymbolicStyle extends Ink.Stable, Comparable<SymbolicStyle>, SymbolicStyleFinder {
     char symbol();
 
     boolean resets();
@@ -13,6 +14,11 @@ public interface SymbolicStyle extends Ink, Comparable<SymbolicStyle> {
     boolean isApplied(@NotNull Style at);
 
     @NotNull Style base();
+
+    @Override
+    default @Nullable SymbolicStyle findSymbolicStyle(char symbol) {
+        return symbol() == symbol ? this : null;
+    }
 
     @ApiStatus.NonExtendable
     default @NotNull String asFormatted() {

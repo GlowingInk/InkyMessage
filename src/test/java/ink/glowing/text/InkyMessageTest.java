@@ -6,10 +6,13 @@ import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
+import java.util.Arrays;
+import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.random.RandomGenerator;
 
 import static ink.glowing.text.InkyMessage.inkyMessage;
+import static ink.glowing.text.placeholder.Placeholder.placeholder;
 import static net.kyori.adventure.text.Component.*;
 import static net.kyori.adventure.text.event.ClickEvent.openUrl;
 import static net.kyori.adventure.text.event.ClickEvent.runCommand;
@@ -146,6 +149,28 @@ public class InkyMessageTest {
         assertEquals(
                 INKY.deserialize("&x&1&2&3&4&5&6Hex colors are cool"),
                 INKY.deserialize("&#123456Hex colors are cool")
+        );
+    }
+
+    @DataProvider
+    public Object[][] deserializeWithInksData() {
+        return new Object[][] {
+                {
+                        "&{test1} &{test2}",
+                        Arrays.asList(
+                                placeholder("test1", text("Hello")),
+                                placeholder("test2", text("world"))
+                        ),
+                        text("Hello world")
+                }
+        };
+    }
+
+    @Test(dataProvider = "deserializeWithInksData")
+    public void deserializeWithInksTest(String text, List<Ink> inks, Component expected) {
+        assertEquals(
+                INKY.deserialize(text, inks),
+                expected
         );
     }
 

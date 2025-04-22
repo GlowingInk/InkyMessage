@@ -31,7 +31,7 @@ final class ClickModifier implements Modifier.Plain { private ClickModifier() {}
 
     @SuppressWarnings("ConstantConditions")
     @Override
-    public @NotNull @Unmodifiable List<String> read(@NotNull InkyMessage.Resolver resolver, @NotNull Component text) {
+    public @NotNull @Unmodifiable List<String> read(@NotNull Component text, @NotNull InkyMessage inkyMessage) {
         var click = text.clickEvent();
         if (click != null) {
             if (text.insertion() != null) {

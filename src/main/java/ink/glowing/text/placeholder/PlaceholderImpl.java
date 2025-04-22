@@ -1,7 +1,7 @@
 package ink.glowing.text.placeholder;
 
-import ink.glowing.text.modifier.ModifierGetter;
 import ink.glowing.text.modifier.Modifier;
+import ink.glowing.text.modifier.ModifierFinder;
 import net.kyori.adventure.text.Component;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -11,7 +11,7 @@ import java.util.function.Function;
 record PlaceholderImpl(
         @NotNull String name,
         @NotNull Function<@NotNull String, @NotNull Component> resultFunct,
-        @NotNull ModifierGetter modifierGetter
+        @NotNull ModifierFinder modifierFinder
 ) implements Placeholder {
     @Override
     public @NotNull Component parse(@NotNull String value) {
@@ -19,7 +19,7 @@ record PlaceholderImpl(
     }
 
     @Override
-    public @Nullable Modifier<?> findModifier(@NotNull String modifierName) {
-        return modifierGetter.findModifier(modifierName);
+    public @Nullable Modifier<?> findLocalModifier(@NotNull String modifierName) {
+        return modifierFinder.findModifier(modifierName);
     }
 }

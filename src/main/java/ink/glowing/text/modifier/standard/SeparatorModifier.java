@@ -9,7 +9,7 @@ import org.jetbrains.annotations.Unmodifiable;
 
 import java.util.List;
 
-class SeparatorModifier implements Modifier.Complex { private SeparatorModifier() {}
+final class SeparatorModifier implements Modifier.Complex { private SeparatorModifier() {}
     static final SeparatorModifier INSTANCE = new SeparatorModifier();
 
     @Override
@@ -20,9 +20,9 @@ class SeparatorModifier implements Modifier.Complex { private SeparatorModifier(
     }
 
     @Override
-    public @NotNull @Unmodifiable List<String> read(InkyMessage.@NotNull Resolver resolver, @NotNull Component text) {
+    public @NotNull @Unmodifiable List<String> read(@NotNull Component text, @NotNull InkyMessage inkyMessage) {
         return text instanceof SelectorComponent selector && selector.separator() != null
-                ? List.of(asFormatted("", selector.separator(), resolver))
+                ? List.of(asFormatted("", selector.separator(), inkyMessage))
                 : List.of();
     }
 

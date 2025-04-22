@@ -19,7 +19,7 @@ final class FontModifier implements Modifier.Plain { private FontModifier() {}
     }
 
     @Override
-    public @NotNull @Unmodifiable List<String> read(@NotNull InkyMessage.Resolver resolver, @NotNull Component text) {
+    public @NotNull @Unmodifiable List<String> read(@NotNull Component text, @NotNull InkyMessage inkyMessage) {
         return text.font() == null
                 ? List.of()
                 : List.of(asFormatted(text.font().asString(), ""));

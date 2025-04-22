@@ -1,12 +1,12 @@
 package ink.glowing.text;
 
 import ink.glowing.text.modifier.Modifier;
-import ink.glowing.text.modifier.ModifierGetter;
+import ink.glowing.text.modifier.ModifierFinder;
 import ink.glowing.text.placeholder.Placeholder;
 import ink.glowing.text.replace.Replacer;
+import ink.glowing.text.symbolic.SymbolicStyle;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
-import net.kyori.adventure.text.format.Style;
 import net.kyori.adventure.text.format.TextColor;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
@@ -94,7 +94,7 @@ final class Parser {
                             params = textStr.substring(paramsIndex, globalIndex);
                         }
                         builder.append(parseSegment(from, initIndex, context));
-                        builder.append(prepareModifiers(context, placeholder).apply(placeholder.parse(params)));
+                        builder.append(prepareModifiers(context, placeholder::findLocalModifier).apply(placeholder.parse(params)));
                         from = globalIndex--;
                     }
 
@@ -159,10 +159,13 @@ final class Parser {
                     lastAppend = (index += charsToSkip - 1) + 1;
                 }
                 default -> {
-                    Style newStyle = resolver.applySymbolicStyle(styleCh, context.lastStyle());
-                    if (newStyle == null) continue;
+                    SymbolicStyle symbolic = resolver.findSymbolicStyle(styleCh);
+                    if (symbolic == null) continue;
                     appendPrevious(builder, lastAppend, index, context);
-                    context.lastStyle(newStyle);
+                    context.lastStyle(symbolic.resets()
+                            ? symbolic.base()
+                            : context.lastStyle().merge(symbolic.base())
+                    );
                     lastAppend = (++index) + 1;
                 }
             }
@@ -184,6 +187,7 @@ final class Parser {
         if (start == end) return;
         builder.append(text(unescape(textStr.substring(start, end))).style(context.lastStyle()));
     }
+
     /**
      * Attempts to parse a hexadecimal color code from text input.
      * @param text hex color string
@@ -193,8 +197,9 @@ final class Parser {
     private static @Nullable TextColor parseHexColor(@NotNull String text, boolean quirky) {
         return quirky
                 ? TextColor.fromHexString("#" +
-                        text.charAt(2) + text.charAt(4) + text.charAt(6) +
-                        text.charAt(8) + text.charAt(10) + text.charAt(12))
+                        text.charAt(2) + text.charAt(4) +
+                        text.charAt(6) + text.charAt(8) +
+                        text.charAt(10) + text.charAt(12))
                 : TextColor.fromCSSHexString(text);
     }
 
@@ -221,22 +226,22 @@ final class Parser {
 
     private @NotNull Function<Component, Component> prepareModifiers(
             @NotNull BuildContext context,
-            @NotNull ModifierGetter modifierGetter
+            @NotNull ModifierFinder modifierFinder
     ) {
-        return prepareModifiers(identity(), context, modifierGetter);
+        return prepareModifiers(identity(), context, modifierFinder);
     }
 
     /**
      * Parses and prepares style modifiers recursively.
      * @param comp component to modify
      * @param context current build context
-     * @param modifierGetter source of style modifiers
+     * @param modifierFinder source of style modifiers
      * @return modified component with all applicable styles
      */
     private @NotNull Function<Component, Component> prepareModifiers(
             @NotNull Function<Component, Component> comp,
             @NotNull BuildContext context,
-            @NotNull ModifierGetter modifierGetter
+            @NotNull ModifierFinder modifierFinder
     ) {
         int from = globalIndex + 1;
         if (from >= textLength || textStr.charAt(from) != '(') {
@@ -244,7 +249,7 @@ final class Parser {
             return comp;
         }
         String modifierStr = extractPlain(from + 1, ":) ");
-        Modifier<?> modifier = modifierGetter.findModifier(modifierStr);
+        Modifier<?> modifier = modifierFinder.findModifier(modifierStr);
         if (modifier == null) {
             globalIndex = from;
             return comp;
@@ -271,7 +276,7 @@ final class Parser {
                 comp = comp.andThen(prev -> complexModifier.modify(prev, finalParams, value.compact()));
             }
         }
-        return prepareModifiers(comp, context, modifierGetter);
+        return prepareModifiers(comp, context, modifierFinder);
     }
 
     /**

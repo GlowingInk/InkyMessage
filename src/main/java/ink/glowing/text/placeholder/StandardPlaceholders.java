@@ -2,7 +2,10 @@ package ink.glowing.text.placeholder;
 
 import org.jetbrains.annotations.NotNull;
 
-import static ink.glowing.text.modifier.ModifierGetter.modifierGetter;
+import java.util.Collection;
+import java.util.Set;
+
+import static ink.glowing.text.modifier.ModifierFinder.modifierFinder;
 import static ink.glowing.text.modifier.standard.StandardModifiers.*;
 import static ink.glowing.text.placeholder.Placeholder.placeholder;
 import static net.kyori.adventure.text.Component.*;
@@ -15,7 +18,7 @@ public final class StandardPlaceholders { private StandardPlaceholders() {}
     private static final Placeholder LANG = placeholder(
             "lang",
             value -> translatable(value),
-            modifierGetter(langArgModifier(), langFallbackModifier())
+            modifierFinder(langArgModifier(), langFallbackModifier())
     );
     private static final Placeholder KEYBIND = placeholder("keybind", value -> keybind(value));
     private static final Placeholder SCORE = placeholder(
@@ -30,6 +33,14 @@ public final class StandardPlaceholders { private StandardPlaceholders() {}
             value -> selector(value),
             selectorSeparatorModifier()
     );
+
+    private static final Set<Placeholder> STANDARD_PLACEHOLDERS = Set.of(
+            LANG, KEYBIND, SCORE, SELECTOR
+    );
+
+    public static @NotNull Collection<@NotNull Placeholder> standardPlaceholders() {
+        return STANDARD_PLACEHOLDERS;
+    }
 
     public static @NotNull Placeholder langPlaceholder() {
         return LANG;
