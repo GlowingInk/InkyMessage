@@ -162,10 +162,7 @@ final class Parser {
                     SymbolicStyle symbolic = context.findSymbolicStyle(styleCh);
                     if (symbolic == null) continue;
                     appendPrevious(builder, lastAppend, index, context);
-                    context.lastStyle(symbolic.resets()
-                            ? symbolic.base()
-                            : context.lastStyle().merge(symbolic.base())
-                    );
+                    context.lastStyle(symbolic.merge(context.lastStyle()));
                     lastAppend = (++index) + 1;
                 }
             }

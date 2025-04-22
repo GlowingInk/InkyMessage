@@ -42,6 +42,16 @@ final class ChainedSymbolicDecoration implements SymbolicStyle {
     }
 
     @Override
+    public @NotNull Style merge(@NotNull Style other) {
+        return other.decoration(decoration, TextDecoration.State.TRUE);
+    }
+
+    @Override
+    public @NotNull Style unmerge(@NotNull Style other) {
+        return other.decoration(decoration, TextDecoration.State.NOT_SET);
+    }
+
+    @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (!(o instanceof ChainedSymbolicDecoration that)) return false;

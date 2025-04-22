@@ -40,6 +40,16 @@ final class ResettingSymbolicColor implements SymbolicStyle {
     }
 
     @Override
+    public @NotNull Style merge(@NotNull Style other) {
+        return cleanStyle;
+    }
+
+    @Override
+    public @NotNull Style unmerge(@NotNull Style other) {
+        return other.color(null);
+    }
+
+    @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (!(o instanceof ResettingSymbolicColor that)) return false;

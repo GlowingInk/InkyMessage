@@ -15,6 +15,14 @@ public interface SymbolicStyle extends Ink, Comparable<SymbolicStyle>, SymbolicS
 
     @NotNull Style base();
 
+    default @NotNull Style merge(@NotNull Style other) {
+        return resets() ? base() : other.merge(base());
+    }
+
+    default @NotNull Style unmerge(@NotNull Style other) {
+        return other.unmerge(base());
+    }
+
     @Override
     default @Nullable SymbolicStyle findSymbolicStyle(char symbol) {
         return symbol() == symbol ? this : null;

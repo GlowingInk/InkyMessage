@@ -29,6 +29,16 @@ record SimpleSymbolicReset(char symbol) implements SymbolicStyle {
     }
 
     @Override
+    public @NotNull Style merge(@NotNull Style other) {
+        return Style.empty();
+    }
+
+    @Override
+    public @NotNull Style unmerge(@NotNull Style other) {
+        return other;
+    }
+
+    @Override
     public int hashCode() {
         return Objects.hash(symbol);
     }

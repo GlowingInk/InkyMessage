@@ -115,11 +115,10 @@ final class Stringifier { private Stringifier() {}
     }
 
     private static @NotNull TreeSet<SymbolicStyle> pullSymbolics(@NotNull Style style, @NotNull InkyMessage inkyMessage) {
-        // TODO StyleBuilder?
         TreeSet<SymbolicStyle> found = new TreeSet<>();
         for (var symb : inkyMessage.symbolics().values()) {
             if (symb.isApplied(style)) {
-                style = style.unmerge(symb.base());
+                style = symb.unmerge(style);
                 found.add(symb);
                 if (style.isEmpty()) return found;
             }
@@ -165,6 +164,16 @@ final class Stringifier { private Stringifier() {}
         @Override
         public @NotNull Style base() {
             return cleanStyle;
+        }
+
+        @Override
+        public @NotNull Style merge(@NotNull Style other) {
+            return cleanStyle;
+        }
+
+        @Override
+        public @NotNull Style unmerge(@NotNull Style other) {
+            return other.color(null);
         }
 
         @Override
