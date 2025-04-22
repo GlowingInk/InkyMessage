@@ -1,181 +1,49 @@
 package ink.glowing.text;
 
 import ink.glowing.text.modifier.Modifier;
+import ink.glowing.text.modifier.ModifierFinder;
 import ink.glowing.text.placeholder.Placeholder;
+import ink.glowing.text.placeholder.PlaceholderFinder;
+import ink.glowing.text.replace.ReplacementMatcher;
 import ink.glowing.text.replace.Replacer;
 import ink.glowing.text.symbolic.StandardSymbolicStyles;
 import ink.glowing.text.symbolic.SymbolicStyle;
+import ink.glowing.text.symbolic.SymbolicStyleFinder;
 import net.kyori.adventure.builder.AbstractBuilder;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.ComponentSerializer;
-import org.jetbrains.annotations.Contract;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
-import org.jetbrains.annotations.Unmodifiable;
+import org.jetbrains.annotations.*;
 
 import java.util.*;
-
-import static ink.glowing.text.Stringifier.stringify;
-import static ink.glowing.text.modifier.standard.StandardModifiers.standardModifiers;
-import static ink.glowing.text.placeholder.StandardPlaceholders.standardPlaceholders;
-import static ink.glowing.text.replace.ReplacementMatcher.replacementMatcher;
-import static ink.glowing.text.replace.StandardReplacers.urlReplacer;
-import static ink.glowing.text.symbolic.StandardSymbolicStyles.notchianFormat;
-import static ink.glowing.text.symbolic.StandardSymbolicStyles.notchianResetSymbol;
-import static java.util.Collections.unmodifiableCollection;
-import static java.util.Collections.unmodifiableMap;
 
 /**
  * User-friendly component (de)serializer with legacy-inspired format.
  */
-public final class InkyMessage implements ComponentSerializer<Component, Component, String> {
-    private static final InkyMessage STANDARD = builder()
-            .addModifiers(standardModifiers())
-            .addSymbolics(notchianFormat())
-            .symbolicReset(notchianResetSymbol())
-            .addReplacer(urlReplacer())
-            .build();
-    
-    private final Map<String, Modifier<?>> modifiers;
-    private final Map<String, Placeholder> placeholders;
-    private final Map<Character, SymbolicStyle> symbolics;
-    private final Collection<Replacer> replacers;
-    private final SymbolicStyle symbolicReset;
-
-    private final Context baseResolver;
-
-    private InkyMessage(
-            @NotNull Map<String, Modifier<?>> modifiers,
-            @NotNull Map<String, Placeholder> placeholders,
-            @NotNull Map<Character, SymbolicStyle> symbolics,
-            @NotNull Collection<Replacer> replacers,
-            @NotNull SymbolicStyle symbolicReset
-    ) {
-        this.modifiers = unmodifiableMap(modifiers);
-        this.placeholders = unmodifiableMap(placeholders);
-        this.symbolics = unmodifiableMap(symbolics);
-        this.replacers = unmodifiableCollection(replacers);
-        this.symbolicReset = symbolicReset;
-
-        Map<String, Placeholder> adjustedPlaceholders = new HashMap<>(placeholders);
-        for (var ph : standardPlaceholders()) {
-            adjustedPlaceholders.put(ph.name(), ph);
-        }
-        Map<Character, SymbolicStyle> adjustedSymbolics = new HashMap<>(symbolics);
-        adjustedSymbolics.put(symbolicReset.symbol(), symbolicReset);
-        this.baseResolver = new Context(
-                this,
-                modifiers::get,
-                adjustedPlaceholders::get,
-                adjustedSymbolics::get,
-                replacementMatcher(replacers),
-                symbolicReset
-        );
-    }
-
-    public @Unmodifiable @NotNull Map<String, Modifier<?>> modifiers() {
-        return modifiers;
-    }
-
-    public @Unmodifiable @NotNull Map<String, Placeholder> placeholders() {
-        return placeholders;
-    }
-
-    public @Unmodifiable @NotNull Map<Character, SymbolicStyle> symbolics() {
-        return symbolics;
-    }
-
-    public @Unmodifiable @NotNull Collection<Replacer> replacers() {
-        return replacers;
-    }
-
-    public @NotNull SymbolicStyle symbolicReset() {
-        return symbolicReset;
-    }
-
+@ApiStatus.NonExtendable
+public interface InkyMessage extends ComponentSerializer<Component, Component, String>,
+        ModifierFinder, PlaceholderFinder, SymbolicStyleFinder, ReplacementMatcher {
     /**
      * Gets the standard instance of InkyMessage.
      * @return the instance
      */
     @Contract(pure = true)
-    public static @NotNull InkyMessage inkyMessage() {
-        return STANDARD;
+    static @NotNull InkyMessage inkyMessage() {
+        return InkyMessageImpl.STANDARD;
     }
 
-    public static @NotNull InkyMessage inkyMessage(@NotNull Ink ink) {
+    @Contract(value = "_ -> new", pure = true)
+    static @NotNull InkyMessage inkyMessage(@NotNull Ink ink) {
         return builder().addInk(ink).build();
     }
 
-    public static @NotNull InkyMessage inkyMessage(@NotNull Ink @NotNull ... inks) {
+    @Contract(value = "_ -> new", pure = true)
+    static @NotNull InkyMessage inkyMessage(@NotNull Ink @NotNull ... inks) {
         return builder().addInks(inks).build();
     }
 
-    public static @NotNull InkyMessage inkyMessage(@NotNull Iterable<@NotNull Ink> inks) {
+    @Contract(value = "_ -> new", pure = true)
+    static @NotNull InkyMessage inkyMessage(@NotNull Iterable<@NotNull Ink> inks) {
         return builder().addInks(inks).build();
-    }
-
-    /**
-     * Convert string into adventure text component.
-     * @param inputText input string
-     * @return converted text component
-     */
-    @Override
-    public @NotNull Component deserialize(@NotNull String inputText) {
-        return deserialize(inputText, this.baseResolver);
-    }
-
-    /**
-     * Convert string into adventure text component.
-     * @param inputText input string
-     * @param ink additional style ink
-     * @return converted text component
-     */
-    public @NotNull Component deserialize(@NotNull String inputText,
-                                          @NotNull Ink ink) {
-        return deserialize(inputText, this.baseResolver.with(ink));
-    }
-
-    /**
-     * Convert string into adventure text component.
-     * @param inputText input string
-     * @param inks additional style inks
-     * @return converted text component
-     */
-    public @NotNull Component deserialize(@NotNull String inputText,
-                                          @NotNull Ink @NotNull ... inks) {
-        return deserialize(inputText, this.baseResolver.with(inks));
-    }
-
-    /**
-     * Convert string into adventure text component.
-     * @param inputText input string
-     * @param inks additional style inks
-     * @return converted text component
-     */
-    public @NotNull Component deserialize(@NotNull String inputText,
-                                          @NotNull Iterable<@NotNull Ink> inks) {
-        return deserialize(inputText, this.baseResolver.with(inks));
-    }
-
-    /**
-     * Convert string into adventure text component.
-     * @param inputText input string
-     * @param context context to use
-     * @return converted text component
-     */
-    private static @NotNull Component deserialize(@NotNull String inputText,
-                                                  @NotNull Context context) {
-        return Parser.parse(inputText, context.stylelessCopy()).compact();
-    }
-
-    /**
-     * Convert adventure component into string.
-     * @param text input component
-     * @return converted string representation
-     */
-    @Override
-    public @NotNull String serialize(@NotNull Component text) {
-        return stringify(text, this);
     }
 
     /**
@@ -183,7 +51,8 @@ public final class InkyMessage implements ComponentSerializer<Component, Compone
      * @param text text to escape
      * @return escaped string
      */
-    public static @NotNull String escape(@NotNull String text) {
+    @Contract(pure = true)
+    static @NotNull String escape(@NotNull String text) {
         StringBuilder builder = new StringBuilder(text.length());
         for (int index = 0; index < text.length(); index++) {
             char ch = text.charAt(index);
@@ -197,10 +66,12 @@ public final class InkyMessage implements ComponentSerializer<Component, Compone
 
     /**
      * Unescape special characters.
+     *
      * @param text text to unescape
      * @return unescaped string
      */
-    public static @NotNull String unescape(@NotNull String text) {
+    @Contract(pure = true)
+    static @NotNull String unescape(@NotNull String text) {
         if (text.indexOf('\\') == -1) return text;
 
         StringBuilder builder = new StringBuilder(text.length());
@@ -226,11 +97,13 @@ public final class InkyMessage implements ComponentSerializer<Component, Compone
 
     /**
      * Check if character is escaped.
+     *
      * @param input text to check in
      * @param index index of character to check
      * @return is character escaped
      */
-    public static boolean isEscapedAt(@NotNull String input, int index) {
+    @Contract(pure = true)
+    static boolean isEscapedAt(@NotNull String input, int index) {
         boolean escaped = false;
         while (--index > -1 && input.charAt(index) == '\\') escaped = !escaped;
         return escaped;
@@ -238,20 +111,24 @@ public final class InkyMessage implements ComponentSerializer<Component, Compone
 
     /**
      * Check if character is not escaped.
+     *
      * @param input text to check in
      * @param index index of character to check
      * @return is character unescaped
      */
-    public static boolean isUnescapedAt(@NotNull String input, int index) {
+    @Contract(pure = true)
+    static boolean isUnescapedAt(@NotNull String input, int index) {
         return !isEscapedAt(input, index);
     }
 
     /**
      * Check if character is special and should be escaped.
+     *
      * @param ch character to check
      * @return is character escapable
      */
-    public static boolean isSpecial(char ch) {
+    @Contract(pure = true)
+    static boolean isSpecial(char ch) {
         return switch (ch) {
             case '&', '[', ']', '(', ')', '{', '}', '\\' -> true;
             default -> false;
@@ -260,32 +137,88 @@ public final class InkyMessage implements ComponentSerializer<Component, Compone
 
     /**
      * Check if character is not special.
+     *
      * @param ch character to check
      * @return is character unescapable
      */
-    public static boolean isNotSpecial(char ch) {
+    @Contract(pure = true)
+    static boolean isNotSpecial(char ch) {
         return !isSpecial(ch);
     }
 
     /**
      * Creates a new context builder.
+     *
      * @return a builder
      */
-    public static @NotNull InkyMessage.Builder builder() {
+    @Contract(value = "-> new", pure = true)
+    static @NotNull InkyMessage.Builder builder() {
         return new Builder();
     }
 
-    public @NotNull InkyMessage.Builder toBuilder() {
-        return new InkyMessage.Builder(
-                new HashMap<>(modifiers),
-                new HashMap<>(placeholders),
-                new HashMap<>(symbolics),
-                new HashSet<>(replacers),
-                symbolicReset
-        );
-    }
+    @Contract(pure = true)
+    @Unmodifiable @NotNull Map<String, Modifier<?>> modifiers();
 
-    public static class Builder implements AbstractBuilder<InkyMessage> {
+    @Contract(pure = true)
+    @Unmodifiable @NotNull Map<String, Placeholder> placeholders();
+
+    @Contract(pure = true)
+    @Unmodifiable @NotNull Map<Character, SymbolicStyle> symbolics();
+
+    @Contract(pure = true)
+    @Unmodifiable @NotNull Collection<Replacer> replacers();
+
+    @Contract(pure = true)
+    @NotNull SymbolicStyle symbolicReset();
+
+
+    /**
+     * Convert string into adventure text component.
+     * @param inputText input string
+     * @return converted text component
+     */
+    @Override
+    @NotNull Component deserialize(@NotNull String inputText);
+
+    /**
+     * Convert string into adventure text component.
+     * @param inputText input string
+     * @param ink additional style ink
+     * @return converted text component
+     */
+    @NotNull Component deserialize(@NotNull String inputText,
+                                   @NotNull Ink ink);
+
+    /**
+     * Convert string into adventure text component.
+     * @param inputText input string
+     * @param inks additional style inks
+     * @return converted text component
+     */
+    @NotNull Component deserialize(@NotNull String inputText,
+                                   @NotNull Ink @NotNull ... inks);
+
+    /**
+     * Convert string into adventure text component.
+     * @param inputText input string
+     * @param inks additional style inks
+     * @return converted text component
+     */
+    @NotNull Component deserialize(@NotNull String inputText,
+                                   @NotNull Iterable<@NotNull Ink> inks);
+
+    /**
+     * Convert adventure component into string.
+     * @param text input component
+     * @return converted string representation
+     */
+    @Override
+    @NotNull String serialize(@NotNull Component text);
+
+    @Contract(value = "-> new", pure = true)
+    @NotNull InkyMessage.Builder toBuilder();
+
+    class Builder implements AbstractBuilder<InkyMessage> {
         private Map<String, Modifier<?>> modifiers;
         private Map<String, Placeholder> placeholders;
         private Map<Character, SymbolicStyle> symbolics;
@@ -312,7 +245,8 @@ public final class InkyMessage implements ComponentSerializer<Component, Compone
             this.replacers = replacers;
             this.symbolicReset = symbolicReset;
         }
-        
+
+        @Contract("_ -> this")
         public @NotNull InkyMessage.Builder addInk(@NotNull Ink ink) {
             return switch (ink) {
                 case Placeholder ph -> addPlaceholder(ph);
@@ -323,11 +257,13 @@ public final class InkyMessage implements ComponentSerializer<Component, Compone
             };
         }
 
+        @Contract("_ -> this")
         public @NotNull InkyMessage.Builder addInks(@NotNull Ink @NotNull ... inks) {
             for (var ink : inks) addInk(ink);
             return this;
         }
 
+        @Contract("_ -> this")
         public @NotNull InkyMessage.Builder addInks(@NotNull Iterable<@NotNull Ink> inks) {
             for (var ink : inks) addInk(ink);
             return this;
@@ -517,10 +453,10 @@ public final class InkyMessage implements ComponentSerializer<Component, Compone
             return this;
         }
 
-        @Override
         @Contract("-> new")
+        @Override
         public @NotNull InkyMessage build() {
-            return new InkyMessage(
+            return new InkyMessageImpl(
                     new HashMap<>(modifiers),
                     new HashMap<>(placeholders),
                     new HashMap<>(symbolics),

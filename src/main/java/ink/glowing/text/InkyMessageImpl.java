@@ -1,0 +1,167 @@
+package ink.glowing.text;
+
+import ink.glowing.text.modifier.Modifier;
+import ink.glowing.text.placeholder.Placeholder;
+import ink.glowing.text.replace.ReplacementMatcher;
+import ink.glowing.text.replace.Replacer;
+import ink.glowing.text.symbolic.SymbolicStyle;
+import net.kyori.adventure.text.Component;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+import org.jetbrains.annotations.Unmodifiable;
+
+import java.util.*;
+
+import static ink.glowing.text.Stringifier.stringify;
+import static ink.glowing.text.modifier.standard.StandardModifiers.standardModifiers;
+import static ink.glowing.text.placeholder.StandardPlaceholders.standardPlaceholders;
+import static ink.glowing.text.replace.ReplacementMatcher.replacementMatcher;
+import static ink.glowing.text.replace.StandardReplacers.urlReplacer;
+import static ink.glowing.text.symbolic.StandardSymbolicStyles.notchianFormat;
+import static ink.glowing.text.symbolic.StandardSymbolicStyles.notchianResetSymbol;
+import static java.util.Collections.unmodifiableCollection;
+import static java.util.Collections.unmodifiableMap;
+
+final class InkyMessageImpl implements InkyMessage {
+    static final InkyMessage STANDARD = InkyMessage.builder()
+            .addModifiers(standardModifiers())
+            .addSymbolics(notchianFormat())
+            .symbolicReset(notchianResetSymbol())
+            .addReplacer(urlReplacer())
+            .build();
+    
+    private final Map<String, Modifier<?>> modifiers;
+    private final Map<String, Placeholder> placeholders;
+    private final Map<Character, SymbolicStyle> symbolics;
+    private final Collection<Replacer> replacers;
+    private final SymbolicStyle symbolicReset;
+
+    private final Context baseContext;
+    private final ReplacementMatcher replacementMatcher;
+
+    InkyMessageImpl(
+            @NotNull Map<String, Modifier<?>> modifiers,
+            @NotNull Map<String, Placeholder> placeholders,
+            @NotNull Map<Character, SymbolicStyle> symbolics,
+            @NotNull Collection<Replacer> replacers,
+            @NotNull SymbolicStyle symbolicReset
+    ) {
+        this.modifiers = unmodifiableMap(modifiers);
+        this.placeholders = unmodifiableMap(placeholders);
+        this.symbolics = unmodifiableMap(symbolics);
+        this.replacers = unmodifiableCollection(replacers);
+        this.symbolicReset = symbolicReset;
+
+        this.replacementMatcher = replacementMatcher(replacers);
+
+        Map<String, Placeholder> adjustedPlaceholders = new HashMap<>(placeholders);
+        for (var ph : standardPlaceholders()) {
+            adjustedPlaceholders.put(ph.name(), ph);
+        }
+        Map<Character, SymbolicStyle> adjustedSymbolics = new HashMap<>(symbolics);
+        adjustedSymbolics.put(symbolicReset.symbol(), symbolicReset);
+        this.baseContext = new Context(
+                this,
+                modifiers::get,
+                adjustedPlaceholders::get,
+                adjustedSymbolics::get,
+                replacementMatcher,
+                symbolicReset
+        );
+    }
+
+    @Override
+    public @Unmodifiable @NotNull Map<String, Modifier<?>> modifiers() {
+        return modifiers;
+    }
+
+    @Override
+    public @Nullable Modifier<?> findModifier(@NotNull String name) {
+        return modifiers.get(name);
+    }
+
+    @Override
+    public @Unmodifiable @NotNull Map<String, Placeholder> placeholders() {
+        return placeholders;
+    }
+
+    @Override
+    public @Nullable Placeholder findPlaceholder(@NotNull String name) {
+        return placeholders.get(name);
+    }
+
+    @Override
+    public @Unmodifiable @NotNull Map<Character, SymbolicStyle> symbolics() {
+        return symbolics;
+    }
+
+    @Override
+    public @Nullable SymbolicStyle findSymbolicStyle(char symbol) {
+        return symbolics.get(symbol);
+    }
+
+    @Override
+    public @Unmodifiable @NotNull Collection<Replacer> replacers() {
+        return replacers;
+    }
+
+    @Override
+    public @NotNull TreeSet<Replacer.FoundSpot> matchReplacements(@NotNull String input) {
+        return replacementMatcher.matchReplacements(input);
+    }
+
+    @Override
+    public @NotNull SymbolicStyle symbolicReset() {
+        return symbolicReset;
+    }
+
+    @Override
+    public @NotNull Component deserialize(@NotNull String inputText) {
+        return deserialize(inputText, this.baseContext);
+    }
+
+    @Override
+    public @NotNull Component deserialize(@NotNull String inputText,
+                                          @NotNull Ink ink) {
+        return deserialize(inputText, this.baseContext.with(ink));
+    }
+
+    @Override
+    public @NotNull Component deserialize(@NotNull String inputText,
+                                          @NotNull Ink @NotNull ... inks) {
+        return deserialize(inputText, this.baseContext.with(inks));
+    }
+
+    @Override
+    public @NotNull Component deserialize(@NotNull String inputText,
+                                          @NotNull Iterable<@NotNull Ink> inks) {
+        return deserialize(inputText, this.baseContext.with(inks));
+    }
+
+    /**
+     * Convert string into adventure text component.
+     * @param inputText input string
+     * @param context context to use
+     * @return converted text component
+     */
+    private static @NotNull Component deserialize(@NotNull String inputText,
+                                                  @NotNull Context context) {
+        return Parser.parse(inputText, context.stylelessCopy()).compact();
+    }
+
+    @Override
+    public @NotNull String serialize(@NotNull Component text) {
+        return stringify(text, this);
+    }
+
+    @Override
+    public @NotNull InkyMessageImpl.Builder toBuilder() {
+        return new InkyMessageImpl.Builder(
+                new HashMap<>(modifiers),
+                new HashMap<>(placeholders),
+                new HashMap<>(symbolics),
+                new HashSet<>(replacers),
+                symbolicReset
+        );
+    }
+}
