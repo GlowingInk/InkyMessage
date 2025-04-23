@@ -28,14 +28,13 @@ import static net.kyori.adventure.text.Component.text;
 final class Parser {
     private final String textStr;
     private final int textLength;
-    private final Context context;
     private final TreeSet<Replacer.FoundSpot> replaceSpots;
+
     private int globalIndex;
 
     private Parser(@NotNull String textStr, @NotNull Context context) {
         this.textStr = textStr;
         this.textLength = textStr.length();
-        this.context = context;
         this.replaceSpots = context.matchReplacements(textStr);
     }
 

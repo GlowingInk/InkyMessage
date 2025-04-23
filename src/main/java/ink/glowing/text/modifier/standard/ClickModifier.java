@@ -57,7 +57,7 @@ final class ClickModifier implements Modifier.Plain { private ClickModifier() {}
                     case SUGGEST_COMMAND -> "suggest";
                     case CHANGE_PAGE -> "page";
                     case COPY_TO_CLIPBOARD -> "copy";
-                    default -> "unknown";
+                    default -> "unknown"; // Who knows what future holds
                 },
                 escape(click.value())
         );

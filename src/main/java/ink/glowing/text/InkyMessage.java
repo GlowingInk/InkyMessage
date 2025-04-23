@@ -66,7 +66,6 @@ public interface InkyMessage extends ComponentSerializer<Component, Component, S
 
     /**
      * Unescape special characters.
-     *
      * @param text text to unescape
      * @return unescaped string
      */
@@ -97,7 +96,6 @@ public interface InkyMessage extends ComponentSerializer<Component, Component, S
 
     /**
      * Check if character is escaped.
-     *
      * @param input text to check in
      * @param index index of character to check
      * @return is character escaped
@@ -111,7 +109,6 @@ public interface InkyMessage extends ComponentSerializer<Component, Component, S
 
     /**
      * Check if character is not escaped.
-     *
      * @param input text to check in
      * @param index index of character to check
      * @return is character unescaped
@@ -123,7 +120,6 @@ public interface InkyMessage extends ComponentSerializer<Component, Component, S
 
     /**
      * Check if character is special and should be escaped.
-     *
      * @param ch character to check
      * @return is character escapable
      */
@@ -170,7 +166,6 @@ public interface InkyMessage extends ComponentSerializer<Component, Component, S
 
     @Contract(pure = true)
     @NotNull SymbolicStyle symbolicReset();
-
 
     /**
      * Convert string into adventure text component.
