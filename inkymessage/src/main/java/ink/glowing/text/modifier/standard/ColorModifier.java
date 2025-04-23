@@ -76,9 +76,11 @@ final class ColorModifier implements Modifier.Plain { private ColorModifier() {}
         TextComponent.Builder localBuilder = text().style(component.style());
         if (component instanceof TextComponent text) {
             String content = text.content();
+            Component[] children = new Component[content.length()];
             for (int i = 0; i < content.length(); i++) {
-                localBuilder.append(text(content.charAt(i), colorGetter.apply(step[0]++ / indexedLength)));
+                children[i] = text(content.charAt(i), colorGetter.apply(step[0]++ / indexedLength));
             }
+            localBuilder.append(children);
         } else {
             localBuilder.append(component
                     .children(Collections.emptyList()) // We'll process children ourselves

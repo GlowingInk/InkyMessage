@@ -6,6 +6,7 @@ import ink.glowing.text.placeholder.Placeholder;
 import ink.glowing.text.replace.Replacer;
 import ink.glowing.text.symbolic.SymbolicStyle;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.ComponentLike;
 import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.format.TextColor;
 import org.jetbrains.annotations.ApiStatus;
@@ -46,7 +47,7 @@ final class Parser {
      */
     static @NotNull Component parse(@NotNull String textStr, @NotNull Context context) {
         if (textStr.isEmpty()) return empty();
-        return new Parser(textStr, context).parseRecursive(0, -1, context);
+        return new Parser(textStr, context).parseRecursive(0, -1, context).asComponent();
     }
 
     /**
@@ -56,7 +57,7 @@ final class Parser {
      * @param context current build context
      * @return component built from the parsed segment
      */
-    private @NotNull Component parseRecursive(int from, int untilCh, @NotNull Context context) {
+    private @NotNull ComponentLike parseRecursive(int from, int untilCh, @NotNull Context context) {
         var builder = text();
         for (globalIndex = from; globalIndex < textLength; globalIndex++) {
             char ch = textStr.charAt(globalIndex);
@@ -65,7 +66,7 @@ final class Parser {
                 char nextCh = textStr.charAt(globalIndex + 1);
                 switch (nextCh) {
                     case '[' -> { // &[...]
-                        builder.append(parseSegment(from, globalIndex, context));
+                        appendSegment(builder, from, globalIndex, context);
                         builder.append(parseRecursive(globalIndex + 2, ']', context));
                         from = globalIndex--;
                     }
@@ -92,33 +93,33 @@ final class Parser {
                             }
                             params = textStr.substring(paramsIndex, globalIndex);
                         }
-                        builder.append(parseSegment(from, initIndex, context));
+                        appendSegment(builder, from, initIndex, context);
                         builder.append(prepareModifiers(context, placeholder::findLocalModifier).apply(placeholder.parse(params)));
                         from = globalIndex--;
                     }
 
                     case '(' -> { // &(...)
-                        builder.append(parseSegment(from, globalIndex, context));
+                        appendSegment(builder, from, globalIndex, context);
                         int initIndex = globalIndex;
                         var modifiers = prepareModifiers(context, context); // Also adjusts globalIndex to last modifier
                         if (textStr.charAt(globalIndex) != '[') {
                             globalIndex = initIndex;
                             continue;
                         }
-                        builder.append(modifiers.apply(parseRecursive(globalIndex + 1, ']', context)));
+                        builder.append(modifiers.apply(parseRecursive(globalIndex + 1, ']', context).asComponent()));
                         from = globalIndex--;
                     }
                 }
             } else if (ch == untilCh && isUnescapedAt(textStr, globalIndex)) {
-                builder.append(parseSegment(from, globalIndex, context));
+                appendSegment(builder, from, globalIndex, context);
                 return untilCh != ')'
                         ? prepareModifiers(context, context).apply(builder.build())
                         : builder.build();
             }
         }
         // In case we didn't find the 'untilCh' char
-        builder.append(parseSegment(from, textLength, context));
-        return builder.build();
+        appendSegment(builder, from, textLength, context);
+        return builder;
     }
 
     /**
@@ -126,17 +127,16 @@ final class Parser {
      * @param from start index (inclusive)
      * @param until end index (exclusive)
      * @param context current build context
-     * @return component representing the styled segment
      */
-    private @NotNull Component parseSegment(int from, int until, @NotNull Context context) {
-        if (from == until) return empty();
-        var builder = text();
+    private void appendSegment(@NotNull TextComponent.Builder builder, int from, int until, @NotNull Context context) {
+        if (from == until) return;
         int lastAppend = from;
         for (int index = from; index < until; index++) {
             var spot = matchSpot(index, until);
             if (spot != null) {
                 appendPrevious(builder, lastAppend, index, context);
-                builder.append(empty().style(context.lastStyle()).append(spot.replacement().get()));
+                var replacement = spot.replacement().get();
+                builder.append(replacement.style(replacement.style().merge(context.lastStyle())));
                 lastAppend = spot.end();
                 index = lastAppend - 1;
                 continue;
@@ -169,7 +169,6 @@ final class Parser {
         if (lastAppend < until) {
             appendPrevious(builder, lastAppend, until, context);
         }
-        return builder.build();
     }
 
     /**
@@ -268,8 +267,8 @@ final class Parser {
                 String value = extractPlainModifierValue(from);
                 comp = comp.andThen(prev -> plainModifier.modify(prev, finalParams, unescape(value)));
             } else if (modifier instanceof Modifier.Complex complexModifier) {
-                Component value = parseRecursive(from, ')', context.stylelessCopy());
-                comp = comp.andThen(prev -> complexModifier.modify(prev, finalParams, value.compact()));
+                Component value = parseRecursive(from, ')', context.stylelessCopy()).asComponent();
+                comp = comp.andThen(prev -> complexModifier.modify(prev, finalParams, value));
             }
         }
         return prepareModifiers(comp, context, modifierFinder);

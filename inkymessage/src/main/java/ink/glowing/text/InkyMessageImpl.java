@@ -149,7 +149,7 @@ final class InkyMessageImpl implements InkyMessage {
      */
     private static @NotNull Component deserialize(@NotNull String inputText,
                                                   @NotNull Context context) {
-        return Parser.parse(inputText, context.stylelessCopy()).compact();
+        return Parser.parse(inputText, context.stylelessCopy());
     }
 
     @Override

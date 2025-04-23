@@ -1,8 +1,8 @@
 package ink.glowing.text;
 
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.ComponentLike;
 import net.kyori.adventure.text.format.TextColor;
-import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.random.RandomGenerator;
 
+import static ink.glowing.text.Helper.*;
 import static ink.glowing.text.InkyMessage.inkyMessage;
 import static ink.glowing.text.placeholder.Placeholder.placeholder;
 import static net.kyori.adventure.text.Component.*;
@@ -26,89 +27,115 @@ import static org.testng.Assert.assertEquals;
 
 public class InkyMessageTest {
     private static final boolean DEBUG = false;
-    private static final InkyMessage INKY = inkyMessage();
-    private static final MiniMessage MINI = miniMessage();
-    
+
     @DataProvider
     public Object[][] deserializeData() {
         return new Object[][] {
                 {
                         "&aGreen &cand red!\\",
-                        text().append(text("Green ").color(GREEN)).append(text("and red!\\").color(RED)).build()
+                        tb(t("Green ").color(GREEN), t("and red!\\").color(RED))
                 }, {
                         "&[&c&lRed and\\\\ bold]",
-                        text("Red and\\ bold").color(RED).decorate(BOLD)
+                        tb(tb(t("Red and\\ bold").color(RED).decorate(BOLD)))
                 }, {
                         "&lBold &cthen just red",
-                        text().append(text("Bold ").decorate(BOLD)).append(text("then just red").color(RED)).build()
+                        tb(t("Bold ").decorate(BOLD), t("then just red").color(RED))
                 }, {
                         "&a&lFirst bold green &rthen&c red",
-                        text().append(text("First bold green ").color(GREEN).decorate(BOLD)).append(text("then")).append(text(" red").color(RED)).build()
+                        tb(t("First bold green ").color(GREEN).decorate(BOLD), t("then"), t(" red").color(RED))
                 }, {
                         "&[Fully clickable\\]](click:run /helloworld)",
-                        text("Fully clickable]").clickEvent(runCommand("/helloworld"))
+                        tb(tb(t("Fully clickable]")).clickEvent(runCommand("/helloworld")))
                 }, {
                         "&aGreen, &[clickable&c red](click:url http://glowing.ink/), red again",
-                        text()
-                                .append(text("Green, ").color(GREEN))
-                                .append(text().clickEvent(openUrl("http://glowing.ink/"))
-                                        .append(text("clickable").color(GREEN))
-                                        .append(text(" red").color(RED)))
-                                .append(text(", red again").color(RED)).build()
+                        tb(
+                                t("Green, ").color(GREEN),
+                                tb(
+                                        t("clickable").color(GREEN),
+                                        t(" red").color(RED)
+                                ).clickEvent(openUrl("http://glowing.ink/")),
+                                t(", red again").color(RED)
+                        )
                 }, {
                         "\\&aRegular \\&[text](color:gold), and some&a \\green",
-                        text("&aRegular &[text](color:gold), and some")
-                                .append(text(" \\green").color(GREEN))
+                        tb(t("&aRegular &[text](color:gold), and some"), t(" \\green").color(GREEN))
                 }, {
-                        "&aGoto https://github.com/GlowingInk and http://repo.glowing.ink.",
-                        text()
-                                .append(text("Goto ").color(GREEN))
-                                .append(text("https://github.com/GlowingInk").clickEvent(openUrl("https://github.com/GlowingInk")).color(GREEN))
-                                .append(text(" and ").color(GREEN))
-                                .append(text("http://repo.glowing.ink").clickEvent(openUrl("http://repo.glowing.ink")).color(GREEN))
-                                .append(text(".").color(GREEN)).build()
+                        "&aGoto https://github.com/GlowingInk and https://repo.glowing.ink.", // TODO This should be parsed into much simpler component
+                        tb(
+                                t("Goto ").color(GREEN),
+                                t("https://github.com/GlowingInk").clickEvent(openUrl("https://github.com/GlowingInk")).color(GREEN),
+                                t(" and ").color(GREEN),
+                                t("https://repo.glowing.ink").clickEvent(openUrl("https://repo.glowing.ink")).color(GREEN),
+                                t(".").color(GREEN)
+                        )
                 }, {
                         "&[aaa&[bbb&[ccc](decor:bold)bbb](decor:italic)&aaaa](color:red)",
-                        text("aaa")
-                                .append(text("bbb").append(text("ccc").decorate(BOLD)).append(text("bbb")).decorate(ITALIC))
-                                .append(text("aaa").color(GREEN)).color(RED)
+                        tb(
+                                tb(
+                                        t("aaa"),
+                                        tb(
+                                                t("bbb"),
+                                                tb(
+                                                        t("ccc")
+                                                ).decorate(BOLD),
+                                                t("bbb")
+                                        ).decorate(ITALIC),
+                                        t("aaa").color(GREEN)
+                                ).color(RED)
+                        )
                 }, {
                         "&cSome &[hover parsing](hover:text &atest!).",
-                        text()
-                                .append(text("Some ").color(RED))
-                                .append(text("hover parsing").color(RED).hoverEvent(showText(text("test!").color(GREEN))))
-                                .append(text(".").color(RED)).build()
+                        tb(
+                                t("Some ").color(RED),
+                                tb(t("hover parsing").color(RED)).hoverEvent(showText(tb(t("test!").color(GREEN)))),
+                                t(".").color(RED)
+                        )
                 }, {
                         "&[Test](fake:modifier lol), &[another one].",
-                        text("Test(fake:modifier lol), another one.")
+                        tb(
+                                tb(t("Test")),
+                                t("(fake:modifier lol), "),
+                                tb(t("another one")),
+                                t(".")
+                        )
                 }, {
                         "&[Test](hover:text Hover)&[ and another](decor:cursive)",
-                        text().append(text("Test").hoverEvent(showText(text("Hover")))).append(text(" and another").decorate(ITALIC)).build()
+                        tb(
+                                tb(t("Test")).hoverEvent(tb(t("Hover")).build()),
+                                tb(t(" and another")).decorate(ITALIC))
                 }, {
                         "Test &{lang:my.cool.test}(arg &aHello world)(arg Yay...)(fallback Falling back)&{lang:test}",
-                        text("Test ")
-                                .append(translatable("my.cool.test")
-                                        .arguments(text("Hello world").color(GREEN), text("Yay..."))
-                                        .fallback("Falling back"))
-                                .append(translatable("test"))
+                        tb(
+                                t("Test "),
+                                translatable("my.cool.test")
+                                        .arguments(
+                                                tb(t("Hello world").color(GREEN)),
+                                                tb(t("Yay...")))
+                                        .fallback("Falling back"),
+                                translatable("test")
+                        )
                 }, {
                         "Press &{keybind:sneak} to sneak!",
-                        text("Press ")
-                                .append(keybind("sneak"))
-                                .append(text(" to sneak!"))
+                        tb(
+                                t("Press "),
+                                keybind("sneak"),
+                                t(" to sneak!")
+                        )
                 }, {
                         "&{lang:test}(arg:4 four args)",
-                        translatable("test").arguments(empty(), empty(), empty(), text("four args"))
+                        tb(translatable("test").arguments(empty(), empty(), empty(), tb(t("four args"))))
+
                 }
         };
     }
 
     @Test(dataProvider = "deserializeData")
-    public void deserializeTest(String text, Component expected) {
+    public void deserializeTest(String text, ComponentLike expectedLike) {
+        Component expected = expectedLike.asComponent();
         if (DEBUG) debugDeserializer(text, expected);
         try {
             assertEquals(
-                    INKY.deserialize(text),
+                    inky(text),
                     expected
             );
         } catch (Throwable throwable) {
@@ -139,16 +166,16 @@ public class InkyMessageTest {
     @Test(dataProvider = "deserializerReverseData")
     public void deserializerReverseTest(String reverse, String normal) {
         assertEquals(
-                INKY.deserialize(reverse),
-                INKY.deserialize(normal)
+                inky(reverse),
+                inky(normal)
         );
     }
 
     @Test
     public void deserializeHexTest() {
         assertEquals(
-                INKY.deserialize("&x&1&2&3&4&5&6Hex colors are cool"),
-                INKY.deserialize("&#123456Hex colors are cool")
+                inky("&x&1&2&3&4&5&6Hex colors are cool"),
+                inky("&#123456Hex colors are cool")
         );
     }
 
@@ -158,73 +185,81 @@ public class InkyMessageTest {
                 {
                         "&{test1} &{test2}",
                         Arrays.asList(
-                                placeholder("test1", text("Hello")),
-                                placeholder("test2", text("world"))
+                                placeholder("test1", t("Hello")),
+                                placeholder("test2", t("world"))
                         ),
-                        text("Hello world")
+                        tb(t("Hello"), t(" "), t("world"))
                 }
         };
     }
 
     @Test(dataProvider = "deserializeWithInksData")
-    public void deserializeWithInksTest(String text, List<Ink> inks, Component expected) {
+    public void deserializeWithInksTest(String text, List<Ink> inks, ComponentLike expectedLike) {
         assertEquals(
-                INKY.deserialize(text, inks),
-                expected
+                inkyMessage().deserialize(text, inks),
+                expectedLike.asComponent()
         );
     }
 
     private void debugDeserializer(String text, Component comp) {
-        System.out.println("Inky: " + MINI.serialize(INKY.deserialize(text)));
-        System.out.println("Mini: " + MINI.serialize(comp));
+        System.out.println("Inky -----");
+        System.out.println(mini(inky(text)));
+        System.out.println("<reset>");
+        System.out.println("Mini -----");
+        System.out.println(mini(comp));
     }
 
     @DataProvider
     public Object[][] serializeData() {
         return new Object[][] {
                 {
-                        text("Hi").color(TextColor.color(0x123456)),
+                        t("Hi").color(TextColor.color(0x123456)),
                         "&#123456Hi"
                 }, {
-                        text("Green").color(GREEN),
+                        t("Green").color(GREEN),
                         "&aGreen"
                 }, {
-                        text().append(text("Italic ").decorate(ITALIC)).append(text("then bold").decorate(BOLD)).build(),
+                        tb(t("Italic ").decorate(ITALIC)).append(t("then bold").decorate(BOLD)),
                         "&oItalic &r&lthen bold"
                 }, {
-                        text()
-                                .append(text("Bold green").color(GREEN).decorate(BOLD))
-                                .append(text(" and "))
-                                .append(text("red").color(RED)).build(),
+                        tb(
+                                t("Bold green").color(GREEN).decorate(BOLD),
+                                t(" and "),
+                                t("red").color(RED)),
                         "&a&lBold green&r and &cred"
                 }, {
-                        text("With hover").hoverEvent(showText(text("Hover!"))),
+                        t("With hover").hoverEvent(showText(t("Hover!"))),
                         "&[With hover](hover:text Hover!)"
                 }, {
-                        text("Hover and click").hoverEvent(showText(text("&aHover!"))).clickEvent(runCommand("cmd")),
+                        t("Hover and click").hoverEvent(showText(t("&aHover!"))).clickEvent(runCommand("cmd")),
                         "&[Hover and click](hover:text \\&aHover!)(click:run cmd)"
                 }, {
-                        text()
-                                .append(text("With "))
-                                .append(text("inner ")
-                                        .append(text("deep").clickEvent(runCommand("cmd")))
-                                .append(text(" component")).hoverEvent(showText(text("Wow")))).build(),
+                        tb(
+                                t("With "),
+                                t("inner ").append(
+                                        t("deep").clickEvent(runCommand("cmd")),
+                                        t(" component")
+                                ).hoverEvent(t("Wow"))
+                        ),
                         "With &[inner &[deep](click:run cmd) component](hover:text Wow)"
                 }, {
-                        text("That's so ")
-                                .append(translatable("cool", "Fallbacked", text("Arg1"), text("Arg2\\"))
-                                        .append(text(" Test")).hoverEvent(showText(text("hover!").color(GREEN)))),
+                        t("That's so ").append(
+                                translatable("cool", "Fallbacked", t("Arg1"), t("Arg2\\")).append(
+                                        t(" Test")
+                                ).hoverEvent(t("hover!").color(GREEN))
+                        ),
                         "That's so &[&{lang:cool}(arg Arg1)(arg Arg2\\\\)(fallback Fallbacked) Test](hover:text &ahover!)"
                 }
         };
     }
 
     @Test(dataProvider = "serializeData")
-    public void serializeTest(Component text, String expected) {
+    public void serializeTest(ComponentLike textLike, String expected) {
+        Component text= textLike.asComponent();
         if (DEBUG) debugSerializer(text);
         try {
             assertEquals(
-                    INKY.serialize(text),
+                    inky(text),
                     expected
             );
         } catch (Throwable throwable) {
@@ -237,51 +272,56 @@ public class InkyMessageTest {
     public Object[][] idealSerializerData() { // TODO
         return new Object[][] {
                 {
-                        text()
-                                .append(text("First green").color(GREEN).decorate(BOLD))
-                                .append(text(" then second green").color(GREEN).decorate(BOLD)).build(),
-                        "&a&lFirst green&a&l then second green"
+                        tb(
+                                t("First green").color(GREEN).decorate(BOLD),
+                                t(" then second green").color(GREEN).decorate(BOLD)
+                        ),
+                        "&a&lFirst green then second green"
                 }, {
-                        text("First green").append(text(" then second green")).color(GREEN).decorate(BOLD),
-                        "&a&lFirst green&a&l then second green"
+                        t("First green").append(t(" then second green")).color(GREEN).decorate(BOLD),
+                        "&a&lFirst green then second green"
                 }, {
-                        text()
-                                .append(text("Outside ").color(GREEN))
-                                .append(text("inside 1 ").color(GREEN).clickEvent(runCommand("/home")))
-                                .append(text(" inside 2").color(RED).clickEvent(runCommand("/home"))).build(),
+                        tb( // Probably won't happen
+                                t("Outside ").color(GREEN),
+                                t("inside 1 ").color(GREEN).clickEvent(runCommand("/home")),
+                                t(" inside 2").color(RED).clickEvent(runCommand("/home"))
+                        ),
                         "&aOutside &[inside 1&c inside 2](click:run /home)"
                 }
         };
     }
 
     @Test(dataProvider = "idealSerializerData", enabled = false)
-    public void idealSerializerTest(Component text, String expected) {
+    public void idealSerializerTest(ComponentLike textLike, String expected) {
+        Component text = textLike.asComponent();
         serializeTest(text, expected);
     }
 
     private void debugSerializer(Component comp) {
-        System.out.println("Inky: " + INKY.serialize(comp));
-        System.out.println("Mini: " + MINI.serialize(comp));
+        System.out.println("Inky: " + inky(comp));
+        System.out.println("Mini: " + mini(comp));
     }
 
     @DataProvider
     public Object[][] serializeAndBackData() {
         return new Object[][] {
-                {text("Test")},
-                {text("Green").color(GREEN)},
-                {text()
-                        .append(text("Bold green").color(GREEN).decorate(BOLD))
-                        .append(text(" and "))
-                        .append(text("red").color(RED)).build()}
+                {t("Test")},
+                {t("Green").color(GREEN)},
+                {tb(
+                        t("Bold green").color(GREEN).decorate(BOLD),
+                        t(" and "),
+                        t("red").color(RED)
+                )}
         };
     }
 
     @Test(dataProvider = "serializeAndBackData")
-    public void serializeAndBackTest(Component text) {
-        String ser = INKY.serialize(text);
-        Component deser = INKY.deserialize(ser);
+    public void serializeAndBackTest(ComponentLike textLike) {
+        Component text = textLike.asComponent();
+        String ser = inky(text);
+        Component deser = inky(ser);
         assertEquals(
-                INKY.serialize(deser),
+                inky(deser),
                 ser
         );
     }
@@ -297,7 +337,7 @@ public class InkyMessageTest {
                 builder.append(SYMBOLS.charAt(rng.nextInt(SYMBOLS.length())));
             }
             try {
-                INKY.deserialize(builder.toString());
+                inky(builder.toString());
             } catch (Throwable throwable) {
                 System.out.println(builder);
                 throw throwable;
@@ -372,8 +412,8 @@ public class InkyMessageTest {
         int warmup = 100000;
         int test = 10000;
 
-        var inkyMessage = INKY;
-        var miniMessage = MINI;
+        var inkyMessage = inkyMessage();
+        var miniMessage = miniMessage();
         for (int i = 0; i < warmup; i++) {
             inkyMessage.deserialize(inky);
             miniMessage.deserialize(mini);
