@@ -5,7 +5,6 @@ import ink.glowing.text.utils.function.FloatFunction;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.ComponentIteratorType;
 import net.kyori.adventure.text.TextComponent;
-import net.kyori.adventure.text.flattener.ComponentFlattener;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextColor;
 import net.kyori.adventure.util.HSVLike;
@@ -22,15 +21,9 @@ import static net.kyori.adventure.text.format.TextColor.color;
 
 // TODO VirtualComponent
 final class ColorModifier implements Modifier.Plain { private ColorModifier() {}
-    private static final ComponentFlattener LENGTH_CALCULATOR = ComponentFlattener.builder()
-            .mapper(TextComponent.class, TextComponent::content)
-            .unknownMapper(x -> " ")
-            .build();
-
     private static final Map<String, NamedTextColor> NAMED_COLORS = NamedTextColor.NAMES.keyToValue();
 
     static final ColorModifier INSTANCE = new ColorModifier();
-
 
     @Override
     public @NotNull Component modify(@NotNull Component text, @NotNull String param, @NotNull String value) {

@@ -2,10 +2,13 @@ package ink.glowing.text;
 
 import ink.glowing.text.modifier.Modifier;
 import ink.glowing.text.modifier.ModifierFinder;
+import ink.glowing.text.modifier.standard.StandardModifiers;
 import ink.glowing.text.placeholder.Placeholder;
 import ink.glowing.text.placeholder.PlaceholderFinder;
+import ink.glowing.text.placeholder.StandardPlaceholders;
 import ink.glowing.text.replace.ReplacementMatcher;
 import ink.glowing.text.replace.Replacer;
+import ink.glowing.text.replace.StandardReplacers;
 import ink.glowing.text.symbolic.StandardSymbolicStyles;
 import ink.glowing.text.symbolic.SymbolicStyle;
 import ink.glowing.text.symbolic.SymbolicStyleFinder;
@@ -16,38 +19,60 @@ import org.jetbrains.annotations.*;
 
 import java.util.*;
 
+import static ink.glowing.text.symbolic.StandardSymbolicStyles.simpleReset;
+
 /**
  * User-friendly component (de)serializer with legacy-inspired format.
  */
 @ApiStatus.NonExtendable
-public interface InkyMessage extends ComponentSerializer<Component, Component, String>,
-        ModifierFinder, PlaceholderFinder, SymbolicStyleFinder, ReplacementMatcher {
+public sealed interface InkyMessage extends ComponentSerializer<Component, Component, String>,
+        ModifierFinder, PlaceholderFinder, SymbolicStyleFinder, ReplacementMatcher permits InkyMessageImpl {
     /**
-     * Gets the standard instance of InkyMessage.
-     * @return the instance
+     * The standard instance of InkyMessage.
+     * @return the standard instance
+     * @see StandardModifiers#standardModifiers()
+     * @see StandardPlaceholders#standardPlaceholders()
+     * @see StandardSymbolicStyles#notchianFormat()
+     * @see StandardSymbolicStyles#notchianResetSymbol()
+     * @see StandardReplacers#urlReplacer()
      */
     @Contract(pure = true)
     static @NotNull InkyMessage inkyMessage() {
         return InkyMessageImpl.STANDARD;
     }
 
+    /**
+     * Creates new instance of InkyMessage with the provided style ink
+     * @param ink style ink to use
+     * @return the new instance
+     */
     @Contract(value = "_ -> new", pure = true)
     static @NotNull InkyMessage inkyMessage(@NotNull Ink ink) {
         return builder().addInk(ink).build();
     }
 
+    /**
+     * Creates new instance of InkyMessage with the provided style ink
+     * @param inks style inks to use
+     * @return the new instance
+     */
     @Contract(value = "_ -> new", pure = true)
     static @NotNull InkyMessage inkyMessage(@NotNull Ink @NotNull ... inks) {
         return builder().addInks(inks).build();
     }
 
+    /**
+     * Creates new instance of InkyMessage with the provided style ink
+     * @param inks style inks to use
+     * @return the new instance
+     */
     @Contract(value = "_ -> new", pure = true)
     static @NotNull InkyMessage inkyMessage(@NotNull Iterable<@NotNull Ink> inks) {
         return builder().addInks(inks).build();
     }
 
     /**
-     * Escape special characters with slashes.
+     * Escapes special characters with slashes.
      * @param text text to escape
      * @return escaped string
      */
@@ -65,17 +90,15 @@ public interface InkyMessage extends ComponentSerializer<Component, Component, S
     }
 
     /**
-     * Unescape special characters.
+     * Unescapes special characters.
      * @param text text to unescape
      * @return unescaped string
      */
     @Contract(pure = true)
     static @NotNull String unescape(@NotNull String text) {
         if (text.indexOf('\\') == -1) return text;
-
-        StringBuilder builder = new StringBuilder(text.length());
-        int length = text.length();
-
+        final int length = text.length();
+        StringBuilder builder = new StringBuilder(length);
         for (
                 int index = 0, nextIndex = text.indexOf('\\');
                 index < length;
@@ -95,7 +118,7 @@ public interface InkyMessage extends ComponentSerializer<Component, Component, S
     }
 
     /**
-     * Check if character is escaped.
+     * Checks if character is escaped.
      * @param input text to check in
      * @param index index of character to check
      * @return is character escaped
@@ -108,7 +131,7 @@ public interface InkyMessage extends ComponentSerializer<Component, Component, S
     }
 
     /**
-     * Check if character is not escaped.
+     * Checks if character is not escaped.
      * @param input text to check in
      * @param index index of character to check
      * @return is character unescaped
@@ -119,7 +142,7 @@ public interface InkyMessage extends ComponentSerializer<Component, Component, S
     }
 
     /**
-     * Check if character is special and should be escaped.
+     * Checks if character is special and should be escaped.
      * @param ch character to check
      * @return is character escapable
      */
@@ -132,8 +155,7 @@ public interface InkyMessage extends ComponentSerializer<Component, Component, S
     }
 
     /**
-     * Check if character is not special.
-     *
+     * Checks if character is not special.
      * @param ch character to check
      * @return is character unescapable
      */
@@ -143,27 +165,37 @@ public interface InkyMessage extends ComponentSerializer<Component, Component, S
     }
 
     /**
-     * Creates a new context builder.
-     *
-     * @return a builder
+     * Map of style modifiers that this InkyMessage instance uses
+     * @return map of style modifiers
      */
-    @Contract(value = "-> new", pure = true)
-    static @NotNull InkyMessage.Builder builder() {
-        return new Builder();
-    }
-
     @Contract(pure = true)
     @Unmodifiable @NotNull Map<String, Modifier<?>> modifiers();
 
+    /**
+     * Map of placeholders that this InkyMessage instance uses
+     * @return map of placeholders
+     */
     @Contract(pure = true)
     @Unmodifiable @NotNull Map<String, Placeholder> placeholders();
 
+    /**
+     * Map of symbolic styles that this InkyMessage instance uses
+     * @return map of symbolic styles
+     */
     @Contract(pure = true)
     @Unmodifiable @NotNull Map<Character, SymbolicStyle> symbolics();
 
+    /**
+     * Collection of replacers that this InkyMessage instance uses
+     * @return collection of replacers
+     */
     @Contract(pure = true)
     @Unmodifiable @NotNull Collection<Replacer> replacers();
 
+    /**
+     * Symbolic style reset that this InkyMessage instance uses
+     * @return symbolic reset
+     */
     @Contract(pure = true)
     @NotNull SymbolicStyle symbolicReset();
 
@@ -210,8 +242,29 @@ public interface InkyMessage extends ComponentSerializer<Component, Component, S
     @Override
     @NotNull String serialize(@NotNull Component text);
 
+    /**
+     * Creates a new InkyMessage builder using this instance's values.
+     * @return a builder
+     */
     @Contract(value = "-> new", pure = true)
-    @NotNull InkyMessage.Builder toBuilder();
+    default @NotNull InkyMessage.Builder toBuilder() {
+        return new Builder(
+                new HashMap<>(modifiers()),
+                new HashMap<>(placeholders()),
+                new HashMap<>(symbolics()),
+                new HashSet<>(replacers()),
+                symbolicReset()
+        );
+    }
+
+    /**
+     * Creates a new InkyMessage builder.
+     * @return a builder
+     */
+    @Contract(value = "-> new", pure = true)
+    static @NotNull InkyMessage.Builder builder() {
+        return new Builder();
+    }
 
     class Builder implements AbstractBuilder<InkyMessage> {
         private Map<String, Modifier<?>> modifiers;
@@ -403,7 +456,7 @@ public interface InkyMessage extends ComponentSerializer<Component, Component, S
 
         @Contract("_ -> this")
         public @NotNull InkyMessage.Builder symbolicReset(char symbol) {
-            this.symbolicReset = StandardSymbolicStyles.simpleReset(symbol);
+            this.symbolicReset = simpleReset(symbol);
             return this;
         }
 

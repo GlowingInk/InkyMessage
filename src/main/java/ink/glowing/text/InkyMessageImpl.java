@@ -10,7 +10,10 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Unmodifiable;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.TreeSet;
 
 import static ink.glowing.text.Stringifier.stringify;
 import static ink.glowing.text.modifier.standard.StandardModifiers.standardModifiers;
@@ -152,16 +155,5 @@ final class InkyMessageImpl implements InkyMessage {
     @Override
     public @NotNull String serialize(@NotNull Component text) {
         return stringify(text, this);
-    }
-
-    @Override
-    public @NotNull InkyMessageImpl.Builder toBuilder() {
-        return new InkyMessageImpl.Builder(
-                new HashMap<>(modifiers),
-                new HashMap<>(placeholders),
-                new HashMap<>(symbolics),
-                new HashSet<>(replacers),
-                symbolicReset
-        );
     }
 }
