@@ -385,6 +385,23 @@ public sealed interface InkyMessage extends ComponentSerializer<Component, Compo
         }
 
         @Contract("_ -> this")
+        public @NotNull InkyMessage.Builder removeReplacer(@NotNull Replacer replacer) {
+            this.replacers.remove(replacer);
+            return this;
+        }
+
+        @Contract("_ -> this")
+        public @NotNull InkyMessage.Builder removeReplacers(@NotNull Replacer @NotNull ... replacers) {
+            return removeReplacers(Arrays.asList(replacers));
+        }
+
+        @Contract("_ -> this")
+        public @NotNull InkyMessage.Builder removeReplacers(@NotNull Collection<? extends @NotNull Replacer> replacers) {
+            this.replacers.removeAll(replacers);
+            return this;
+        }
+
+        @Contract("_ -> this")
         public @NotNull InkyMessage.Builder addReplacers(@NotNull Iterable<? extends @NotNull Replacer> replacers) {
             for (var replacer : replacers) addReplacer(replacer);
             return this;
@@ -437,6 +454,29 @@ public sealed interface InkyMessage extends ComponentSerializer<Component, Compo
         }
 
         @Contract("_ -> this")
+        public @NotNull InkyMessage.Builder removePlaceholder(@NotNull Placeholder placeholder) {
+            this.placeholders.put(placeholder.name(), placeholder);
+            return this;
+        }
+
+        @Contract("_ -> this")
+        public @NotNull InkyMessage.Builder removePlaceholders(@NotNull Placeholder @NotNull ... placeholders) {
+            return removePlaceholders(Arrays.asList(placeholders));
+        }
+
+        @Contract("_ -> this")
+        public @NotNull InkyMessage.Builder removePlaceholders(@NotNull Iterable<? extends @NotNull Placeholder> placeholders) {
+            for (var placeholder : placeholders) removePlaceholder(placeholder);
+            return this;
+        }
+
+        @Contract("_ -> this")
+        public @NotNull InkyMessage.Builder removePlaceholders(@NotNull Map<String, Placeholder> placeholders) {
+            this.placeholders.putAll(placeholders);
+            return this;
+        }
+
+        @Contract("_ -> this")
         public @NotNull InkyMessage.Builder modifiers(@NotNull Modifier<?> @NotNull ... modifiers) {
             return modifiers(Arrays.asList(modifiers));
         }
@@ -483,6 +523,29 @@ public sealed interface InkyMessage extends ComponentSerializer<Component, Compo
         }
 
         @Contract("_ -> this")
+        public @NotNull InkyMessage.Builder removeModifier(@NotNull Modifier<?> modifier) {
+            this.modifiers.put(modifier.name(), modifier);
+            return this;
+        }
+
+        @Contract("_ -> this")
+        public @NotNull InkyMessage.Builder removeModifiers(@NotNull Modifier<?> @NotNull ... modifiers) {
+            return removeModifiers(Arrays.asList(modifiers));
+        }
+
+        @Contract("_ -> this")
+        public @NotNull InkyMessage.Builder removeModifiers(@NotNull Iterable<? extends @NotNull Modifier<?>> modifiers) {
+            for (var modifier : modifiers) removeModifier(modifier);
+            return this;
+        }
+
+        @Contract("_ -> this")
+        public @NotNull InkyMessage.Builder removeModifiers(@NotNull Map<String, Modifier<?>> modifiers) {
+            this.modifiers.putAll(modifiers);
+            return this;
+        }
+
+        @Contract("_ -> this")
         public @NotNull InkyMessage.Builder symbolicReset(char symbol) {
             this.symbolicReset = simpleReset(symbol);
             return this;
@@ -524,6 +587,29 @@ public sealed interface InkyMessage extends ComponentSerializer<Component, Compo
 
         @Contract("_ -> this")
         public @NotNull InkyMessage.Builder addSymbolics(@NotNull Map<Character, SymbolicStyle> symbolics) {
+            this.symbolics.putAll(symbolics);
+            return this;
+        }
+
+        @Contract("_ -> this")
+        public @NotNull InkyMessage.Builder removeSymbolic(@NotNull SymbolicStyle symbolic) {
+            this.symbolics.put(symbolic.symbol(), symbolic);
+            return this;
+        }
+
+        @Contract("_ -> this")
+        public @NotNull InkyMessage.Builder removeSymbolics(@NotNull SymbolicStyle @NotNull ... symbolics) {
+            return removeSymbolics(Arrays.asList(symbolics));
+        }
+
+        @Contract("_ -> this")
+        public @NotNull InkyMessage.Builder removeSymbolics(@NotNull Iterable<? extends @NotNull SymbolicStyle> symbolics) {
+            for (var symbolic : symbolics) removeSymbolic(symbolic);
+            return this;
+        }
+
+        @Contract("_ -> this")
+        public @NotNull InkyMessage.Builder removeSymbolics(@NotNull Map<Character, SymbolicStyle> symbolics) {
             this.symbolics.putAll(symbolics);
             return this;
         }

@@ -32,9 +32,11 @@ bound to them, which are different from the default ones.
 ## Plans (until 1.0.0 release)
 - Arbitrary type and amount of modifiers values
 - Shadow color modifier
+- Aliases system
 - Better API for marking (de)serializable elements / precise escaping API
-- Better serialization
-- More and better unit tests
+## Plans (1.0.0+)
+- Better serialization (`Component` to `String`)
+- More unit tests
 
 ## Get it ![Version](https://img.shields.io/github/v/tag/GlowingInk/InkyMessage?sort=semver&style=flat&label=release)
 Versions in dependency sections may be outdated. Check the badge above for the latest one.
