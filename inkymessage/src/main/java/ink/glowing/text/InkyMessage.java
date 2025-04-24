@@ -33,7 +33,7 @@ public sealed interface InkyMessage extends ComponentSerializer<Component, Compo
      * @see StandardModifiers#standardModifiers()
      * @see StandardPlaceholders#standardPlaceholders()
      * @see StandardSymbolicStyles#notchianFormat()
-     * @see StandardSymbolicStyles#notchianResetSymbol()
+     * @see StandardSymbolicStyles#standardResetSymbol()
      * @see StandardReplacers#urlReplacer()
      */
     @Contract(pure = true)
@@ -301,7 +301,7 @@ public sealed interface InkyMessage extends ComponentSerializer<Component, Compo
                 case Modifier<?> mod -> addModifier(mod);
                 case Replacer rp -> addReplacer(rp);
                 case SymbolicStyle sym -> addSymbolic(sym);
-                default -> throw new IllegalArgumentException("Unknown stable ink type: " + ink.getClass().getSimpleName());
+                default -> throw new IllegalArgumentException("Unknown ink type: " + ink.getClass().getSimpleName());
             };
         }
 
@@ -331,8 +331,7 @@ public sealed interface InkyMessage extends ComponentSerializer<Component, Compo
         @Contract("_ -> this")
         public @NotNull InkyMessage.Builder replacers(@NotNull Iterable<? extends @NotNull Replacer> replacers) {
             this.replacers = new HashSet<>();
-            addReplacers(replacers);
-            return this;
+            return addReplacers(replacers);
         }
 
         @Contract("_ -> this")
@@ -366,15 +365,13 @@ public sealed interface InkyMessage extends ComponentSerializer<Component, Compo
         @Contract("_ -> this")
         public @NotNull InkyMessage.Builder placeholders(@NotNull Collection<? extends @NotNull Placeholder> placeholders) {
             this.placeholders = new HashMap<>(placeholders.size());
-            addPlaceholders(placeholders);
-            return this;
+            return addPlaceholders(placeholders);
         }
 
         @Contract("_ -> this")
         public @NotNull InkyMessage.Builder placeholders(@NotNull Iterable<? extends @NotNull Placeholder> placeholders) {
             this.placeholders = new HashMap<>();
-            addPlaceholders(placeholders);
-            return this;
+            return addPlaceholders(placeholders);
         }
 
         @Contract("_ -> this")
@@ -414,15 +411,13 @@ public sealed interface InkyMessage extends ComponentSerializer<Component, Compo
         @Contract("_ -> this")
         public @NotNull InkyMessage.Builder modifiers(@NotNull Collection<? extends @NotNull Modifier<?>> modifiers) {
             this.modifiers = new HashMap<>(modifiers.size());
-            addModifiers(modifiers);
-            return this;
+            return addModifiers(modifiers);
         }
 
         @Contract("_ -> this")
         public @NotNull InkyMessage.Builder modifiers(@NotNull Iterable<? extends @NotNull Modifier<?>> modifiers) {
             this.modifiers = new HashMap<>();
-            addModifiers(modifiers);
-            return this;
+            return addModifiers(modifiers);
         }
 
         @Contract("_ -> this")
@@ -468,8 +463,7 @@ public sealed interface InkyMessage extends ComponentSerializer<Component, Compo
         @Contract("_ -> this")
         public @NotNull InkyMessage.Builder symbolics(@NotNull Collection<? extends @NotNull SymbolicStyle> symbolics) {
             this.symbolics = new HashMap<>(symbolics.size());
-            addSymbolics(symbolics);
-            return this;
+            return addSymbolics(symbolics);
         }
 
         @Contract("_ -> this")

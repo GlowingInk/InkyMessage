@@ -52,22 +52,13 @@ final class ChainedSymbolicDecoration implements SymbolicStyle {
     }
 
     @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof ChainedSymbolicDecoration that)) return false;
-        return symbol == that.symbol && decoration == that.decoration;
+    public boolean equals(Object obj) {
+        if (obj == this) return true;
+        return obj instanceof ChainedSymbolicDecoration other && other.decoration == decoration;
     }
 
     @Override
     public int hashCode() {
         return Objects.hash(symbol, decoration);
-    }
-
-    @Override
-    public String toString() {
-        return "ChainedSymbolicDecoration[" +
-                "symbol=" + symbol + ", " +
-                "decoration=" + decoration +
-                ']';
     }
 }

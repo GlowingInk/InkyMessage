@@ -21,7 +21,7 @@ import static ink.glowing.text.placeholder.StandardPlaceholders.standardPlacehol
 import static ink.glowing.text.replace.ReplacementMatcher.replacementMatcher;
 import static ink.glowing.text.replace.StandardReplacers.urlReplacer;
 import static ink.glowing.text.symbolic.StandardSymbolicStyles.notchianFormat;
-import static ink.glowing.text.symbolic.StandardSymbolicStyles.notchianResetSymbol;
+import static ink.glowing.text.symbolic.StandardSymbolicStyles.standardResetSymbol;
 import static java.util.Collections.unmodifiableCollection;
 import static java.util.Collections.unmodifiableMap;
 
@@ -29,7 +29,7 @@ final class InkyMessageImpl implements InkyMessage {
     static final InkyMessage STANDARD = InkyMessage.builder()
             .addModifiers(standardModifiers())
             .addSymbolics(notchianFormat())
-            .symbolicReset(notchianResetSymbol())
+            .symbolicReset(standardResetSymbol())
             .addReplacer(urlReplacer())
             .build();
     

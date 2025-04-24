@@ -184,23 +184,12 @@ final class Stringifier { private Stringifier() {}
         @Override
         public boolean equals(Object obj) {
             if (obj == this) return true;
-            if (obj == null || obj.getClass() != this.getClass()) return false;
-            var that = (HexSymbolicStyle) obj;
-            return Objects.equals(this.color, that.color) &&
-                    Objects.equals(this.cleanStyle, that.cleanStyle);
+            return obj instanceof HexSymbolicStyle other && other.color.equals(color);
         }
 
         @Override
         public int hashCode() {
             return Objects.hash(color, cleanStyle);
-        }
-
-        @Override
-        public String toString() {
-            return "HexSymbolicStyle[" +
-                    "color=" + color + ", " +
-                    "cleanStyle=" + cleanStyle +
-                    ']';
         }
     }
 }

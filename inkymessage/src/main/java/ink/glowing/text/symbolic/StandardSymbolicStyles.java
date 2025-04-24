@@ -48,22 +48,35 @@ public final class StandardSymbolicStyles { private StandardSymbolicStyles() {}
             NOTCHIAN_COLORS, NOTCHIAN_DECORATIONS
     );
 
-    private static final List<SymbolicStyle> BEDROCK_COLORS = GeneralUtils.concat(
-            ArrayList::new, Collections::unmodifiableList,
-            NOTCHIAN_COLORS,
-            List.of(
-                    resettingColor('g', color(0xDDD605)),
-                    resettingColor('h', color(0xE3D4D1)),
-                    resettingColor('i', color(0xCECACA)),
-                    resettingColor('j', color(0x443A3B)),
-                    resettingColor('m', color(0x971607)),
-                    resettingColor('n', color(0xB4684D)),
-                    resettingColor('p', color(0xDEB12D)),
-                    resettingColor('q', color(0x47A036)),
-                    resettingColor('s', color(0x2CBAA8)),
-                    resettingColor('t', color(0x21497B)),
-                    resettingColor('u', color(0x9A5CC6))
-            )
+    private static final List<SymbolicStyle> BEDROCK_COLORS = List.of(
+            chainedColor('0', BLACK),
+            chainedColor('1', DARK_BLUE),
+            chainedColor('2', DARK_GREEN),
+            chainedColor('3', DARK_AQUA),
+            chainedColor('4', DARK_RED),
+            chainedColor('5', DARK_PURPLE),
+            chainedColor('6', GOLD),
+            chainedColor('7', color(0xC6C6C6)),
+            chainedColor('8', DARK_GRAY),
+            chainedColor('9', BLUE),
+            chainedColor('a', GREEN),
+            chainedColor('b', AQUA),
+            chainedColor('c', RED),
+            chainedColor('d', LIGHT_PURPLE),
+            chainedColor('e', YELLOW),
+            chainedColor('f', WHITE),
+            chainedColor('g', color(0xDDD605)),
+            chainedColor('h', color(0xE3D4D1)),
+            chainedColor('i', color(0xCECACA)),
+            chainedColor('j', color(0x443A3B)),
+            chainedColor('m', color(0x971607)),
+            chainedColor('n', color(0xB4684D)),
+            chainedColor('p', color(0xDEB12D)),
+            chainedColor('q', color(0x47A036)),
+            chainedColor('s', color(0x2CBAA8)),
+            chainedColor('t', color(0x21497B)),
+            chainedColor('u', color(0x9A5CC6)),
+            chainedColor('v', color(0xEB7114))
     );
 
     private static final List<SymbolicStyle> BEDROCK_DECORATIONS = List.of(
@@ -77,7 +90,7 @@ public final class StandardSymbolicStyles { private StandardSymbolicStyles() {}
             BEDROCK_COLORS, BEDROCK_DECORATIONS
     );
 
-    public static char notchianResetSymbol() {
+    public static char standardResetSymbol() {
         return 'r';
     }
 
@@ -121,6 +134,10 @@ public final class StandardSymbolicStyles { private StandardSymbolicStyles() {}
 
     public static @NotNull SymbolicStyle resettingColor(char symbol, @NotNull TextColor color) {
         return new ResettingSymbolicColor(symbol, color);
+    }
+    
+    public static @NotNull SymbolicStyle chainedColor(char symbol, @NotNull TextColor color) {
+        return new ChainedSymbolicColor(symbol, color);
     }
 
     public static @NotNull SymbolicStyle simpleReset(char symbol) {

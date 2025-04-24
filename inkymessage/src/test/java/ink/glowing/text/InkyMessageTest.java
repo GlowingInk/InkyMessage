@@ -421,19 +421,19 @@ public class InkyMessageTest {
 
         long start, end;
 
-        start = System.currentTimeMillis();
+        start = System.nanoTime();
         for (int i = 0; i < test; i++) {
             inkyMessage.deserialize(inky);
         }
-        end = System.currentTimeMillis();
-        System.out.println(end - start);
+        end = System.nanoTime();
+        System.out.println((double) (end - start) / test);
 
-        start = System.currentTimeMillis();
+        start = System.nanoTime();
         for (int i = 0; i < test; i++) {
             miniMessage.deserialize(mini);
         }
-        end = System.currentTimeMillis();
-        System.out.println(end - start);
+        end = System.nanoTime();
+        System.out.println((double) (end - start) / test);
 
         System.out.println("Inky: " + miniMessage.serialize(inkyMessage.deserialize(inky)));
         System.out.println("<reset>");

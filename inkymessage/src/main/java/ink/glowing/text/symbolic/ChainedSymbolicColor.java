@@ -8,12 +8,12 @@ import org.jetbrains.annotations.NotNull;
 import java.util.Objects;
 
 @ApiStatus.Internal
-final class ResettingSymbolicColor implements SymbolicStyle {
+final class ChainedSymbolicColor implements SymbolicStyle {
     private final char symbol;
     private final TextColor color;
     private final Style cleanStyle;
 
-    ResettingSymbolicColor(char symbol, @NotNull TextColor color) {
+    ChainedSymbolicColor(char symbol, @NotNull TextColor color) {
         this.symbol = symbol;
         this.color = color;
         this.cleanStyle = Style.style(color);
@@ -26,7 +26,7 @@ final class ResettingSymbolicColor implements SymbolicStyle {
 
     @Override
     public boolean resets() {
-        return true;
+        return false;
     }
 
     @Override
@@ -41,7 +41,7 @@ final class ResettingSymbolicColor implements SymbolicStyle {
 
     @Override
     public @NotNull Style merge(@NotNull Style other) {
-        return cleanStyle;
+        return other.color(color);
     }
 
     @Override
@@ -52,7 +52,7 @@ final class ResettingSymbolicColor implements SymbolicStyle {
     @Override
     public boolean equals(Object obj) {
         if (obj == this) return true;
-        return obj instanceof ResettingSymbolicColor other && other.color.equals(color);
+        return obj instanceof ChainedSymbolicColor other && other.color.equals(color);
     }
 
     @Override
