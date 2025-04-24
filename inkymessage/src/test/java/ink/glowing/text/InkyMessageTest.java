@@ -406,7 +406,7 @@ public class InkyMessageTest {
     @Test(
             dataProvider = "performanceData",
             description = "The \"test\" exists purely for getting a *rough* idea of deserializer performance vs MiniMessage",
-            enabled = true
+            enabled = false
     )
     public void performanceTest(String inky, String mini) {
         int warmup = 100000;

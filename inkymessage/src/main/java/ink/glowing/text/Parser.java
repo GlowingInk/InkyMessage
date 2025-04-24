@@ -114,7 +114,7 @@ final class Parser {
                 appendSegment(builder, from, globalIndex, context);
                 return untilCh != ')'
                         ? prepareModifiers(context, context).apply(builder.build())
-                        : builder.build();
+                        : builder;
             }
         }
         // In case we didn't find the 'untilCh' char
@@ -142,8 +142,7 @@ final class Parser {
                 continue;
             }
             char ch = textStr.charAt(index);
-            if (!isSpecial(ch)) continue;
-            if (index + 1 == until || isEscapedAt(textStr, index)) continue;
+            if (!isSpecial(ch) || index + 1 == until || isEscapedAt(textStr, index)) continue;
             char styleCh = textStr.charAt(index + 1);
             switch (styleCh) {
                 case '#', 'x' -> {
@@ -205,16 +204,16 @@ final class Parser {
      * @return matching replacement spot or null if none
      */
     private @Nullable Replacer.FoundSpot matchSpot(int index, int end) {
-        while (!replaceSpots.isEmpty()) {
-            var spot = replaceSpots.last();
+        for (var iterator = replaceSpots.descendingIterator(); iterator.hasNext();) {
+            var spot = iterator.next();
             if (spot.start() == index) {
-                replaceSpots.pollLast();
-                return spot.end() > end ? null : spot;
+                iterator.remove();
+                return spot.end() <= end ? spot : null;
             } else if (spot.start() < index) {
-                replaceSpots.pollLast();
-                continue;
+                iterator.remove();
+            } else {
+                break;
             }
-            break;
         }
         return null;
     }
