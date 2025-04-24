@@ -17,11 +17,11 @@ import java.util.TreeSet;
 
 import static ink.glowing.text.Stringifier.stringify;
 import static ink.glowing.text.modifier.standard.StandardModifiers.standardModifiers;
-import static ink.glowing.text.placeholder.StandardPlaceholders.standardPlaceholders;
+import static ink.glowing.text.placeholder.StandardPlaceholders.standardPlaceholdersMap;
 import static ink.glowing.text.replace.ReplacementMatcher.replacementMatcher;
 import static ink.glowing.text.replace.StandardReplacers.urlReplacer;
-import static ink.glowing.text.symbolic.StandardSymbolicStyles.notchianFormat;
-import static ink.glowing.text.symbolic.StandardSymbolicStyles.standardResetSymbol;
+import static ink.glowing.text.symbolic.standard.StandardSymbolicStyles.notchianFormat;
+import static ink.glowing.text.symbolic.standard.StandardSymbolicStyles.standardResetSymbol;
 import static java.util.Collections.unmodifiableCollection;
 import static java.util.Collections.unmodifiableMap;
 
@@ -58,9 +58,7 @@ final class InkyMessageImpl implements InkyMessage {
         this.replacementMatcher = replacementMatcher(replacers);
 
         Map<String, Placeholder> adjustedPlaceholders = new HashMap<>(placeholders);
-        for (var ph : standardPlaceholders()) {
-            adjustedPlaceholders.put(ph.name(), ph);
-        }
+        adjustedPlaceholders.putAll(standardPlaceholdersMap());
         Map<Character, SymbolicStyle> adjustedSymbolics = new HashMap<>(symbolics);
         adjustedSymbolics.put(symbolicReset.symbol(), symbolicReset);
         this.baseContext = new Context(

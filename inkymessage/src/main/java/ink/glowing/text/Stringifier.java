@@ -9,12 +9,11 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 import java.util.TreeSet;
 
 import static ink.glowing.text.InkyMessage.escape;
 import static ink.glowing.text.modifier.standard.StandardModifiers.*;
-import static net.kyori.adventure.text.format.Style.style;
+import static ink.glowing.text.symbolic.standard.StandardSymbolicStyles.resetDecorations;
 
 @ApiStatus.Internal
 final class Stringifier { private Stringifier() {}
@@ -137,18 +136,10 @@ final class Stringifier { private Stringifier() {}
         return modifiers;
     }
 
-    private static final class HexSymbolicStyle implements SymbolicStyle {
-        private final @NotNull TextColor color;
-        private final @NotNull Style cleanStyle;
-
-        private HexSymbolicStyle(@NotNull TextColor color) {
-            this.color = color;
-            this.cleanStyle = style(color);
-        }
-
+    private record HexSymbolicStyle(@NotNull TextColor color) implements SymbolicStyle {
         @Override
         public char symbol() {
-            return '#';
+                return '#';
         }
 
         @Override
@@ -162,13 +153,8 @@ final class Stringifier { private Stringifier() {}
         }
 
         @Override
-        public @NotNull Style base() {
-            return cleanStyle;
-        }
-
-        @Override
         public @NotNull Style merge(@NotNull Style other) {
-            return cleanStyle;
+            return other.decorations(resetDecorations()).color(color);
         }
 
         @Override
@@ -179,17 +165,6 @@ final class Stringifier { private Stringifier() {}
         @Override
         public @NotNull String asFormatted() {
             return "&" + color.asHexString();
-        }
-
-        @Override
-        public boolean equals(Object obj) {
-            if (obj == this) return true;
-            return obj instanceof HexSymbolicStyle other && other.color.equals(color);
-        }
-
-        @Override
-        public int hashCode() {
-            return Objects.hash(color, cleanStyle);
         }
     }
 }

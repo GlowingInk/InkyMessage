@@ -14,7 +14,10 @@ import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.TreeSet;
 
 import static ink.glowing.text.replace.ReplacementMatcher.composeReplacementMatchers;
 import static ink.glowing.text.replace.ReplacementMatcher.replacementMatcher;
@@ -120,50 +123,34 @@ final class Context implements ModifierFinder, PlaceholderFinder, SymbolicStyleF
         var symbolics = this.symbolics;
         var replacers = this.replacers;
 
-        Map<String, Modifier<?>> modifiersMap = null;
-        Map<String, Placeholder> placeholdersMap = null;
-        Map<Character, SymbolicStyle> symbolicStylesMap = null;
-        Set<Replacer> replacersSet = null;
+        var modifiersMap = new HashMap<String, Modifier<?>>();
+        var placeholdersMap = new HashMap<String, Placeholder>();
+        var symbolicsMap = new HashMap<Character, SymbolicStyle>();
+        var replacersSet = new HashSet<Replacer>();
 
-        for (var ink : inks) {
+        for (Ink ink : inks) {
             switch (ink) {
-                case Modifier<?> mod -> {
-                    if (modifiersMap == null) {
-                        modifiersMap = new HashMap<>();
-                        modifiers = modifiers.thenModifierFinder(modifiersMap::get);
-                    }
-                    modifiersMap.put(mod.name(), mod);
-                }
-
-                case Placeholder ph -> {
-                    if (placeholdersMap == null) {
-                        placeholdersMap = new HashMap<>();
-                        placeholders = placeholders.thenPlaceholderFinder(placeholdersMap::get);
-                    }
-                    placeholdersMap.put(ph.name(), ph);
-                }
-
-                case SymbolicStyle sym -> {
-                    if (symbolicStylesMap == null) {
-                        symbolicStylesMap = new HashMap<>();
-                        symbolics = symbolics.thenSymbloicStyleFinder(symbolicStylesMap::get);
-                    }
-                    symbolicStylesMap.put(sym.symbol(), sym);
-                }
-
-                case Replacer rep -> {
-                    if (replacersSet == null) {
-                        replacersSet = new HashSet<>();
-                    }
-                    replacersSet.add(rep);
-                }
-
-                default -> throw new IllegalArgumentException("Unknown ink type: " + ink.getClass().getSimpleName());
+                case Modifier<?> mod -> modifiersMap.put(mod.name(), mod);
+                case Placeholder ph -> placeholdersMap.put(ph.name(), ph);
+                case SymbolicStyle sym -> symbolicsMap.put(sym.symbol(), sym);
+                case Replacer rep -> replacersSet.add(rep);
+                default-> throw new IllegalArgumentException("Unknown ink type: " + ink.getClass().getSimpleName());
             }
         }
-        if (replacersSet != null) {
+
+        if (!modifiersMap.isEmpty()) {
+            modifiers = modifiers.thenModifierFinder(modifiersMap::get);
+        }
+        if (!placeholdersMap.isEmpty()) {
+            placeholders = placeholders.thenPlaceholderFinder(placeholdersMap::get);
+        }
+        if (!symbolicsMap.isEmpty()) {
+            symbolics = symbolics.thenSymbloicStyleFinder(symbolicsMap::get);
+        }
+        if (!replacersSet.isEmpty()) {
             replacers = composeReplacementMatchers(replacers, replacementMatcher(replacersSet));
         }
+
         return new Context(this.inkyMessage, modifiers, placeholders, symbolics, replacers, this.symbolicReset);
     }
 }

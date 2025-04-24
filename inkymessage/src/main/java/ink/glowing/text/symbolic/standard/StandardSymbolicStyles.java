@@ -1,21 +1,27 @@
-package ink.glowing.text.symbolic;
+package ink.glowing.text.symbolic.standard;
 
+import ink.glowing.text.symbolic.SymbolicStyle;
 import ink.glowing.text.utils.GeneralUtils;
 import net.kyori.adventure.text.format.TextColor;
 import net.kyori.adventure.text.format.TextDecoration;
+import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Unmodifiable;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 import static net.kyori.adventure.text.format.NamedTextColor.*;
 import static net.kyori.adventure.text.format.TextColor.color;
 import static net.kyori.adventure.text.format.TextDecoration.*;
 
 public final class StandardSymbolicStyles { private StandardSymbolicStyles() {}
+    private static final Map<TextDecoration, State> RESET_DECORATIONS;
+    static {
+        Map<TextDecoration, State> resetDecorations = new EnumMap<>(TextDecoration.class);
+        for (var decoration : TextDecoration.values()) resetDecorations.put(decoration, State.NOT_SET);
+        RESET_DECORATIONS = Collections.unmodifiableMap(resetDecorations);
+    }
+
     private static final List<SymbolicStyle> NOTCHIAN_COLORS = List.of(
             resettingColor('0', BLACK),
             resettingColor('1', DARK_BLUE),
@@ -94,16 +100,26 @@ public final class StandardSymbolicStyles { private StandardSymbolicStyles() {}
         return 'r';
     }
 
+    /**
+     * Decorations defined by the notchian client/server
+     * @return notchian decorations
+     * @see StandardSymbolicStyles#chainedDecoration(char, TextDecoration)
+     */
     public static @NotNull @Unmodifiable Collection<SymbolicStyle> notchianDecorations() {
         return NOTCHIAN_DECORATIONS;
     }
 
+    /**
+     * Colors defined by the notchian client/server
+     * @return notchian colors
+     * @see StandardSymbolicStyles#resettingColor(char, TextColor)
+     */
     public static @NotNull @Unmodifiable Collection<SymbolicStyle> notchianColors() {
         return NOTCHIAN_COLORS;
     }
 
     /**
-     * Combined decorations and colors
+     * Combined decorations and colors defined by the notchian client/server
      * @see StandardSymbolicStyles#notchianColors()
      * @see StandardSymbolicStyles#notchianDecorations()
      */
@@ -111,16 +127,26 @@ public final class StandardSymbolicStyles { private StandardSymbolicStyles() {}
         return NOTCHIAN_FORMAT;
     }
 
+    /**
+     * Decorations defined by the bedrock client/server
+     * @return bedrock decorations
+     * @see StandardSymbolicStyles#chainedDecoration(char, TextDecoration)
+     */
     public static @NotNull @Unmodifiable Collection<SymbolicStyle> bedrockDecorations() {
         return BEDROCK_DECORATIONS;
     }
 
+    /**
+     * Colors defined by the bedrock client/server
+     * @return bedrock colors
+     * @see StandardSymbolicStyles#chainedColor(char, TextColor)
+     */
     public static @NotNull @Unmodifiable Collection<SymbolicStyle> bedrockColors() {
         return BEDROCK_COLORS;
     }
 
     /**
-     * Combined decorations and colors
+     * Combined decorations and colors defined by the bedrock client/server
      * @see StandardSymbolicStyles#bedrockColors()
      * @see StandardSymbolicStyles#bedrockDecorations()
      */
@@ -128,19 +154,44 @@ public final class StandardSymbolicStyles { private StandardSymbolicStyles() {}
         return BEDROCK_FORMAT;
     }
 
+    /**
+     * Creates a symbolic style that just adds the decoration to the final style
+     * @param symbol symbol of this style
+     * @param decoration decoration to apply
+     * @return a new chained decoration
+     */
+    @Contract(value = "_, _ -> new", pure = true)
     public static @NotNull SymbolicStyle chainedDecoration(char symbol, @NotNull TextDecoration decoration) {
         return new ChainedSymbolicDecoration(symbol, decoration);
     }
 
+    /**
+     * Creates a symbolic style that resets the decorations and sets the color to the final style
+     * @param symbol symbol of this style
+     * @param color color to apply
+     * @return a new resetting color
+     */
+    @Contract(value = "_, _ -> new", pure = true)
     public static @NotNull SymbolicStyle resettingColor(char symbol, @NotNull TextColor color) {
         return new ResettingSymbolicColor(symbol, color);
     }
-    
+
+    /**
+     * Creates a symbolic style that just sets the color to the final style
+     * @param symbol symbol of this style
+     * @param color color to apply
+     * @return a new chained color
+     */
+    @Contract(value = "_, _ -> new", pure = true)
     public static @NotNull SymbolicStyle chainedColor(char symbol, @NotNull TextColor color) {
         return new ChainedSymbolicColor(symbol, color);
     }
 
     public static @NotNull SymbolicStyle simpleReset(char symbol) {
         return new SimpleSymbolicReset(symbol);
+    }
+
+    public static @NotNull Map<TextDecoration, State> resetDecorations() {
+        return RESET_DECORATIONS;
     }
 }

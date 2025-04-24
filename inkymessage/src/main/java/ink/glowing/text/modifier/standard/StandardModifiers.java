@@ -1,6 +1,7 @@
 package ink.glowing.text.modifier.standard;
 
 import ink.glowing.text.modifier.Modifier;
+import ink.glowing.text.utils.Named;
 import ink.glowing.text.utils.Named.NamePattern;
 import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.text.event.ClickCallback;
@@ -9,11 +10,17 @@ import org.intellij.lang.annotations.Pattern;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Unmodifiable;
 
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Map;
 import java.util.Set;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
+
+import static java.util.function.Function.identity;
 
 public final class StandardModifiers { private StandardModifiers() {}
-    private static final Set<Modifier<?>> STANDARD = Set.of(
+    private static final Collection<Modifier<?>> STANDARD = Set.of(
             clickModifier(),
             colorModifier(),
             decorModifier(),
@@ -21,6 +28,9 @@ public final class StandardModifiers { private StandardModifiers() {}
             hoverModifier(),
             httpModifier(),
             httpsModifier()
+    );
+    private static final Map<String, Modifier<?>> STANDARD_MAP = Collections.unmodifiableMap(
+            STANDARD.stream().collect(Collectors.toMap(Named::name, identity()))
     );
 
     /**
@@ -33,8 +43,12 @@ public final class StandardModifiers { private StandardModifiers() {}
      * @see StandardModifiers#httpModifier()
      * @see StandardModifiers#httpsModifier()
      */
-    public static @NotNull @Unmodifiable Set<Modifier<?>> standardModifiers() {
+    public static @NotNull @Unmodifiable Collection<Modifier<?>> standardModifiers() {
         return STANDARD;
+    }
+
+    public static @NotNull @Unmodifiable Map<String, Modifier<?>> standardModifiersMap() {
+        return STANDARD_MAP;
     }
 
     public static @NotNull Modifier.Plain clickModifier() {

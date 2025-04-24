@@ -1,13 +1,19 @@
 package ink.glowing.text.placeholder;
 
+import ink.glowing.text.utils.Named;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Unmodifiable;
 
 import java.util.Collection;
+import java.util.Collections;
+import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import static ink.glowing.text.modifier.ModifierFinder.modifierFinder;
 import static ink.glowing.text.modifier.standard.StandardModifiers.*;
 import static ink.glowing.text.placeholder.Placeholder.placeholder;
+import static java.util.function.Function.identity;
 import static net.kyori.adventure.text.Component.*;
 
 /**
@@ -34,12 +40,19 @@ public final class StandardPlaceholders { private StandardPlaceholders() {}
             selectorSeparatorModifier()
     );
 
-    private static final Set<Placeholder> STANDARD_PLACEHOLDERS = Set.of(
+    private static final Set<Placeholder> STANDARD = Set.of(
             LANG, KEYBIND, SCORE, SELECTOR
     );
+    private static final Map<String, Placeholder> STANDARD_MAP = Collections.unmodifiableMap(
+            STANDARD.stream().collect(Collectors.toMap(Named::name, identity()))
+    );
 
-    public static @NotNull Collection<@NotNull Placeholder> standardPlaceholders() {
-        return STANDARD_PLACEHOLDERS;
+    public static @NotNull @Unmodifiable Collection<@NotNull Placeholder> standardPlaceholders() {
+        return STANDARD;
+    }
+
+    public static @NotNull @Unmodifiable Map<String, @NotNull Placeholder> standardPlaceholdersMap() {
+        return STANDARD_MAP;
     }
 
     public static @NotNull Placeholder langPlaceholder() {

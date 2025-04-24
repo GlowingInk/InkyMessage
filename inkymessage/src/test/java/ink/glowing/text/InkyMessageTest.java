@@ -406,7 +406,7 @@ public class InkyMessageTest {
     @Test(
             dataProvider = "performanceData",
             description = "The \"test\" exists purely for getting a *rough* idea of deserializer performance vs MiniMessage",
-            enabled = false
+            enabled = true
     )
     public void performanceTest(String inky, String mini) {
         int warmup = 100000;
@@ -426,14 +426,14 @@ public class InkyMessageTest {
             inkyMessage.deserialize(inky);
         }
         end = System.nanoTime();
-        System.out.println((double) (end - start) / test);
+        System.out.println((end - start) / test);
 
         start = System.nanoTime();
         for (int i = 0; i < test; i++) {
             miniMessage.deserialize(mini);
         }
         end = System.nanoTime();
-        System.out.println((double) (end - start) / test);
+        System.out.println((end - start) / test);
 
         System.out.println("Inky: " + miniMessage.serialize(inkyMessage.deserialize(inky)));
         System.out.println("<reset>");

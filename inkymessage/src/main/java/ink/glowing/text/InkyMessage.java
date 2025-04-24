@@ -9,9 +9,9 @@ import ink.glowing.text.placeholder.StandardPlaceholders;
 import ink.glowing.text.replace.ReplacementMatcher;
 import ink.glowing.text.replace.Replacer;
 import ink.glowing.text.replace.StandardReplacers;
-import ink.glowing.text.symbolic.StandardSymbolicStyles;
 import ink.glowing.text.symbolic.SymbolicStyle;
 import ink.glowing.text.symbolic.SymbolicStyleFinder;
+import ink.glowing.text.symbolic.standard.StandardSymbolicStyles;
 import net.kyori.adventure.builder.AbstractBuilder;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.ComponentSerializer;
@@ -19,7 +19,7 @@ import org.jetbrains.annotations.*;
 
 import java.util.*;
 
-import static ink.glowing.text.symbolic.StandardSymbolicStyles.simpleReset;
+import static ink.glowing.text.symbolic.standard.StandardSymbolicStyles.simpleReset;
 
 /**
  * User-friendly component (de)serializer with legacy-inspired format.
@@ -42,7 +42,7 @@ public sealed interface InkyMessage extends ComponentSerializer<Component, Compo
     }
 
     /**
-     * Creates new instance of InkyMessage with the provided style ink
+     * Creates new instance of InkyMessage with the provided style ink.
      * @param ink style ink to use
      * @return the new instance
      */
@@ -52,7 +52,7 @@ public sealed interface InkyMessage extends ComponentSerializer<Component, Compo
     }
 
     /**
-     * Creates new instance of InkyMessage with the provided style ink
+     * Creates new instance of InkyMessage with the provided style ink.
      * @param inks style inks to use
      * @return the new instance
      */
@@ -62,7 +62,7 @@ public sealed interface InkyMessage extends ComponentSerializer<Component, Compo
     }
 
     /**
-     * Creates new instance of InkyMessage with the provided style ink
+     * Creates new instance of InkyMessage with the provided style ink.
      * @param inks style inks to use
      * @return the new instance
      */
@@ -165,35 +165,35 @@ public sealed interface InkyMessage extends ComponentSerializer<Component, Compo
     }
 
     /**
-     * Map of style modifiers that this InkyMessage instance uses
+     * Map of style modifiers that this InkyMessage instance uses.
      * @return map of style modifiers
      */
     @Contract(pure = true)
     @Unmodifiable @NotNull Map<String, Modifier<?>> modifiers();
 
     /**
-     * Map of placeholders that this InkyMessage instance uses
+     * Map of placeholders that this InkyMessage instance uses.
      * @return map of placeholders
      */
     @Contract(pure = true)
     @Unmodifiable @NotNull Map<String, Placeholder> placeholders();
 
     /**
-     * Map of symbolic styles that this InkyMessage instance uses
+     * Map of symbolic styles that this InkyMessage instance uses.
      * @return map of symbolic styles
      */
     @Contract(pure = true)
     @Unmodifiable @NotNull Map<Character, SymbolicStyle> symbolics();
 
     /**
-     * Collection of replacers that this InkyMessage instance uses
+     * Collection of replacers that this InkyMessage instance uses.
      * @return collection of replacers
      */
     @Contract(pure = true)
     @Unmodifiable @NotNull Collection<Replacer> replacers();
 
     /**
-     * Symbolic style reset that this InkyMessage instance uses
+     * Symbolic style reset that this InkyMessage instance uses.
      * @return symbolic reset
      */
     @Contract(pure = true)
@@ -241,6 +241,39 @@ public sealed interface InkyMessage extends ComponentSerializer<Component, Compo
      */
     @Override
     @NotNull String serialize(@NotNull Component text);
+
+    /**
+     * Convert adventure component into string.
+     * @param text input component
+     * @param ink additional style ink
+     * @return converted string representation
+     */
+    default @NotNull String serialize(@NotNull Component text,
+                                      @NotNull Ink ink) {
+        return toBuilder().addInk(ink).build().serialize(text);
+    }
+
+    /**
+     * Convert adventure component into string.
+     * @param text input component
+     * @param inks additional style inks
+     * @return converted string representation
+     */
+    default @NotNull String serialize(@NotNull Component text,
+                                      @NotNull Ink @NotNull ... inks) {
+        return toBuilder().addInks(inks).build().serialize(text);
+    }
+
+    /**
+     * Convert adventure component into string.
+     * @param text input component
+     * @param inks additional style inks
+     * @return converted string representation
+     */
+    default @NotNull String serialize(@NotNull Component text,
+                                      @NotNull Iterable<@NotNull Ink> inks) {
+        return toBuilder().addInks(inks).build().serialize(text);
+    }
 
     /**
      * Creates a new InkyMessage builder using this instance's values.
@@ -318,7 +351,7 @@ public sealed interface InkyMessage extends ComponentSerializer<Component, Compo
         }
 
         @Contract("_ -> this")
-        public @NotNull InkyMessage.Builder replacers(@NotNull Replacer @NotNull ... replacers) {
+        public @NotNull InkyMessage.Builder replacers(@NotNull Replacer  @NotNull ... replacers) {
             return replacers(Arrays.asList(replacers));
         }
 
