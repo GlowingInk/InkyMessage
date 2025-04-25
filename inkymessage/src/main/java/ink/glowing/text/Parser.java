@@ -33,10 +33,10 @@ final class Parser {
 
     private int globalIndex;
 
-    private Parser(@NotNull String textStr, @NotNull Context context) {
+    private Parser(@NotNull String textStr, @NotNull TreeSet<Replacer.FoundSpot> replaceSpots) {
         this.textStr = textStr;
         this.textLength = textStr.length();
-        this.replaceSpots = context.matchReplacements(textStr);
+        this.replaceSpots = replaceSpots;
     }
 
     /**
@@ -47,7 +47,10 @@ final class Parser {
      */
     static @NotNull Component parse(@NotNull String textStr, @NotNull Context context) {
         if (textStr.isEmpty()) return empty();
-        return new Parser(textStr, context).parseRecursive(0, -1, context).asComponent();
+        textStr = textStr.replace('§', '&');
+        return new Parser(textStr, context.matchReplacements(textStr))
+                .parseRecursive(0, -1, context)
+                .asComponent();
     }
 
     /**
