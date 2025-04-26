@@ -14,10 +14,7 @@ import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.TreeSet;
+import java.util.*;
 
 import static ink.glowing.text.replace.ReplacementMatcher.composeReplacementMatchers;
 import static ink.glowing.text.replace.ReplacementMatcher.replacementMatcher;
@@ -117,7 +114,7 @@ final class Context implements ModifierFinder, PlaceholderFinder, SymbolicStyleF
         return with(Arrays.asList(inks));
     }
 
-    public @NotNull Context with(@NotNull Iterable<@NotNull Ink> inks) {
+    public @NotNull Context with(@NotNull Iterable<? extends @NotNull Ink> inks) {
         var modifiers = this.modifiers;
         var placeholders = this.placeholders;
         var symbolics = this.symbolics;
@@ -128,15 +125,7 @@ final class Context implements ModifierFinder, PlaceholderFinder, SymbolicStyleF
         var symbolicsMap = new HashMap<Character, SymbolicStyle>();
         var replacersSet = new HashSet<Replacer>();
 
-        for (Ink ink : inks) {
-            switch (ink) {
-                case Modifier<?> mod -> modifiersMap.put(mod.name(), mod);
-                case Placeholder ph -> placeholdersMap.put(ph.name(), ph);
-                case SymbolicStyle sym -> symbolicsMap.put(sym.symbol(), sym);
-                case Replacer rep -> replacersSet.add(rep);
-                default-> throw new IllegalArgumentException("Unknown ink type: " + ink.getClass().getSimpleName());
-            }
-        }
+        with(inks, modifiersMap, placeholdersMap, symbolicsMap, replacersSet);
 
         if (!modifiersMap.isEmpty()) {
             modifiers = modifiers.thenModifierFinder(modifiersMap::get);
@@ -152,5 +141,22 @@ final class Context implements ModifierFinder, PlaceholderFinder, SymbolicStyleF
         }
 
         return new Context(this.inkyMessage, modifiers, placeholders, symbolics, replacers, this.symbolicReset);
+    }
+
+    private static void with(@NotNull Iterable<? extends @NotNull Ink> inks,
+                             @NotNull Map<String, Modifier<?>> modifiersMap,
+                             @NotNull Map<String, Placeholder> placeholdersMap,
+                             @NotNull Map<Character, SymbolicStyle> symbolicsMap,
+                             @NotNull Set<Replacer> replacersSet) {
+        for (Ink ink : inks) {
+            switch (ink) {
+                case Modifier<?> mod -> modifiersMap.put(mod.name(), mod);
+                case Placeholder ph -> placeholdersMap.put(ph.name(), ph);
+                case SymbolicStyle sym -> symbolicsMap.put(sym.symbol(), sym);
+                case Replacer rep -> replacersSet.add(rep);
+                case Ink.Provider pr -> with(pr.inks(), modifiersMap, placeholdersMap, symbolicsMap, replacersSet);
+                default-> throw new IllegalArgumentException("Unknown ink type: " + ink.getClass().getSimpleName());
+            }
+        }
     }
 }

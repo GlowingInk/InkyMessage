@@ -5,15 +5,24 @@ import ink.glowing.text.modifier.Modifier;
 import ink.glowing.text.modifier.ModifierFinder;
 import ink.glowing.text.utils.Named;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.flattener.ComponentFlattener;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.function.Function;
 import java.util.function.Supplier;
 
+import static net.kyori.adventure.text.Component.text;
+
 // TODO VirtualComponent?
 public interface Placeholder extends Ink, Named, PlaceholderFinder {
     @NotNull Component parse(@NotNull String value);
+
+    default @NotNull String parseInlined(@NotNull String value) {
+        StringBuilder builder = new StringBuilder();
+        ComponentFlattener.basic().flatten(parse(value), builder::append);
+        return builder.toString();
+    }
 
     @Override
     default @Nullable Placeholder findPlaceholder(@NotNull String name) {
@@ -55,5 +64,30 @@ public interface Placeholder extends Ink, Named, PlaceholderFinder {
                                             @NotNull Function<@NotNull String, @NotNull Component> resultFunct,
                                             @NotNull ModifierFinder localModifiers) {
         return new PlaceholderImpl(name, resultFunct, localModifiers);
+    }
+
+    static @NotNull Placeholder.Inlined inlinedPlaceholder(@NotNull String name,
+                                                           @NotNull String result) {
+        return new InlinedPlaceholderImpl(name, (v) -> result);
+    }
+
+    static @NotNull Placeholder.Inlined inlinedPlaceholder(@NotNull String name,
+                                                           @NotNull Supplier<@NotNull String> result) {
+        return new InlinedPlaceholderImpl(name, (v) -> result.get());
+    }
+
+    static @NotNull Placeholder.Inlined inlinedPlaceholder(@NotNull String name,
+                                                           @NotNull Function<@NotNull String, @NotNull String> result) {
+        return new InlinedPlaceholderImpl(name, result);
+    }
+
+    interface Inlined extends Placeholder {
+        @Override
+        default @NotNull Component parse(@NotNull String value) {
+            return text(parseInlined(value));
+        }
+
+        @Override
+        @NotNull String parseInlined(@NotNull String value);
     }
 }

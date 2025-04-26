@@ -2,6 +2,7 @@ package ink.glowing.text;
 
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.ComponentLike;
+import net.kyori.adventure.text.event.ClickEvent;
 import net.kyori.adventure.text.format.TextColor;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
@@ -13,6 +14,7 @@ import java.util.random.RandomGenerator;
 
 import static ink.glowing.text.Helper.*;
 import static ink.glowing.text.InkyMessage.inkyMessage;
+import static ink.glowing.text.placeholder.Placeholder.inlinedPlaceholder;
 import static ink.glowing.text.placeholder.Placeholder.placeholder;
 import static net.kyori.adventure.text.Component.*;
 import static net.kyori.adventure.text.event.ClickEvent.openUrl;
@@ -189,15 +191,23 @@ public class InkyMessageTest {
                                 placeholder("test2", t("world"))
                         ),
                         tb(t("Hello"), t(" "), t("world"))
+                }, {
+                        "&[Test inline](click:run /&{cmd} &{arg})",
+                        Arrays.asList(
+                                inlinedPlaceholder("cmd", "command"),
+                                placeholder("arg", text("argument"))
+                        ),
+                        tb(tb(t("Test inline")).clickEvent(ClickEvent.runCommand("/command argument")))
                 }
         };
     }
 
     @Test(dataProvider = "deserializeWithInksData")
     public void deserializeWithInksTest(String text, List<Ink> inks, ComponentLike expectedLike) {
+        Component expected = expectedLike.asComponent();
         assertEquals(
                 inkyMessage().deserialize(text, inks),
-                expectedLike.asComponent()
+                expected
         );
     }
 

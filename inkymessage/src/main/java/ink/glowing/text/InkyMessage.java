@@ -46,9 +46,9 @@ public sealed interface InkyMessage extends ComponentSerializer<Component, Compo
      * @param ink style ink to use
      * @return the new instance
      */
-    @Contract(value = "_ -> new", pure = true)
-    static @NotNull InkyMessage inkyMessage(@NotNull Ink ink) {
-        return builder().addInk(ink).build();
+    @Contract(value = "_, _ -> new", pure = true)
+    static @NotNull InkyMessage inkyMessage(char reset, @NotNull Ink ink) {
+        return builder().addInk(ink).symbolicReset(reset).build();
     }
 
     /**
@@ -56,9 +56,9 @@ public sealed interface InkyMessage extends ComponentSerializer<Component, Compo
      * @param inks style inks to use
      * @return the new instance
      */
-    @Contract(value = "_ -> new", pure = true)
-    static @NotNull InkyMessage inkyMessage(@NotNull Ink @NotNull ... inks) {
-        return builder().addInks(inks).build();
+    @Contract(value = "_, _ -> new", pure = true)
+    static @NotNull InkyMessage inkyMessage(char reset, @NotNull Ink @NotNull ... inks) {
+        return builder().addInks(inks).symbolicReset(reset).build();
     }
 
     /**
@@ -66,9 +66,9 @@ public sealed interface InkyMessage extends ComponentSerializer<Component, Compo
      * @param inks style inks to use
      * @return the new instance
      */
-    @Contract(value = "_ -> new", pure = true)
-    static @NotNull InkyMessage inkyMessage(@NotNull Iterable<@NotNull Ink> inks) {
-        return builder().addInks(inks).build();
+    @Contract(value = "_, _ -> new", pure = true)
+    static @NotNull InkyMessage inkyMessage(char reset, @NotNull Iterable<? extends @NotNull Ink> inks) {
+        return builder().addInks(inks).symbolicReset(reset).build();
     }
 
     /**
@@ -271,7 +271,7 @@ public sealed interface InkyMessage extends ComponentSerializer<Component, Compo
      * @return converted string representation
      */
     default @NotNull String serialize(@NotNull Component text,
-                                      @NotNull Iterable<@NotNull Ink> inks) {
+                                      @NotNull Iterable<? extends @NotNull Ink> inks) {
         return toBuilder().addInks(inks).build().serialize(text);
     }
 
@@ -334,6 +334,7 @@ public sealed interface InkyMessage extends ComponentSerializer<Component, Compo
                 case Modifier<?> mod -> addModifier(mod);
                 case Replacer rp -> addReplacer(rp);
                 case SymbolicStyle sym -> addSymbolic(sym);
+                case Ink.Provider pr -> addInks(pr.inks());
                 default -> throw new IllegalArgumentException("Unknown ink type: " + ink.getClass().getSimpleName());
             };
         }
@@ -345,13 +346,13 @@ public sealed interface InkyMessage extends ComponentSerializer<Component, Compo
         }
 
         @Contract("_ -> this")
-        public @NotNull InkyMessage.Builder addInks(@NotNull Iterable<@NotNull Ink> inks) {
+        public @NotNull InkyMessage.Builder addInks(@NotNull Iterable<? extends @NotNull Ink> inks) {
             for (var ink : inks) addInk(ink);
             return this;
         }
 
         @Contract("_ -> this")
-        public @NotNull InkyMessage.Builder replacers(@NotNull Replacer  @NotNull ... replacers) {
+        public @NotNull InkyMessage.Builder replacers(@NotNull Replacer @NotNull ... replacers) {
             return replacers(Arrays.asList(replacers));
         }
 

@@ -3,6 +3,7 @@ package ink.glowing.text;
 import ink.glowing.text.modifier.Modifier;
 import ink.glowing.text.modifier.ModifierFinder;
 import ink.glowing.text.placeholder.Placeholder;
+import ink.glowing.text.placeholder.PlaceholderFinder;
 import ink.glowing.text.replace.Replacer;
 import ink.glowing.text.symbolic.SymbolicStyle;
 import net.kyori.adventure.text.Component;
@@ -47,7 +48,6 @@ final class Parser {
      */
     static @NotNull Component parse(@NotNull String textStr, @NotNull Context context) {
         if (textStr.isEmpty()) return empty();
-        textStr = textStr.replace('§', '&');
         return new Parser(textStr, context.matchReplacements(textStr))
                 .parseRecursive(0, -1, context)
                 .asComponent();
@@ -76,28 +76,16 @@ final class Parser {
 
                     case '{' -> { // &{placeholder} | &{placeholder:...}
                         int initIndex = globalIndex;
-                        if (!iterateUntil(":}")) {
-                            globalIndex = initIndex;
+                        var placeholderData = parsePlaceholder(context);
+                        if (placeholderData == null) {
                             continue;
                         }
-                        Placeholder placeholder = context.findPlaceholder(textStr.substring(initIndex + 2, globalIndex));
-                        if (placeholder == null) {
-                            globalIndex = initIndex;
-                            continue;
-                        }
-                        String params;
-                        if (textStr.charAt(globalIndex) == '}') {
-                            params = "";
-                        } else {
-                            int paramsIndex = globalIndex += 1;
-                            if (!iterateUntil('}')) {
-                                globalIndex = initIndex;
-                                continue;
-                            }
-                            params = textStr.substring(paramsIndex, globalIndex);
-                        }
+                        var placeholder = placeholderData.placeholder;
                         appendSegment(builder, from, initIndex, context);
-                        builder.append(prepareModifiers(context, placeholder::findLocalModifier).apply(placeholder.parse(params)));
+                        builder.append(prepareModifiers(
+                                context,
+                                placeholder::findLocalModifier
+                        ).apply(placeholder.parse(placeholderData.params)));
                         from = globalIndex--;
                     }
 
@@ -266,7 +254,7 @@ final class Parser {
             }
             String finalParams = params;
             if (modifier instanceof Modifier.Plain plainModifier) {
-                String value = extractPlainModifierValue(from);
+                String value = extractPlainModifierValue(from, context);
                 comp = comp.andThen(prev -> plainModifier.modify(prev, finalParams, unescape(value)));
             } else if (modifier instanceof Modifier.Complex complexModifier) {
                 Component value = parseRecursive(from, ')', context.stylelessCopy()).asComponent();
@@ -296,15 +284,55 @@ final class Parser {
      * @param from start index for extraction
      * @return extracted value string
      */
-    private @NotNull String extractPlainModifierValue(int from) {
+    private @NotNull String extractPlainModifierValue(int from, @NotNull Context context) {
         if (globalIndex != textLength && textStr.charAt(globalIndex) != ')') {
+            StringBuilder builder = new StringBuilder();
             globalIndex = from;
-            if (iterateUntil(')')) {
-                return textStr.substring(from, globalIndex);
+            int lastIndex = globalIndex;
+            for (;globalIndex < textLength; globalIndex++) {
+                char ch = textStr.charAt(globalIndex);
+                if (ch == ')' && isUnescapedAt(textStr, globalIndex)) {
+                    return builder.append(textStr, lastIndex, globalIndex).toString();
+                } else if (isSpecial(ch) && isUnescapedAt(textStr, globalIndex)) {
+                    int initIndex = globalIndex;
+                    PlaceholderData data = parsePlaceholder(context);
+                    if (data != null) {
+                        builder.append(textStr, lastIndex, initIndex);
+                        builder.append(data.placeholder.parseInlined(data.params));
+                        lastIndex = globalIndex + 1;
+                    }
+                }
             }
         }
         return "";
     }
+
+    private @Nullable PlaceholderData parsePlaceholder(PlaceholderFinder placeholders) {
+        int initIndex = globalIndex;
+        if (!iterateUntil(":}")) {
+            globalIndex = initIndex;
+            return null;
+        }
+        Placeholder placeholder = placeholders.findPlaceholder(textStr.substring(initIndex + 2, globalIndex));
+        if (placeholder == null) {
+            globalIndex = initIndex;
+            return null;
+        }
+        String params;
+        if (textStr.charAt(globalIndex) == '}') {
+            params = "";
+        } else {
+            int paramsIndex = (++globalIndex);
+            if (!iterateUntil('}')) {
+                globalIndex = initIndex;
+                return null;
+            }
+            params = textStr.substring(paramsIndex, globalIndex);
+        }
+        return new PlaceholderData(placeholder, params);
+    }
+
+    private record PlaceholderData(@NotNull Placeholder placeholder, @NotNull String params) { }
 
     /**
      * Advances globalIndex until specified unescaped character is found.

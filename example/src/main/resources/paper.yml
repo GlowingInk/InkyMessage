@@ -1,0 +1,6 @@
+name: InkyMessageExample
+version: 1.0.0
+main: ink.glowing.text.example.paper.InkyMessageChatPaper
+description: An example plugin
+author: GlowingInk
+api-version: '1.21.5'
