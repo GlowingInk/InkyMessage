@@ -9,7 +9,7 @@
         <version>0.12.0-SNAPSHOT</version>
     </parent>
 
-    <artifactId>example</artifactId>
+    <artifactId>inkymessage-example-plugin</artifactId>
 
     <repositories>
         <repository>

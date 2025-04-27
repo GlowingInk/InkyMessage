@@ -1,7 +1,6 @@
 package ink.glowing.text.example.paper;
 
 import ink.glowing.text.InkyMessage;
-import io.papermc.paper.chat.ChatRenderer;
 import io.papermc.paper.event.player.AsyncChatEvent;
 import net.kyori.adventure.text.Component;
 import org.bukkit.event.EventHandler;
@@ -18,17 +17,19 @@ import static ink.glowing.text.extra.paper.PaperPlaceholders.playerPlaceholder;
 import static ink.glowing.text.placeholder.Placeholder.placeholder;
 import static ink.glowing.text.replace.StandardReplacers.fancyUrlReplacer;
 import static ink.glowing.text.symbolic.standard.StandardSymbolicStyles.notchianFormat;
+import static ink.glowing.text.utils.function.Caching.caching;
+import static io.papermc.paper.chat.ChatRenderer.viewerUnaware;
 import static net.kyori.adventure.text.Component.text;
 
-public class InkyMessageChatPaper extends JavaPlugin implements Listener {
+public class InkyMessageChatPaper extends JavaPlugin implements Listener { // TODO
     private static final String FORMAT =
-            "&{sender:display_name}(click:suggest /tell &{sender:name} ) > &{message}"; // TODO
+            "&{sender:display_name}(click:suggest /tell &{sender:name} ) > &{message}(hover:text &{time})";
     private static final InkyMessage CHAT_FORMATTER = inkyMessage();
     private static final InkyMessage PLAYER_INPUT = inkyMessage(
             'r',
             inkProvider(notchianFormat()),
             fancyUrlReplacer(),
-            placeholder("time", (ignored) -> text(LocalTime.now().format(DateTimeFormatter.ISO_LOCAL_TIME)))
+            placeholder("time", () -> text(LocalTime.now().format(DateTimeFormatter.ISO_LOCAL_TIME)))
     );
 
     @Override
@@ -41,8 +42,8 @@ public class InkyMessageChatPaper extends JavaPlugin implements Listener {
         Component result = CHAT_FORMATTER.deserialize(
                 FORMAT,
                 playerPlaceholder("sender", event.getPlayer()),
-                placeholder("message", () -> PLAYER_INPUT.deserialize(event.signedMessage().message()))
+                placeholder("message", caching(() -> PLAYER_INPUT.deserialize(event.signedMessage().message())))
         );
-        event.renderer(ChatRenderer.viewerUnaware((player, displayName, message) -> result));
+        event.renderer(viewerUnaware((player, displayName, message) -> result));
     }
 }

@@ -29,6 +29,7 @@
             <groupId>ink.glowing.text</groupId>
             <artifactId>inkymessage</artifactId>
             <version>${project.version}</version>
+            <scope>provided</scope>
         </dependency>
     </dependencies>
 </project>

@@ -10,4 +10,7 @@
     </parent>
     <artifactId>inkymessage-extra</artifactId>
     <packaging>pom</packaging>
+    <modules>
+        <module>paper</module>
+    </modules>
 </project>
