@@ -26,7 +26,7 @@ public interface SymbolicStyleFinder {
         return symbolicStyleFinder(Arrays.asList(symbolicStyles));
     }
 
-    static @NotNull SymbolicStyleFinder symbolicStyleFinder(@NotNull SequencedCollection<@NotNull SymbolicStyle> symbolicStyles) {
+    static @NotNull SymbolicStyleFinder symbolicStyleFinder(@NotNull SequencedCollection<? extends @NotNull SymbolicStyle> symbolicStyles) {
         return switch (symbolicStyles.size()) {
             case 0 -> (symbol) -> null;
             case 1 -> symbolicStyles.getFirst();

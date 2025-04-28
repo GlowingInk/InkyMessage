@@ -22,7 +22,7 @@ public interface ModifierFinder {
         return modifierFinder(Arrays.asList(modifiers));
     }
 
-    static @NotNull ModifierFinder modifierFinder(@NotNull SequencedCollection<@NotNull Modifier<?>> modifiers) {
+    static @NotNull ModifierFinder modifierFinder(@NotNull SequencedCollection<? extends @NotNull Modifier<?>> modifiers) {
         return switch (modifiers.size()) {
             case 0 -> (name) -> null;
             case 1 -> modifiers.getFirst();

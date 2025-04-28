@@ -232,7 +232,7 @@ public sealed interface InkyMessage extends ComponentSerializer<Component, Compo
      * @return converted text component
      */
     @NotNull Component deserialize(@NotNull String inputText,
-                                   @NotNull Iterable<@NotNull Ink> inks);
+                                   @NotNull Iterable<? extends @NotNull Ink> inks);
 
     /**
      * Convert adventure component into string.

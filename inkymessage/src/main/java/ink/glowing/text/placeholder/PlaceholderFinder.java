@@ -22,7 +22,7 @@ public interface PlaceholderFinder {
         return placeholderFinder(Arrays.asList(placeholders));
     }
 
-    static @NotNull PlaceholderFinder placeholderFinder(@NotNull SequencedCollection<@NotNull Placeholder> placeholders) {
+    static @NotNull PlaceholderFinder placeholderFinder(@NotNull SequencedCollection<? extends @NotNull Placeholder> placeholders) {
         return switch (placeholders.size()) {
             case 0 -> (name) -> null;
             case 1 -> placeholders.getFirst();

@@ -135,7 +135,7 @@ final class InkyMessageImpl implements InkyMessage {
 
     @Override
     public @NotNull Component deserialize(@NotNull String inputText,
-                                          @NotNull Iterable<@NotNull Ink> inks) {
+                                          @NotNull Iterable<? extends @NotNull Ink> inks) {
         return deserialize(inputText, this.baseContext.with(inks));
     }
 

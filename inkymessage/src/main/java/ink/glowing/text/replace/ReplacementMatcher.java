@@ -21,7 +21,7 @@ public interface ReplacementMatcher {
         return replacementMatcher(Arrays.asList(replacers));
     }
 
-    static @NotNull ReplacementMatcher replacementMatcher(@NotNull SequencedCollection<@NotNull Replacer> replacers) {
+    static @NotNull ReplacementMatcher replacementMatcher(@NotNull SequencedCollection<? extends @NotNull Replacer> replacers) {
         return switch (replacers.size()) {
             case 0 -> (input) -> new TreeSet<>();
             case 1 -> replacers.getFirst();
