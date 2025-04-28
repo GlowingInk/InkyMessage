@@ -9,6 +9,7 @@ import net.kyori.adventure.text.Component;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Unmodifiable;
+import org.jetbrains.annotations.VisibleForTesting;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -39,7 +40,8 @@ final class InkyMessageImpl implements InkyMessage {
     private final Collection<Replacer> replacers;
     private final SymbolicStyle symbolicReset;
 
-    private final Context baseContext;
+    @VisibleForTesting
+    final Context baseContext;
     private final ReplacementMatcher replacementMatcher;
 
     InkyMessageImpl(
