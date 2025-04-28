@@ -31,6 +31,7 @@ public sealed interface InkyMessage extends ComponentSerializer<Component, Compo
      * The standard instance of InkyMessage.
      * @return the standard instance
      * @see StandardModifiers#standardModifiers()
+     * @see StandardPlaceholders#requiredPlaceholders()
      * @see StandardPlaceholders#standardPlaceholders()
      * @see StandardSymbolicStyles#notchianFormat()
      * @see StandardSymbolicStyles#standardResetSymbol()
@@ -152,7 +153,7 @@ public sealed interface InkyMessage extends ComponentSerializer<Component, Compo
     @Contract(pure = true)
     static boolean isSpecial(char ch) {
         return switch (ch) {
-            case '&', '[', ']', '(', ')', '{', '}', '\\' -> true;
+            case '&', '[', ']', '(', ')', '{', '}', '<', '>','\\' -> true;
             default -> false;
         };
     }
@@ -165,7 +166,7 @@ public sealed interface InkyMessage extends ComponentSerializer<Component, Compo
     @Contract(pure = true)
     static boolean isNotSpecial(char ch) {
         return switch (ch) {
-            case '&', '[', ']', '(', ')', '{', '}', '\\' -> false;
+            case '&', '[', ']', '(', ')', '{', '}', '<', '>', '\\' -> false;
             default -> true;
         };
     }

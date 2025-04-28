@@ -14,8 +14,8 @@ import java.util.random.RandomGenerator;
 
 import static ink.glowing.text.Helper.*;
 import static ink.glowing.text.InkyMessage.inkyMessage;
-import static ink.glowing.text.placeholder.Placeholder.inlinedPlaceholder;
 import static ink.glowing.text.placeholder.Placeholder.placeholder;
+import static ink.glowing.text.placeholder.Placeholder.plainPlaceholder;
 import static net.kyori.adventure.text.Component.*;
 import static net.kyori.adventure.text.event.ClickEvent.openUrl;
 import static net.kyori.adventure.text.event.ClickEvent.runCommand;
@@ -126,6 +126,13 @@ public class InkyMessageTest {
                 }, {
                         "&{lang:test}(arg:4 four args)",
                         tb(translatable("test").arguments(empty(), empty(), empty(), tb(t("four args"))))
+                }, {
+                        "&<&aPlain text\\> &[This one too](color:green)> &agreen",
+                        tb(
+                                t("&aPlain text> &[This one too](color:green)"),
+                                t(" "),
+                                t("green").color(GREEN)
+                        )
                 }
         };
     }
@@ -193,7 +200,7 @@ public class InkyMessageTest {
                 }, {
                         "&[Test inline](click:run /&{cmd} &{arg})",
                         Arrays.asList(
-                                inlinedPlaceholder("cmd", "command"),
+                                plainPlaceholder("cmd", "command"),
                                 placeholder("arg", text("argument"))
                         ),
                         tb(tb(t("Test inline")).clickEvent(ClickEvent.runCommand("/command argument")))

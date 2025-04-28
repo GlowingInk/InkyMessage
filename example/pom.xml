@@ -69,7 +69,7 @@
         </dependency>
         <dependency>
             <groupId>ink.glowing.text</groupId>
-            <artifactId>inkymessage-paper</artifactId>
+            <artifactId>inkymessage-extra-paper</artifactId>
             <version>${project.version}</version>
         </dependency>
     </dependencies>

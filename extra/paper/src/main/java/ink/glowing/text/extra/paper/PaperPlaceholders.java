@@ -5,25 +5,12 @@ import ink.glowing.text.utils.Named.NamePattern;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.Arrays;
-import java.util.List;
-
-import static ink.glowing.text.placeholder.Placeholder.inlinedPlaceholder;
 import static ink.glowing.text.placeholder.Placeholder.placeholder;
 import static net.kyori.adventure.text.Component.empty;
 import static net.kyori.adventure.text.Component.text;
 
-public class PaperPlaceholders {
-    public static @NotNull List<Placeholder> playerPlaceholders(@NotNull Player player) {
-        return Arrays.asList(
-                placeholder("display_name", player.displayName()),
-                inlinedPlaceholder("name", player.getName()),
-                inlinedPlaceholder("uuid", player.getUniqueId().toString()),
-                inlinedPlaceholder("locale", player.locale().toString()),
-                inlinedPlaceholder("locale_tag", player.locale().toLanguageTag())
-        );
-    }
-
+// TODO Statistic, ip, location, more?
+public final class PaperPlaceholders { private PaperPlaceholders() { }
     public static @NotNull Placeholder playerPlaceholder(@NotNull Player player) {
         return playerPlaceholder("player", player);
     }

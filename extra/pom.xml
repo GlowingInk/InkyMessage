@@ -12,5 +12,15 @@
     <packaging>pom</packaging>
     <modules>
         <module>paper</module>
+        <module>papi</module>
     </modules>
+
+    <dependencies>
+        <dependency>
+            <groupId>ink.glowing.text</groupId>
+            <artifactId>inkymessage</artifactId>
+            <version>0.12.0-SNAPSHOT</version>
+            <scope>provided</scope>
+        </dependency>
+    </dependencies>
 </project>

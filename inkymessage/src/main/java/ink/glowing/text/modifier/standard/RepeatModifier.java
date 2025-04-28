@@ -4,7 +4,10 @@ import ink.glowing.text.modifier.Modifier;
 import net.kyori.adventure.text.Component;
 import org.jetbrains.annotations.NotNull;
 
-final class RepeatModifier implements Modifier.Plain {
+import static net.kyori.adventure.text.Component.empty;
+import static net.kyori.adventure.text.Component.text;
+
+final class RepeatModifier implements Modifier.Plain { // TODO Should be either removed or have more control over text amount
     static final RepeatModifier INSTANCE = new RepeatModifier();
 
     @Override
@@ -15,8 +18,9 @@ final class RepeatModifier implements Modifier.Plain {
         } catch (NumberFormatException exception) {
             return text;
         }
+        if (count < 0) return empty();
         if (count == 0) return text;
-        var builder = Component.text().append(text);
+        var builder = text().append(text);
         for (int i = 0; i < count; i++) {
             builder.append(text);
         }

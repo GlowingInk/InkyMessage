@@ -17,7 +17,8 @@ import java.util.TreeSet;
 
 import static ink.glowing.text.Stringifier.stringify;
 import static ink.glowing.text.modifier.standard.StandardModifiers.standardModifiers;
-import static ink.glowing.text.placeholder.StandardPlaceholders.standardPlaceholdersMap;
+import static ink.glowing.text.placeholder.StandardPlaceholders.newlinePlaceholder;
+import static ink.glowing.text.placeholder.StandardPlaceholders.requiredPlaceholdersMap;
 import static ink.glowing.text.replace.ReplacementMatcher.replacementMatcher;
 import static ink.glowing.text.replace.StandardReplacers.urlReplacer;
 import static ink.glowing.text.symbolic.standard.StandardSymbolicStyles.notchianFormat;
@@ -27,6 +28,7 @@ import static java.util.Collections.unmodifiableMap;
 
 final class InkyMessageImpl implements InkyMessage {
     static final InkyMessage STANDARD = InkyMessage.builder()
+            .addPlaceholder(newlinePlaceholder())
             .addModifiers(standardModifiers())
             .addSymbolics(notchianFormat())
             .symbolicReset(standardResetSymbol())
@@ -58,7 +60,7 @@ final class InkyMessageImpl implements InkyMessage {
         this.replacementMatcher = replacementMatcher(replacers);
 
         Map<String, Placeholder> adjustedPlaceholders = new HashMap<>(placeholders);
-        adjustedPlaceholders.putAll(standardPlaceholdersMap());
+        adjustedPlaceholders.putAll(requiredPlaceholdersMap());
         Map<Character, SymbolicStyle> adjustedSymbolics = new HashMap<>(symbolics);
         adjustedSymbolics.put(symbolicReset.symbol(), symbolicReset);
         this.baseContext = new Context(

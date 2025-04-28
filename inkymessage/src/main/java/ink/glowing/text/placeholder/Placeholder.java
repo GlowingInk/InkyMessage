@@ -66,22 +66,22 @@ public interface Placeholder extends Ink, Named, PlaceholderFinder {
         return new PlaceholderImpl(name, resultFunct, localModifiers);
     }
 
-    static @NotNull Placeholder.Inlined inlinedPlaceholder(@NotNull String name,
-                                                           @NotNull String result) {
-        return new InlinedPlaceholderImpl(name, (v) -> result);
+    static @NotNull Placeholder.Plain plainPlaceholder(@NotNull String name,
+                                                       @NotNull String result) {
+        return new PlainPlaceholderImpl(name, (v) -> result);
     }
 
-    static @NotNull Placeholder.Inlined inlinedPlaceholder(@NotNull String name,
-                                                           @NotNull Supplier<@NotNull String> result) {
-        return new InlinedPlaceholderImpl(name, (v) -> result.get());
+    static @NotNull Placeholder.Plain plainPlaceholder(@NotNull String name,
+                                                       @NotNull Supplier<@NotNull String> result) {
+        return new PlainPlaceholderImpl(name, (v) -> result.get());
     }
 
-    static @NotNull Placeholder.Inlined inlinedPlaceholder(@NotNull String name,
-                                                           @NotNull Function<@NotNull String, @NotNull String> result) {
-        return new InlinedPlaceholderImpl(name, result);
+    static @NotNull Placeholder.Plain plainPlaceholder(@NotNull String name,
+                                                       @NotNull Function<@NotNull String, @NotNull String> result) {
+        return new PlainPlaceholderImpl(name, result);
     }
 
-    interface Inlined extends Placeholder {
+    interface Plain extends Placeholder {
         @Override
         default @NotNull Component parse(@NotNull String value) {
             return text(parseInlined(value));

@@ -101,6 +101,18 @@ final class Parser { // TODO This is a mess. Tokenizer?
                         builder.append(modifiers.apply(parseRecursive(globalIndex + 1, ']', context).asComponent()));
                         from = globalIndex--;
                     }
+
+                    case '<' -> { // &<...>
+                        appendSegment(builder, from, globalIndex, context);
+                        int initIndex = globalIndex;
+                        if (!iterateUntil('>')) {
+                            globalIndex = initIndex;
+                            continue;
+                        }
+                        String sub = unescape(textStr.substring(initIndex + 2, globalIndex));
+                        builder.append(text(sub));
+                        from = globalIndex + 1;
+                    }
                 }
             } else if (ch == untilCh && isUnescapedAt(textStr, globalIndex)) {
                 appendSegment(builder, from, globalIndex, context);
@@ -275,7 +287,7 @@ final class Parser { // TODO This is a mess. Tokenizer?
     private @NotNull String extractPlain(int from, @NotNull String until) {
         globalIndex = from;
         if (iterateUntil(until)) {
-            return textStr.substring(from, globalIndex);
+            return unescape(textStr.substring(from, globalIndex));
         }
         return "";
     }
@@ -292,8 +304,10 @@ final class Parser { // TODO This is a mess. Tokenizer?
             int lastIndex = globalIndex;
             for (;globalIndex < textLength; globalIndex++) {
                 char ch = textStr.charAt(globalIndex);
-                if (ch == ')' && isUnescapedAt(textStr, globalIndex)) {
-                    return builder.append(textStr, lastIndex, globalIndex).toString();
+                if (ch == ')') {
+                    if (isUnescapedAt(textStr, globalIndex)) {
+                        return builder.append(textStr, lastIndex, globalIndex).toString();
+                    }
                 } else if (isSpecial(ch) && isUnescapedAt(textStr, globalIndex)) {
                     int initIndex = globalIndex;
                     PlaceholderData data = parsePlaceholder(context);
@@ -314,7 +328,7 @@ final class Parser { // TODO This is a mess. Tokenizer?
             globalIndex = initIndex;
             return null;
         }
-        Placeholder placeholder = placeholders.findPlaceholder(textStr.substring(initIndex + 2, globalIndex));
+        Placeholder placeholder = placeholders.findPlaceholder(unescape(textStr.substring(initIndex + 2, globalIndex)));
         if (placeholder == null) {
             globalIndex = initIndex;
             return null;
@@ -328,7 +342,7 @@ final class Parser { // TODO This is a mess. Tokenizer?
                 globalIndex = initIndex;
                 return null;
             }
-            params = textStr.substring(paramsIndex, globalIndex);
+            params = unescape(textStr.substring(paramsIndex, globalIndex));
         }
         return new PlaceholderData(placeholder, params);
     }
