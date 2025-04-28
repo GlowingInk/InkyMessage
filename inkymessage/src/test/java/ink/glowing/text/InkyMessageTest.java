@@ -117,16 +117,15 @@ public class InkyMessageTest {
                                 translatable("test")
                         )
                 }, {
-                        "Press &{keybind:sneak} to sneak!",
+                        "&aPress &{keybind:sneak} to sneak!", // TODO This should be parsed into much simpler component
                         tb(
-                                t("Press "),
-                                keybind("sneak"),
-                                t(" to sneak!")
+                                t("Press ").color(GREEN),
+                                keybind("sneak").color(GREEN),
+                                t(" to sneak!").color(GREEN)
                         )
                 }, {
                         "&{lang:test}(arg:4 four args)",
                         tb(translatable("test").arguments(empty(), empty(), empty(), tb(t("four args"))))
-
                 }
         };
     }

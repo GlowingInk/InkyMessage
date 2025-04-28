@@ -18,6 +18,7 @@ import java.util.TreeSet;
 import java.util.function.Function;
 
 import static ink.glowing.text.InkyMessage.*;
+import static ink.glowing.text.modifier.ModifierFinder.composeModifierFinders;
 import static java.util.function.Function.identity;
 import static net.kyori.adventure.text.Component.empty;
 import static net.kyori.adventure.text.Component.text;
@@ -84,8 +85,8 @@ final class Parser { // TODO This is a mess. Tokenizer?
                         appendSegment(builder, from, initIndex, context);
                         builder.append(prepareModifiers(
                                 context,
-                                placeholder::findLocalModifier
-                        ).apply(placeholder.parse(placeholderData.params)));
+                                composeModifierFinders(context, placeholder::findLocalModifier)
+                        ).apply(placeholder.parse(placeholderData.params)).applyFallbackStyle(context.lastStyle()));
                         from = globalIndex--;
                     }
 
@@ -127,7 +128,7 @@ final class Parser { // TODO This is a mess. Tokenizer?
             if (spot != null) {
                 appendPrevious(builder, lastAppend, index, context);
                 var replacement = spot.replacement().get();
-                builder.append(replacement.style(replacement.style().merge(context.lastStyle())));
+                builder.append(replacement.applyFallbackStyle(context.lastStyle()));
                 lastAppend = spot.end();
                 index = lastAppend - 1;
                 continue;
@@ -170,7 +171,7 @@ final class Parser { // TODO This is a mess. Tokenizer?
      */
     private void appendPrevious(@NotNull TextComponent.Builder builder, int start, int end, @NotNull Context context) {
         if (start == end) return;
-        builder.append(text(unescape(textStr.substring(start, end))).style(context.lastStyle()));
+        builder.append(text(unescape(textStr.substring(start, end))).applyFallbackStyle(context.lastStyle()));
     }
 
     /**

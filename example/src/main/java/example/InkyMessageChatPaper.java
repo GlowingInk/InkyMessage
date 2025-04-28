@@ -1,4 +1,4 @@
-package ink.glowing.text.example.paper;
+package example;
 
 import ink.glowing.text.InkyMessage;
 import io.papermc.paper.event.player.AsyncChatEvent;
@@ -23,13 +23,15 @@ import static net.kyori.adventure.text.Component.text;
 
 public class InkyMessageChatPaper extends JavaPlugin implements Listener { // TODO
     private static final String FORMAT =
-            "&{sender:display_name}(click:suggest /tell &{sender:name} ) > &{message}(hover:text &{time})";
-    private static final InkyMessage CHAT_FORMATTER = inkyMessage();
+            "&{sender:display_name}(click:suggest /tell &{sender:name} ) &8>&7 &{message}(hover:text &{time})";
+    private static final DateTimeFormatter TIME_FORMAT = DateTimeFormatter.ofPattern("HH:mm:ss");
+    private static final InkyMessage CHAT_FORMATTER = inkyMessage().with(
+            placeholder("time", () -> text(LocalTime.now().format(TIME_FORMAT)))
+    );
     private static final InkyMessage PLAYER_INPUT = inkyMessage(
             'r',
             inkProvider(notchianFormat()),
-            fancyUrlReplacer(),
-            placeholder("time", () -> text(LocalTime.now().format(DateTimeFormatter.ISO_LOCAL_TIME)))
+            fancyUrlReplacer()
     );
 
     @Override
@@ -42,7 +44,14 @@ public class InkyMessageChatPaper extends JavaPlugin implements Listener { // TO
         Component result = CHAT_FORMATTER.deserialize(
                 FORMAT,
                 playerPlaceholder("sender", event.getPlayer()),
-                placeholder("message", caching(() -> PLAYER_INPUT.deserialize(event.signedMessage().message())))
+                placeholder(
+                        "message",
+                        caching(() -> PLAYER_INPUT.deserialize(
+                                event.signedMessage()
+                                        .message()
+                                        .replace("\\", "\\\\")
+                                        .replace("&[", "\\&[")
+                        )))
         );
         event.renderer(viewerUnaware((player, displayName, message) -> result));
     }

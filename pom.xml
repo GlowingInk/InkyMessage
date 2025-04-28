@@ -38,6 +38,7 @@
                         <link>https://jd.advntr.dev/api/${adventure.version}/</link>
                         <ling>https://javadoc.io/doc/org.jetbrains/annotations/${annotations.version}/</ling>
                     </links>
+                    <skip>${skip-deploy}</skip>
                 </configuration>
                 <executions>
                     <execution>

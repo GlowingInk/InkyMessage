@@ -96,11 +96,12 @@ public sealed interface InkyMessage extends ComponentSerializer<Component, Compo
      */
     @Contract(pure = true)
     static @NotNull String unescape(@NotNull String text) {
-        if (text.indexOf('\\') == -1) return text;
+        int nextIndex = text.indexOf('\\');
+        if (nextIndex == -1) return text;
         final int length = text.length();
         StringBuilder builder = new StringBuilder(length);
         for (
-                int index = 0, nextIndex = text.indexOf('\\');
+                int index = 0;
                 index < length;
                 index = nextIndex + 2, nextIndex = text.indexOf('\\', index)
         ) {
@@ -138,7 +139,9 @@ public sealed interface InkyMessage extends ComponentSerializer<Component, Compo
      */
     @Contract(pure = true)
     static boolean isUnescapedAt(@NotNull String input, int index) {
-        return !isEscapedAt(input, index);
+        boolean escaped = true;
+        while (--index > -1 && input.charAt(index) == '\\') escaped = !escaped;
+        return escaped;
     }
 
     /**
@@ -161,7 +164,10 @@ public sealed interface InkyMessage extends ComponentSerializer<Component, Compo
      */
     @Contract(pure = true)
     static boolean isNotSpecial(char ch) {
-        return !isSpecial(ch);
+        return switch (ch) {
+            case '&', '[', ']', '(', ')', '{', '}', '\\' -> false;
+            default -> true;
+        };
     }
 
     /**
@@ -273,6 +279,21 @@ public sealed interface InkyMessage extends ComponentSerializer<Component, Compo
     default @NotNull String serialize(@NotNull Component text,
                                       @NotNull Iterable<? extends @NotNull Ink> inks) {
         return toBuilder().addInks(inks).build().serialize(text);
+    }
+
+    @Contract(value = "_ -> new", pure = true)
+    default @NotNull InkyMessage with(@NotNull Ink ink) {
+        return toBuilder().addInk(ink).build();
+    }
+
+    @Contract(value = "_ -> new", pure = true)
+    default @NotNull InkyMessage with(@NotNull Ink @NotNull ... inks) {
+        return toBuilder().addInks(inks).build();
+    }
+
+    @Contract(value = "_ -> new", pure = true)
+    default @NotNull InkyMessage with(@NotNull Iterable<? extends @NotNull Ink> inks) {
+        return toBuilder().addInks(inks).build();
     }
 
     /**
