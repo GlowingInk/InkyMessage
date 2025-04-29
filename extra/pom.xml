@@ -6,7 +6,7 @@
     <parent>
         <groupId>ink.glowing.text</groupId>
         <artifactId>inkymessage-project</artifactId>
-        <version>0.12.0</version>
+        <version>0.13.0-SNAPSHOT</version>
     </parent>
     <artifactId>inkymessage-extra</artifactId>
     <packaging>pom</packaging>
@@ -19,7 +19,7 @@
         <dependency>
             <groupId>ink.glowing.text</groupId>
             <artifactId>inkymessage</artifactId>
-            <version>0.12.0</version>
+            <version>0.13.0-SNAPSHOT</version>
             <scope>provided</scope>
         </dependency>
     </dependencies>
