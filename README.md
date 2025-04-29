@@ -52,9 +52,9 @@ Add to repositories
 Add to dependencies
 ```xml
 <dependency>
-    <groupId>ink.glowing</groupId>
+    <groupId>ink.glowing.text</groupId>
     <artifactId>inkymessage</artifactId>
-    <version>0.11.0</version>
+    <version>0.12.0</version>
 </dependency>
 ```
 ### Gradle
@@ -67,6 +67,6 @@ repositories {
 }
 
 dependencies {
-    implementation("ink.glowing:inkymessage:0.11.0")
+    implementation("ink.glowing.text:inkymessage:0.12.0")
 }
 ```
