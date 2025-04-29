@@ -12,7 +12,8 @@ import org.bukkit.plugin.java.JavaPlugin;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 
-import static ink.glowing.text.Ink.inkProvider;
+import static ink.glowing.text.Ink.Provider.inkProvider;
+import static ink.glowing.text.InkyMessage.escape;
 import static ink.glowing.text.InkyMessage.inkyMessage;
 import static ink.glowing.text.extra.paper.PaperPlaceholders.playerPlaceholder;
 import static ink.glowing.text.placeholder.Placeholder.placeholder;
@@ -80,11 +81,9 @@ public class InkyMessageChatPaper extends JavaPlugin implements Listener { // TO
                 placeholder(
                         "message",
                         caching(() -> PLAYER_INPUT.deserialize(
-                                event.signedMessage()
-                                        .message()
-                                        .replace("\\", "\\\\")
-                                        .replace("&[", "\\&[")
-                        )))
+                                escape(event.signedMessage().message()).replace("\\&", "&")
+                        ))
+                )
         );
         event.renderer(viewerUnaware((player, displayName, message) -> result));
     }

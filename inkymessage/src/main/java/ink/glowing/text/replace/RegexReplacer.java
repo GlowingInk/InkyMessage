@@ -1,6 +1,7 @@
 package ink.glowing.text.replace;
 
 import net.kyori.adventure.text.Component;
+import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
@@ -10,7 +11,8 @@ import java.util.regex.MatchResult;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public record RegexReplacer(@NotNull Pattern pattern,
+@ApiStatus.Internal
+record RegexReplacer(@NotNull Pattern pattern,
                             @NotNull Function<MatchResult, Component> replacement) implements Replacer {
     @Override
     public @NotNull List<FoundSpot> findSpots(@NotNull String input) {
