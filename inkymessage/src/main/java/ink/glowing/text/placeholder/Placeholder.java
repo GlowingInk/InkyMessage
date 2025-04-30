@@ -29,7 +29,7 @@ public interface Placeholder extends Ink, Named, PlaceholderFinder {
         return name.equals(name()) ? this : null;
     }
 
-    default @Nullable Modifier<?> findLocalModifier(@NotNull String name) {
+    default @Nullable Modifier findLocalModifier(@NotNull String name) {
         return null;
     }
 

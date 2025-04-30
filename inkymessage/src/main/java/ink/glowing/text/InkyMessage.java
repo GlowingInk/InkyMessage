@@ -176,7 +176,7 @@ public sealed interface InkyMessage extends ComponentSerializer<Component, Compo
      * @return map of style modifiers
      */
     @Contract(pure = true)
-    @Unmodifiable @NotNull Map<String, Modifier<?>> modifiers();
+    @Unmodifiable @NotNull Map<String, Modifier> modifiers();
 
     /**
      * Map of placeholders that this InkyMessage instance uses.
@@ -322,7 +322,7 @@ public sealed interface InkyMessage extends ComponentSerializer<Component, Compo
     }
 
     class Builder implements AbstractBuilder<InkyMessage> {
-        private Map<String, Modifier<?>> modifiers;
+        private Map<String, Modifier> modifiers;
         private Map<String, Placeholder> placeholders;
         private Map<Character, SymbolicStyle> symbolics;
         private Collection<Replacer> replacers;
@@ -336,7 +336,7 @@ public sealed interface InkyMessage extends ComponentSerializer<Component, Compo
         }
 
         Builder(
-                @NotNull Map<String, Modifier<?>> modifiers,
+                @NotNull Map<String, Modifier> modifiers,
                 @NotNull Map<String, Placeholder> placeholders,
                 @NotNull Map<Character, SymbolicStyle> symbolics,
                 @NotNull Collection<Replacer> replacers,
@@ -353,7 +353,7 @@ public sealed interface InkyMessage extends ComponentSerializer<Component, Compo
         public @NotNull InkyMessage.Builder addInk(@NotNull Ink ink) {
             return switch (ink) {
                 case Placeholder ph -> addPlaceholder(ph);
-                case Modifier<?> mod -> addModifier(mod);
+                case Modifier mod -> addModifier(mod);
                 case Replacer rp -> addReplacer(rp);
                 case SymbolicStyle sym -> addSymbolic(sym);
                 case Ink.Provider pr -> addInks(pr.inks());
@@ -500,70 +500,70 @@ public sealed interface InkyMessage extends ComponentSerializer<Component, Compo
         }
 
         @Contract("_ -> this")
-        public @NotNull InkyMessage.Builder modifiers(@NotNull Modifier<?> @NotNull ... modifiers) {
+        public @NotNull InkyMessage.Builder modifiers(@NotNull Modifier @NotNull ... modifiers) {
             return modifiers(Arrays.asList(modifiers));
         }
 
         @Contract("_ -> this")
-        public @NotNull InkyMessage.Builder modifiers(@NotNull Collection<? extends @NotNull Modifier<?>> modifiers) {
+        public @NotNull InkyMessage.Builder modifiers(@NotNull Collection<? extends @NotNull Modifier> modifiers) {
             this.modifiers = new HashMap<>(modifiers.size());
             return addModifiers(modifiers);
         }
 
         @Contract("_ -> this")
-        public @NotNull InkyMessage.Builder modifiers(@NotNull Iterable<? extends @NotNull Modifier<?>> modifiers) {
+        public @NotNull InkyMessage.Builder modifiers(@NotNull Iterable<? extends @NotNull Modifier> modifiers) {
             this.modifiers = new HashMap<>();
             return addModifiers(modifiers);
         }
 
         @Contract("_ -> this")
-        public @NotNull InkyMessage.Builder modifiers(@NotNull Map<String, Modifier<?>> modifiers) {
+        public @NotNull InkyMessage.Builder modifiers(@NotNull Map<String, Modifier> modifiers) {
             this.modifiers = new HashMap<>(modifiers);
             return this;
         }
 
         @Contract("_ -> this")
-        public @NotNull InkyMessage.Builder addModifier(@NotNull Modifier<?> modifier) {
+        public @NotNull InkyMessage.Builder addModifier(@NotNull Modifier modifier) {
             this.modifiers.put(modifier.name(), modifier);
             return this;
         }
 
         @Contract("_ -> this")
-        public @NotNull InkyMessage.Builder addModifiers(@NotNull Modifier<?> @NotNull ... modifiers) {
+        public @NotNull InkyMessage.Builder addModifiers(@NotNull Modifier @NotNull ... modifiers) {
             return addModifiers(Arrays.asList(modifiers));
         }
 
         @Contract("_ -> this")
-        public @NotNull InkyMessage.Builder addModifiers(@NotNull Iterable<? extends @NotNull Modifier<?>> modifiers) {
+        public @NotNull InkyMessage.Builder addModifiers(@NotNull Iterable<? extends @NotNull Modifier> modifiers) {
             for (var modifier : modifiers) addModifier(modifier);
             return this;
         }
 
         @Contract("_ -> this")
-        public @NotNull InkyMessage.Builder addModifiers(@NotNull Map<String, Modifier<?>> modifiers) {
+        public @NotNull InkyMessage.Builder addModifiers(@NotNull Map<String, Modifier> modifiers) {
             this.modifiers.putAll(modifiers);
             return this;
         }
 
         @Contract("_ -> this")
-        public @NotNull InkyMessage.Builder removeModifier(@NotNull Modifier<?> modifier) {
+        public @NotNull InkyMessage.Builder removeModifier(@NotNull Modifier modifier) {
             this.modifiers.put(modifier.name(), modifier);
             return this;
         }
 
         @Contract("_ -> this")
-        public @NotNull InkyMessage.Builder removeModifiers(@NotNull Modifier<?> @NotNull ... modifiers) {
+        public @NotNull InkyMessage.Builder removeModifiers(@NotNull Modifier @NotNull ... modifiers) {
             return removeModifiers(Arrays.asList(modifiers));
         }
 
         @Contract("_ -> this")
-        public @NotNull InkyMessage.Builder removeModifiers(@NotNull Iterable<? extends @NotNull Modifier<?>> modifiers) {
+        public @NotNull InkyMessage.Builder removeModifiers(@NotNull Iterable<? extends @NotNull Modifier> modifiers) {
             for (var modifier : modifiers) removeModifier(modifier);
             return this;
         }
 
         @Contract("_ -> this")
-        public @NotNull InkyMessage.Builder removeModifiers(@NotNull Map<String, Modifier<?>> modifiers) {
+        public @NotNull InkyMessage.Builder removeModifiers(@NotNull Map<String, Modifier> modifiers) {
             this.modifiers.putAll(modifiers);
             return this;
         }

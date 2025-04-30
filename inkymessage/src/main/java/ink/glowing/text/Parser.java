@@ -247,34 +247,139 @@ final class Parser { // TODO This is a mess. Tokenizer?
             return comp;
         }
         String modifierStr = extractPlain(from + 1, ":) ");
-        Modifier<?> modifier = modifierFinder.findModifier(modifierStr);
+        Modifier modifier = modifierFinder.findModifier(modifierStr);
         if (modifier == null) {
             globalIndex = from;
             return comp;
         }
         from = globalIndex + 1;
-        if (globalIndex >= textLength || textStr.charAt(globalIndex) == ')') {
-            if (modifier instanceof Modifier.Plain plainModifier) {
-                comp = comp.andThen(prev -> plainModifier.modify(prev, "", ""));
-            } else if (modifier instanceof Modifier.Complex complexModifier) {
-                comp = comp.andThen(prev -> complexModifier.modify(prev, "", empty()));
+
+        var input = prepareInput(from, context);
+        comp = comp.andThen(modifier.prepareModify(input));
+        return prepareModifiers(comp, context, modifierFinder);
+    }
+
+    private Modifier.Tokens prepareInput(int from, Context context) {
+        if (globalIndex >= textLength) return EmptyParametersImpl.FULLY_EMPTY;
+        if (textStr.charAt(globalIndex) != ')' && textStr.charAt(globalIndex) == ':') {
+            String params = extractPlain(from, " )");
+            globalIndex = from + params.length();
+            if (textStr.charAt(globalIndex) == ')') {
+                return new EmptyParametersImpl(params);
+            } else {
+                return new ParametersImpl(params, context);
             }
         } else {
-            String params = "";
-            if (textStr.charAt(globalIndex) == ':') {
-                params = extractPlain(from, " )");
-                from += params.length() + 1;
-            }
-            String finalParams = params;
-            if (modifier instanceof Modifier.Plain plainModifier) {
-                String value = extractPlainModifierValue(from, context);
-                comp = comp.andThen(prev -> plainModifier.modify(prev, finalParams, unescape(value)));
-            } else if (modifier instanceof Modifier.Complex complexModifier) {
-                Component value = parseRecursive(from, ')', context.stylelessCopy()).asComponent();
-                comp = comp.andThen(prev -> complexModifier.modify(prev, finalParams, value));
-            }
+            return new ParametersImpl("", context);
         }
-        return prepareModifiers(comp, context, modifierFinder);
+    }
+
+    private record EmptyParametersImpl(@NotNull String parameter) implements Modifier.Tokens {
+        static final Modifier.Tokens FULLY_EMPTY = new EmptyParametersImpl("");
+
+        @Override
+        public @Nullable String nextString() {
+            return null;
+        }
+
+        @Override
+        public @NotNull String remainingString() {
+            return "";
+        }
+
+        @Override
+        public @Nullable Component nextComponent() {
+            return null;
+        }
+
+        @Override
+        public @NotNull Component remainingComponent() {
+            return empty();
+        }
+
+        @Override
+        public boolean hasMore() {
+            return false;
+        }
+    }
+
+    private class ParametersImpl implements Modifier.Tokens {
+        final String param;
+        final Context context;
+        boolean more;
+
+        ParametersImpl(String param, Context context) {
+            this.param = param;
+            this.context = context;
+            this.more = true;
+
+            globalIndex++;
+        }
+
+        @Override
+        public @NotNull String parameter() {
+            return param;
+        }
+
+        @Override
+        public @Nullable String nextString() {
+            if (!more) return null;
+            int from = textStr.charAt(globalIndex) == '&' && globalIndex + 1 < textLength && textStr.charAt(globalIndex + 1) == '<'
+                    ? globalIndex + 1
+                    : globalIndex;
+            if (from >= textLength || textStr.charAt(from) == ')') {
+                char result = textStr.charAt(globalIndex);
+                globalIndex = from;
+                more = false;
+                return Character.toString(result);
+            }
+            char until = textStr.charAt(from) == '<'
+                    ? '>'
+                    : ' ';
+            return postCheck(extractPlainModifierValue(from, until, context));
+        }
+
+        @Override
+        public @NotNull String remainingString() {
+            if (!more || globalIndex >= textLength) return "";
+            return postCheck(extractPlainModifierValue(globalIndex, ')', context));
+        }
+
+        @Override
+        public @Nullable Component nextComponent() {
+            if (!more) return null;
+            int from = textStr.charAt(globalIndex) == '&' && globalIndex + 1 < textLength && textStr.charAt(globalIndex + 1) == '['
+                    ? globalIndex + 1
+                    : globalIndex;
+            if (from >= textLength || textStr.charAt(from) == ')') {
+                char result = textStr.charAt(globalIndex);
+                globalIndex = from;
+                more = false;
+                return text(result);
+            }
+            char until = textStr.charAt(from) == '['
+                    ? ']'
+                    : ' ';
+            return postCheck(parseRecursive(from, until, context.stylelessCopy()).asComponent());
+        }
+
+        @Override
+        public @NotNull Component remainingComponent() {
+            if (!more || globalIndex >= textLength) return empty();
+            return postCheck(parseRecursive(globalIndex, ')', context.stylelessCopy()).asComponent());
+        }
+
+        @Override
+        public boolean hasMore() {
+            return more;
+        }
+
+        private <T> T postCheck(T t) {
+            if (textStr.charAt(globalIndex) != ' ') {
+                more = false;
+            }
+            return t;
+        }
     }
 
     /**
@@ -297,14 +402,14 @@ final class Parser { // TODO This is a mess. Tokenizer?
      * @param from start index for extraction
      * @return extracted value string
      */
-    private @NotNull String extractPlainModifierValue(int from, @NotNull Context context) {
+    private @NotNull String extractPlainModifierValue(int from, char until, @NotNull Context context) {
         if (globalIndex != textLength && textStr.charAt(globalIndex) != ')') {
             StringBuilder builder = new StringBuilder();
             globalIndex = from;
             int lastIndex = globalIndex;
             for (;globalIndex < textLength; globalIndex++) {
                 char ch = textStr.charAt(globalIndex);
-                if (ch == ')') {
+                if (ch == until) {
                     if (isUnescapedAt(textStr, globalIndex)) {
                         return builder.append(textStr, lastIndex, globalIndex).toString();
                     }

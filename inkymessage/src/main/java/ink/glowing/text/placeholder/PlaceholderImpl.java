@@ -19,7 +19,7 @@ record PlaceholderImpl(
     }
 
     @Override
-    public @Nullable Modifier<?> findLocalModifier(@NotNull String modifierName) {
+    public @Nullable Modifier findLocalModifier(@NotNull String modifierName) {
         return modifierFinder.findModifier(modifierName);
     }
 }

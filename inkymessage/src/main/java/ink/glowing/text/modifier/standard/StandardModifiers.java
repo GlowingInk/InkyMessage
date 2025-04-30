@@ -21,7 +21,7 @@ import static java.util.function.Function.identity;
 import static net.kyori.adventure.text.event.ClickEvent.callback;
 
 public final class StandardModifiers { private StandardModifiers() {}
-    private static final Collection<Modifier<?>> STANDARD = Set.of(
+    private static final Collection<Modifier> STANDARD = Set.of(
             clickModifier(),
             colorModifier(),
             decorModifier(),
@@ -30,7 +30,7 @@ public final class StandardModifiers { private StandardModifiers() {}
             httpModifier(),
             httpsModifier()
     );
-    private static final Map<String, Modifier<?>> STANDARD_MAP = Collections.unmodifiableMap(
+    private static final Map<String, Modifier> STANDARD_MAP = Collections.unmodifiableMap(
             STANDARD.stream().collect(Collectors.toMap(Named::name, identity()))
     );
 
@@ -44,7 +44,7 @@ public final class StandardModifiers { private StandardModifiers() {}
      * @see StandardModifiers#httpModifier()
      * @see StandardModifiers#httpsModifier()
      */
-    public static @NotNull @Unmodifiable Collection<Modifier<?>> standardModifiers() {
+    public static @NotNull @Unmodifiable Collection<Modifier> standardModifiers() {
         return STANDARD;
     }
 
@@ -52,7 +52,7 @@ public final class StandardModifiers { private StandardModifiers() {}
      * A map of modifiers that are used by the standard InkyMessage instance.
      * @see StandardModifiers#standardModifiers()
      */
-    public static @NotNull @Unmodifiable Map<String, Modifier<?>> standardModifiersMap() {
+    public static @NotNull @Unmodifiable Map<String, Modifier> standardModifiersMap() {
         return STANDARD_MAP;
     }
 

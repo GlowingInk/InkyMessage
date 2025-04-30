@@ -35,7 +35,7 @@ final class InkyMessageImpl implements InkyMessage {
             .addReplacer(urlReplacer())
             .build();
     
-    private final Map<String, Modifier<?>> modifiers;
+    private final Map<String, Modifier> modifiers;
     private final Map<String, Placeholder> placeholders;
     private final Map<Character, SymbolicStyle> symbolics;
     private final Collection<Replacer> replacers;
@@ -45,7 +45,7 @@ final class InkyMessageImpl implements InkyMessage {
     private final ReplacementMatcher replacementMatcher;
 
     InkyMessageImpl(
-            @NotNull Map<String, Modifier<?>> modifiers,
+            @NotNull Map<String, Modifier> modifiers,
             @NotNull Map<String, Placeholder> placeholders,
             @NotNull Map<Character, SymbolicStyle> symbolics,
             @NotNull Collection<Replacer> replacers,
@@ -74,12 +74,12 @@ final class InkyMessageImpl implements InkyMessage {
     }
 
     @Override
-    public @Unmodifiable @NotNull Map<String, Modifier<?>> modifiers() {
+    public @Unmodifiable @NotNull Map<String, Modifier> modifiers() {
         return modifiers;
     }
 
     @Override
-    public @Nullable Modifier<?> findModifier(@NotNull String name) {
+    public @Nullable Modifier findModifier(@NotNull String name) {
         return modifiers.get(name);
     }
 

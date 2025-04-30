@@ -9,7 +9,7 @@ import java.util.*;
 @FunctionalInterface
 public interface ModifierFinder {
     @Contract(pure = true)
-    @Nullable Modifier<?> findModifier(@NotNull String name);
+    @Nullable Modifier findModifier(@NotNull String name);
 
     default @NotNull ModifierFinder thenModifierFinder(@NotNull ModifierFinder modifierFinder) {
         return (name) -> {
@@ -18,31 +18,31 @@ public interface ModifierFinder {
         };
     }
 
-    static @NotNull ModifierFinder modifierFinder(@NotNull Modifier<?> @NotNull ... modifiers) {
+    static @NotNull ModifierFinder modifierFinder(@NotNull Modifier @NotNull ... modifiers) {
         return modifierFinder(Arrays.asList(modifiers));
     }
 
-    static @NotNull ModifierFinder modifierFinder(@NotNull SequencedCollection<? extends @NotNull Modifier<?>> modifiers) {
+    static @NotNull ModifierFinder modifierFinder(@NotNull SequencedCollection<? extends @NotNull Modifier> modifiers) {
         return switch (modifiers.size()) {
             case 0 -> (name) -> null;
             case 1 -> modifiers.getFirst();
-            default -> modifierFinder((Collection<? extends Modifier<?>>) modifiers);
+            default -> modifierFinder((Collection<? extends Modifier>) modifiers);
         };
     }
 
-    static @NotNull ModifierFinder modifierFinder(@NotNull Collection<? extends @NotNull Modifier<?>> modifiers) {
-        Map<String, Modifier<?>> modifiersMap = new HashMap<>(modifiers.size());
+    static @NotNull ModifierFinder modifierFinder(@NotNull Collection<? extends @NotNull Modifier> modifiers) {
+        Map<String, Modifier> modifiersMap = new HashMap<>(modifiers.size());
         for (var modifier : modifiers) modifiersMap.put(modifier.name(), modifier);
         return modifiersMap::get;
     }
 
-    static @NotNull ModifierFinder modifierFinder(@NotNull Iterable<? extends @NotNull Modifier<?>> modifiers) {
-        Map<String, Modifier<?>> modifiersMap = new HashMap<>();
+    static @NotNull ModifierFinder modifierFinder(@NotNull Iterable<? extends @NotNull Modifier> modifiers) {
+        Map<String, Modifier> modifiersMap = new HashMap<>();
         for (var modifier : modifiers) modifiersMap.put(modifier.name(), modifier);
         return modifiersMap::get;
     }
 
-    static @NotNull ModifierFinder modifierFinder(@NotNull Map<String, Modifier<?>> modifiersMap) {
+    static @NotNull ModifierFinder modifierFinder(@NotNull Map<String, Modifier> modifiersMap) {
         return modifiersMap::get;
     }
 

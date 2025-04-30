@@ -8,7 +8,9 @@ import ink.glowing.text.replace.ReplacementMatcher;
 import ink.glowing.text.replace.Replacer;
 import ink.glowing.text.symbolic.SymbolicStyle;
 import ink.glowing.text.symbolic.SymbolicStyleFinder;
+import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.Style;
+import net.kyori.adventure.text.serializer.ComponentDecoder;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
@@ -19,8 +21,8 @@ import java.util.*;
 import static ink.glowing.text.replace.ReplacementMatcher.composeReplacementMatchers;
 import static ink.glowing.text.replace.ReplacementMatcher.replacementMatcher;
 
-@ApiStatus.Internal
-final class Context implements ModifierFinder, PlaceholderFinder, SymbolicStyleFinder, ReplacementMatcher {
+final class Context implements ModifierFinder, PlaceholderFinder, SymbolicStyleFinder, ReplacementMatcher,
+        ComponentDecoder<String, Component> {
     private final InkyMessage inkyMessage;
 
     private final ModifierFinder modifiers;
@@ -49,22 +51,30 @@ final class Context implements ModifierFinder, PlaceholderFinder, SymbolicStyleF
         this.lastStyle = Style.empty();
     }
 
+    @Override
+    public @NotNull Component deserialize(@NotNull String textStr) {
+        return Parser.parse(textStr, stylelessCopy());
+    }
+
+    @ApiStatus.Internal
     @Contract(pure = true, value = "-> new")
-    public @NotNull Context stylelessCopy() {
+    @NotNull Context stylelessCopy() {
         return new Context(inkyMessage, modifiers, placeholders, symbolics, replacers, symbolicReset);
     }
 
+    @ApiStatus.Internal
     @Contract(pure = true)
-    public @NotNull Style lastStyle() {
+    @NotNull Style lastStyle() {
         return lastStyle;
     }
 
-    public void lastStyle(@NotNull Style lastStyle) {
+    @ApiStatus.Internal
+    void lastStyle(@NotNull Style lastStyle) {
         this.lastStyle = lastStyle;
     }
 
     @Override
-    public @Nullable Modifier<?> findModifier(@NotNull String name) {
+    public @Nullable Modifier findModifier(@NotNull String name) {
         return modifiers.findModifier(name);
     }
 
@@ -100,7 +110,7 @@ final class Context implements ModifierFinder, PlaceholderFinder, SymbolicStyleF
         var replacers = this.replacers;
 
         switch (ink) {
-            case Modifier<?> mod    -> modifiers = modifiers.thenModifierFinder(mod);
+            case Modifier mod    -> modifiers = modifiers.thenModifierFinder(mod);
             case Placeholder ph     -> placeholders = placeholders.thenPlaceholderFinder(ph);
             case SymbolicStyle sym  -> symbolics = symbolics.thenSymbloicStyleFinder(sym);
             case Replacer rep       -> replacers = composeReplacementMatchers(rep, replacers);
@@ -120,7 +130,7 @@ final class Context implements ModifierFinder, PlaceholderFinder, SymbolicStyleF
         var symbolics = this.symbolics;
         var replacers = this.replacers;
 
-        var modifiersMap = new HashMap<String, Modifier<?>>();
+        var modifiersMap = new HashMap<String, Modifier>();
         var placeholdersMap = new HashMap<String, Placeholder>();
         var symbolicsMap = new HashMap<Character, SymbolicStyle>();
         var replacersSet = new HashSet<Replacer>();
@@ -144,13 +154,13 @@ final class Context implements ModifierFinder, PlaceholderFinder, SymbolicStyleF
     }
 
     private static void with(@NotNull Iterable<? extends @NotNull Ink> inks,
-                             @NotNull Map<String, Modifier<?>> modifiersMap,
+                             @NotNull Map<String, Modifier> modifiersMap,
                              @NotNull Map<String, Placeholder> placeholdersMap,
                              @NotNull Map<Character, SymbolicStyle> symbolicsMap,
                              @NotNull Set<Replacer> replacersSet) {
         for (Ink ink : inks) {
             switch (ink) {
-                case Modifier<?> mod -> modifiersMap.put(mod.name(), mod);
+                case Modifier mod -> modifiersMap.put(mod.name(), mod);
                 case Placeholder ph -> placeholdersMap.put(ph.name(), ph);
                 case SymbolicStyle sym -> symbolicsMap.put(sym.symbol(), sym);
                 case Replacer rep -> replacersSet.add(rep);
