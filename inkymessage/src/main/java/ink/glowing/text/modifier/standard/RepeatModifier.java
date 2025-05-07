@@ -7,8 +7,8 @@ import org.jetbrains.annotations.NotNull;
 import static net.kyori.adventure.text.Component.empty;
 import static net.kyori.adventure.text.Component.text;
 
-final class RepeatModifier implements Modifier.Plain { // TODO Should be either removed or have more control over text amount
-    static final RepeatModifier INSTANCE = new RepeatModifier();
+enum RepeatModifier implements Modifier.Plain { // TODO Should be either removed or have more control over text amount
+    INSTANCE;
 
     @Override
     public @NotNull Component modify(@NotNull Component text, @NotNull String param, @NotNull String value) {
@@ -28,7 +28,7 @@ final class RepeatModifier implements Modifier.Plain { // TODO Should be either 
     }
 
     @Override
-    public @NotNull @NamePattern String name() {
+    public @NotNull @LabelPattern String label() {
         return "repeat";
     }
 }

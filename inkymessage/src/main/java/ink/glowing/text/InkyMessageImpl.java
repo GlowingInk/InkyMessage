@@ -79,8 +79,8 @@ final class InkyMessageImpl implements InkyMessage {
     }
 
     @Override
-    public @Nullable Modifier findModifier(@NotNull String name) {
-        return modifiers.get(name);
+    public @Nullable Modifier findModifier(@NotNull String label) {
+        return modifiers.get(label);
     }
 
     @Override
@@ -89,8 +89,8 @@ final class InkyMessageImpl implements InkyMessage {
     }
 
     @Override
-    public @Nullable Placeholder findPlaceholder(@NotNull String name) {
-        return placeholders.get(name);
+    public @Nullable Placeholder findPlaceholder(@NotNull String label) {
+        return placeholders.get(label);
     }
 
     @Override
@@ -116,6 +116,11 @@ final class InkyMessageImpl implements InkyMessage {
     @Override
     public @NotNull SymbolicStyle symbolicReset() {
         return symbolicReset;
+    }
+
+    @Override
+    public @NotNull Context baseContext() {
+        return baseContext;
     }
 
     @Override
@@ -149,7 +154,7 @@ final class InkyMessageImpl implements InkyMessage {
      */
     private static @NotNull Component deserialize(@NotNull String inputText,
                                                   @NotNull Context context) {
-        return Parser.parse(inputText, context.stylelessCopy());
+        return Parser.parse(inputText, context);
     }
 
     @Override

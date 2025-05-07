@@ -7,8 +7,8 @@ import org.intellij.lang.annotations.Subst;
 import org.jetbrains.annotations.NotNull;
 
 final class UrlModifier implements Modifier.Plain {
-    static final Modifier.Plain HTTP = new UrlModifier("http");
-    static final Modifier.Plain HTTPS = new UrlModifier("https");
+    static final Modifier HTTP = new UrlModifier("http");
+    static final Modifier HTTPS = new UrlModifier("https");
 
     private final @Subst("ms-web+lmao3") String scheme;
     
@@ -23,7 +23,7 @@ final class UrlModifier implements Modifier.Plain {
     }
 
     @Override
-    public @NotNull @NamePattern String name() {
+    public @NotNull @LabelPattern String label() {
         return scheme;
     }
 }

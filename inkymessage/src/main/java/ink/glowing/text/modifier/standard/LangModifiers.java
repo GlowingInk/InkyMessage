@@ -1,23 +1,56 @@
 package ink.glowing.text.modifier.standard;
 
+import ink.glowing.text.Context;
 import ink.glowing.text.InkyMessage;
 import ink.glowing.text.modifier.Modifier;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TranslatableComponent;
 import net.kyori.adventure.text.TranslationArgument;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.TestOnly;
 import org.jetbrains.annotations.Unmodifiable;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.UnaryOperator;
 
 import static net.kyori.adventure.text.Component.empty;
 import static net.kyori.adventure.text.TranslationArgument.component;
 
-final class LangModifiers { private LangModifiers() {}
-    static class ArgModifier implements Modifier.Complex { private ArgModifier() {}
+final class LangModifiers {
+    private LangModifiers() {}
+
+    @TestOnly
+    enum ArgsModifier implements Modifier { // TODO Merge with Arg
+        INSTANCE;
+
+        @Override
+        public @NotNull UnaryOperator<Component> prepareModification(@NotNull Arguments arguments, @NotNull Context context) {
+            return text -> {
+                if (!(text instanceof TranslatableComponent langText)) return text;
+                List<TranslationArgument> translationArgs = new ArrayList<>(arguments.list().size());
+                for (var arg : arguments.list()) {
+                    translationArgs.add(component(arg.asComponent()));
+                }
+                return langText.arguments(translationArgs);
+            };
+        }
+
+        @Override
+        public boolean unknownArgumentAsString(@NotNull String parameter) {
+            return false;
+        }
+
+        @Override
+        public @NotNull String label() {
+            return "args";
+        }
+    }
+
+    enum ArgModifier implements Modifier.Complex {
+        INSTANCE;
+
         private static final TranslationArgument EMPTY_ARG = component(empty());
-        static final ArgModifier INSTANCE = new ArgModifier();
 
         @Override
         public @NotNull Component modify(@NotNull Component text, @NotNull String param, @NotNull Component value) {
@@ -49,7 +82,7 @@ final class LangModifiers { private LangModifiers() {}
         }
 
         @Override
-        public @NotNull @Unmodifiable List<String> read(@NotNull Component text, @NotNull InkyMessage inkyMessage) {
+        public @NotNull @Unmodifiable List<String> readModifier(@NotNull Component text, @NotNull InkyMessage inkyMessage) {
             if (text instanceof TranslatableComponent lang) {
                 List<String> argsStr = new ArrayList<>(0);
                 for (var arg : lang.arguments()) {
@@ -61,13 +94,13 @@ final class LangModifiers { private LangModifiers() {}
         }
 
         @Override
-        public @NotNull @NamePattern String name() {
+        public @NotNull @LabelPattern String label() {
             return "arg";
         }
     }
 
-    static class FallbackModifier implements Modifier.Plain { private FallbackModifier() {}
-        static final FallbackModifier INSTANCE = new FallbackModifier();
+    enum FallbackModifier implements Modifier.Plain {
+        INSTANCE;
 
         @Override
         public @NotNull Component modify(@NotNull Component text, @NotNull String param, @NotNull String value) {
@@ -77,14 +110,14 @@ final class LangModifiers { private LangModifiers() {}
         }
 
         @Override
-        public @NotNull @Unmodifiable List<String> read(@NotNull Component text, @NotNull InkyMessage inkyMessage) {
+        public @NotNull @Unmodifiable List<String> readModifier(@NotNull Component text, @NotNull InkyMessage inkyMessage) {
             return text instanceof TranslatableComponent lang && lang.fallback() != null
                     ? List.of(asFormatted("", lang.fallback()))
                     : List.of();
         }
 
         @Override
-        public @NotNull @NamePattern String name() {
+        public @NotNull @LabelPattern String label() {
             return "fallback";
         }
     }

@@ -9,8 +9,8 @@ import org.jetbrains.annotations.Unmodifiable;
 
 import java.util.List;
 
-final class FontModifier implements Modifier.Plain { private FontModifier() {}
-    static final FontModifier INSTANCE = new FontModifier();
+enum FontModifier implements Modifier.Plain {
+    INSTANCE;
 
     @Override
     public @NotNull Component modify(@NotNull Component text, @NotNull String param, @NotNull String value) {
@@ -19,7 +19,7 @@ final class FontModifier implements Modifier.Plain { private FontModifier() {}
     }
 
     @Override
-    public @NotNull @Unmodifiable List<String> read(@NotNull Component text, @NotNull InkyMessage inkyMessage) {
+    public @NotNull @Unmodifiable List<String> readModifier(@NotNull Component text, @NotNull InkyMessage inkyMessage) {
         return text.font() == null
                 ? List.of()
                 : List.of(asFormatted(text.font().asString(), ""));
@@ -27,11 +27,11 @@ final class FontModifier implements Modifier.Plain { private FontModifier() {}
 
     @Override
     public @NotNull String asFormatted(@NotNull String param, @NotNull String value) {
-        return name() + ":" + param;
+        return label() + ":" + param;
     }
 
     @Override
-    public @NotNull @NamePattern String name() {
+    public @NotNull @LabelPattern String label() {
         return "font";
     }
 }

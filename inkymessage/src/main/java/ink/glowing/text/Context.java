@@ -9,9 +9,7 @@ import ink.glowing.text.replace.Replacer;
 import ink.glowing.text.symbolic.SymbolicStyle;
 import ink.glowing.text.symbolic.SymbolicStyleFinder;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.Style;
 import net.kyori.adventure.text.serializer.ComponentDecoder;
-import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -21,7 +19,7 @@ import java.util.*;
 import static ink.glowing.text.replace.ReplacementMatcher.composeReplacementMatchers;
 import static ink.glowing.text.replace.ReplacementMatcher.replacementMatcher;
 
-final class Context implements ModifierFinder, PlaceholderFinder, SymbolicStyleFinder, ReplacementMatcher,
+public final class Context implements ModifierFinder, PlaceholderFinder, SymbolicStyleFinder, ReplacementMatcher,
         ComponentDecoder<String, Component> {
     private final InkyMessage inkyMessage;
 
@@ -30,8 +28,6 @@ final class Context implements ModifierFinder, PlaceholderFinder, SymbolicStyleF
     private final SymbolicStyleFinder symbolics;
     private final ReplacementMatcher replacers;
     private final SymbolicStyle symbolicReset;
-
-    private Style lastStyle;
 
     Context(
             @NotNull InkyMessage inkyMessage,
@@ -47,40 +43,21 @@ final class Context implements ModifierFinder, PlaceholderFinder, SymbolicStyleF
         this.symbolics = symbolics;
         this.replacers = replacers;
         this.symbolicReset = symbolicReset;
-
-        this.lastStyle = Style.empty();
     }
 
     @Override
     public @NotNull Component deserialize(@NotNull String textStr) {
-        return Parser.parse(textStr, stylelessCopy());
-    }
-
-    @ApiStatus.Internal
-    @Contract(pure = true, value = "-> new")
-    @NotNull Context stylelessCopy() {
-        return new Context(inkyMessage, modifiers, placeholders, symbolics, replacers, symbolicReset);
-    }
-
-    @ApiStatus.Internal
-    @Contract(pure = true)
-    @NotNull Style lastStyle() {
-        return lastStyle;
-    }
-
-    @ApiStatus.Internal
-    void lastStyle(@NotNull Style lastStyle) {
-        this.lastStyle = lastStyle;
+        return Parser.parse(textStr, this);
     }
 
     @Override
-    public @Nullable Modifier findModifier(@NotNull String name) {
-        return modifiers.findModifier(name);
+    public @Nullable Modifier findModifier(@NotNull String label) {
+        return modifiers.findModifier(label);
     }
 
     @Override
-    public @Nullable Placeholder findPlaceholder(@NotNull String name) {
-        return placeholders.findPlaceholder(name);
+    public @Nullable Placeholder findPlaceholder(@NotNull String label) {
+        return placeholders.findPlaceholder(label);
     }
 
     @Override
@@ -160,8 +137,8 @@ final class Context implements ModifierFinder, PlaceholderFinder, SymbolicStyleF
                              @NotNull Set<Replacer> replacersSet) {
         for (Ink ink : inks) {
             switch (ink) {
-                case Modifier mod -> modifiersMap.put(mod.name(), mod);
-                case Placeholder ph -> placeholdersMap.put(ph.name(), ph);
+                case Modifier mod -> modifiersMap.put(mod.label(), mod);
+                case Placeholder ph -> placeholdersMap.put(ph.label(), ph);
                 case SymbolicStyle sym -> symbolicsMap.put(sym.symbol(), sym);
                 case Replacer rep -> replacersSet.add(rep);
                 case Ink.Provider pr -> with(pr.inks(), modifiersMap, placeholdersMap, symbolicsMap, replacersSet);

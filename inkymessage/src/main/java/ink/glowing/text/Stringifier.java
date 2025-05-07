@@ -79,10 +79,10 @@ final class Stringifier { private Stringifier() {}
                         .append("&{lang:")
                         .append(escape(translatable.key()))
                         .append("}");
-                for (var modifier : langArgModifier().read(translatable, inkyMessage)) {
+                for (var modifier : langArgModifier().readModifier(translatable, inkyMessage)) {
                     builder.append(modifier);
                 }
-                for (var modifier : langFallbackModifier().read(translatable, inkyMessage)) {
+                for (var modifier : langFallbackModifier().readModifier(translatable, inkyMessage)) {
                     builder.append(modifier);
                 }
             }
@@ -104,7 +104,7 @@ final class Stringifier { private Stringifier() {}
                         .append("&{selector:")
                         .append(escape(selector.pattern()))
                         .append('}');
-                for (var modifier : selectorSeparatorModifier().read(selector, inkyMessage)) {
+                for (var modifier : selectorSeparatorModifier().readModifier(selector, inkyMessage)) {
                     builder.append(modifier);
                 }
             }
@@ -131,7 +131,7 @@ final class Stringifier { private Stringifier() {}
     private static @NotNull List<String> pullModifiers(@NotNull Component text, @NotNull InkyMessage inkyMessage) {
         List<String> modifiers = new ArrayList<>();
         for (var modifier : inkyMessage.modifiers().values()) {
-            modifiers.addAll(modifier.read(text, inkyMessage));
+            modifiers.addAll(modifier.readModifier(text, inkyMessage));
         }
         return modifiers;
     }

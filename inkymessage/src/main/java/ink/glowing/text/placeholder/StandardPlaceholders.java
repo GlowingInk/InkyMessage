@@ -1,6 +1,6 @@
 package ink.glowing.text.placeholder;
 
-import ink.glowing.text.utils.Named;
+import ink.glowing.text.utils.Labeled;
 import net.kyori.adventure.text.Component;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Unmodifiable;
@@ -21,7 +21,9 @@ import static net.kyori.adventure.text.Component.*;
  * lang, keyboard, score and selector, ATM, are included in the serializer by default - there's no need to add them.
  * But it also means that it's impossible to remove them. TODO
  */
-public final class StandardPlaceholders { private StandardPlaceholders() {}
+public final class StandardPlaceholders {
+    private StandardPlaceholders() {}
+
     private static final Placeholder LANG = placeholder(
             "lang",
             value -> translatable(value),
@@ -48,12 +50,12 @@ public final class StandardPlaceholders { private StandardPlaceholders() {}
             LANG, KEYBIND, SCORE, SELECTOR
     );
     private static final Map<String, Placeholder> REQUIRED_MAP = Collections.unmodifiableMap(
-            REQUIRED.stream().collect(Collectors.toMap(Named::name, identity()))
+            REQUIRED.stream().collect(Collectors.toMap(Labeled::label, identity()))
     );
 
     private static final Set<Placeholder> STANDARD = Set.of(NEWLINE);
     private static final Map<String, Placeholder> STANDARD_MAP = Collections.unmodifiableMap(
-            STANDARD.stream().collect(Collectors.toMap(Named::name, identity()))
+            STANDARD.stream().collect(Collectors.toMap(Labeled::label, identity()))
     );
 
     public static @NotNull @Unmodifiable Collection<@NotNull Placeholder> requiredPlaceholders() {

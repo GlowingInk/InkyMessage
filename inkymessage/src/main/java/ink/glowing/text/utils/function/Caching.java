@@ -7,9 +7,15 @@ import java.util.Map;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
-public final class Caching { private Caching() {}
+public final class Caching {
+    private Caching() {}
+
     public static <T, R> @NotNull Function<T, R> caching(@NotNull Function<T, R> function) {
-        return new CFunction<>(function);
+        return new CFunction<>(function, new HashMap<>());
+    }
+
+    public static <T, R> @NotNull Function<T, R> caching(@NotNull Function<T, R> function, @NotNull Map<T, R> cacheMap) {
+        return new CFunction<>(function, cacheMap);
     }
 
     public static <R> @NotNull Supplier<R> caching(@NotNull Supplier<R> supplier) {
@@ -17,12 +23,12 @@ public final class Caching { private Caching() {}
     }
 
     private static final class CFunction<T, R> implements Function<T, R> {
-        private final Map<T, R> cache;
         private final Function<T, R> origin;
+        private final Map<T, R> cache;
 
-        private CFunction(Function<T, R> origin) {
+        private CFunction(@NotNull Function<T, R> origin, @NotNull Map<T, R> cache) {
             this.origin = origin;
-            this.cache = new HashMap<>();
+            this.cache = cache;
         }
 
         @Override
@@ -33,17 +39,19 @@ public final class Caching { private Caching() {}
 
     private static final class CSupplier<R> implements Supplier<R> {
         private final Supplier<R> origin;
-        private R cache;
+        private boolean cached;
+        private R value;
 
-        private CSupplier(Supplier<R> origin) {
+        private CSupplier(@NotNull Supplier<R> origin) {
             this.origin = origin;
         }
 
         @Override
         public R get() {
-            return cache == null
-                    ? (cache = origin.get())
-                    : cache;
+            if (cached) return value;
+            value = origin.get();
+            cached = true;
+            return value;
         }
     }
 }

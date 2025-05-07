@@ -1,5 +1,7 @@
 package ink.glowing.text;
 
+import ink.glowing.text.modifier.standard.StandardModifiers;
+import ink.glowing.text.placeholder.Placeholder;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.ComponentLike;
 import net.kyori.adventure.text.event.ClickEvent;
@@ -7,15 +9,14 @@ import net.kyori.adventure.text.format.TextColor;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
-import java.util.Arrays;
-import java.util.List;
+import java.util.Collection;
+import java.util.Set;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.random.RandomGenerator;
 
 import static ink.glowing.text.Helper.*;
 import static ink.glowing.text.InkyMessage.inkyMessage;
 import static ink.glowing.text.placeholder.Placeholder.placeholder;
-import static ink.glowing.text.placeholder.Placeholder.plainPlaceholder;
 import static net.kyori.adventure.text.Component.*;
 import static net.kyori.adventure.text.event.ClickEvent.openUrl;
 import static net.kyori.adventure.text.event.ClickEvent.runCommand;
@@ -192,24 +193,34 @@ public class InkyMessageTest {
         return new Object[][] {
                 {
                         "&{test1} &{test2}",
-                        Arrays.asList(
+                        Set.of(
                                 placeholder("test1", t("Hello")),
                                 placeholder("test2", t("world"))
                         ),
                         tb(t("Hello"), t(" "), t("world"))
                 }, {
                         "&[Test inline](click:run /&{cmd} &{arg})",
-                        Arrays.asList(
-                                plainPlaceholder("cmd", "command"),
+                        Set.of(
+                                Placeholder.literalPlaceholder("cmd", "command"),
                                 placeholder("arg", text("argument"))
                         ),
                         tb(tb(t("Test inline")).clickEvent(ClickEvent.runCommand("/command argument")))
+                }, {
+                        "&{lang:more_values}(args [First] [Second](color:red) [&aThi rd])",
+                        Set.of(
+                                StandardModifiers.langArgsModifier()
+                        ),
+                        tb(translatable("more_values").arguments(
+                                tb(t("First")),
+                                tb(t("Second")).color(RED),
+                                tb(t("Thi rd").color(GREEN))
+                        ))
                 }
         };
     }
 
     @Test(dataProvider = "deserializeWithInksData")
-    public void deserializeWithInksTest(String text, List<Ink> inks, ComponentLike expectedLike) {
+    public void deserializeWithInksTest(String text, Collection<Ink> inks, ComponentLike expectedLike) {
         Component expected = expectedLike.asComponent();
         assertEquals(
                 inkyMessage().deserialize(text, inks),
@@ -418,7 +429,6 @@ public class InkyMessageTest {
         };
     }
 
-    // TODO Proper JMH
     @Test(
             dataProvider = "performanceData",
             description = "The \"test\" exists purely for getting a *rough* idea of deserializer performance vs MiniMessage",

@@ -140,9 +140,7 @@ public sealed interface InkyMessage extends ComponentSerializer<Component, Compo
      */
     @Contract(pure = true)
     static boolean isUnescapedAt(@NotNull String input, int index) {
-        boolean escaped = true;
-        while (--index > -1 && input.charAt(index) == '\\') escaped = !escaped;
-        return escaped;
+        return !isEscapedAt(input, index);
     }
 
     /**
@@ -165,10 +163,7 @@ public sealed interface InkyMessage extends ComponentSerializer<Component, Compo
      */
     @Contract(pure = true)
     static boolean isNotSpecial(char ch) {
-        return switch (ch) {
-            case '&', '[', ']', '(', ')', '{', '}', '<', '>', '\\' -> false;
-            default -> true;
-        };
+        return !isSpecial(ch);
     }
 
     /**
@@ -205,6 +200,13 @@ public sealed interface InkyMessage extends ComponentSerializer<Component, Compo
      */
     @Contract(pure = true)
     @NotNull SymbolicStyle symbolicReset();
+
+    /**
+     * Returns the base Context of this InkyMessage instance.
+     * @return a new context
+     */
+    @Contract(value = "-> new", pure = true)
+    @NotNull Context baseContext();
 
     /**
      * Convert string into adventure text component.
@@ -257,7 +259,7 @@ public sealed interface InkyMessage extends ComponentSerializer<Component, Compo
      */
     default @NotNull String serialize(@NotNull Component text,
                                       @NotNull Ink ink) {
-        return toBuilder().addInk(ink).build().serialize(text);
+        return with(ink).serialize(text);
     }
 
     /**
@@ -268,7 +270,7 @@ public sealed interface InkyMessage extends ComponentSerializer<Component, Compo
      */
     default @NotNull String serialize(@NotNull Component text,
                                       @NotNull Ink @NotNull ... inks) {
-        return toBuilder().addInks(inks).build().serialize(text);
+        return with(inks).serialize(text);
     }
 
     /**
@@ -279,7 +281,7 @@ public sealed interface InkyMessage extends ComponentSerializer<Component, Compo
      */
     default @NotNull String serialize(@NotNull Component text,
                                       @NotNull Iterable<? extends @NotNull Ink> inks) {
-        return toBuilder().addInks(inks).build().serialize(text);
+        return with(inks).serialize(text);
     }
 
     @Contract(value = "_ -> new", pure = true)
@@ -455,7 +457,7 @@ public sealed interface InkyMessage extends ComponentSerializer<Component, Compo
 
         @Contract("_ -> this")
         public @NotNull InkyMessage.Builder addPlaceholder(@NotNull Placeholder placeholder) {
-            this.placeholders.put(placeholder.name(), placeholder);
+            this.placeholders.put(placeholder.label(), placeholder);
             return this;
         }
 
@@ -478,7 +480,7 @@ public sealed interface InkyMessage extends ComponentSerializer<Component, Compo
 
         @Contract("_ -> this")
         public @NotNull InkyMessage.Builder removePlaceholder(@NotNull Placeholder placeholder) {
-            this.placeholders.put(placeholder.name(), placeholder);
+            this.placeholders.put(placeholder.label(), placeholder);
             return this;
         }
 
@@ -524,7 +526,7 @@ public sealed interface InkyMessage extends ComponentSerializer<Component, Compo
 
         @Contract("_ -> this")
         public @NotNull InkyMessage.Builder addModifier(@NotNull Modifier modifier) {
-            this.modifiers.put(modifier.name(), modifier);
+            this.modifiers.put(modifier.label(), modifier);
             return this;
         }
 
@@ -547,7 +549,7 @@ public sealed interface InkyMessage extends ComponentSerializer<Component, Compo
 
         @Contract("_ -> this")
         public @NotNull InkyMessage.Builder removeModifier(@NotNull Modifier modifier) {
-            this.modifiers.put(modifier.name(), modifier);
+            this.modifiers.put(modifier.label(), modifier);
             return this;
         }
 

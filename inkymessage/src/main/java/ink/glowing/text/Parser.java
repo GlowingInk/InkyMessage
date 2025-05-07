@@ -9,15 +9,22 @@ import ink.glowing.text.symbolic.SymbolicStyle;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.ComponentLike;
 import net.kyori.adventure.text.TextComponent;
+import net.kyori.adventure.text.format.Style;
 import net.kyori.adventure.text.format.TextColor;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.TreeSet;
 import java.util.function.Function;
+import java.util.function.IntPredicate;
 
 import static ink.glowing.text.InkyMessage.*;
+import static ink.glowing.text.modifier.Modifier.Argument.modifierArgument;
+import static ink.glowing.text.modifier.Modifier.Arguments.emptyModifierArguments;
+import static ink.glowing.text.modifier.Modifier.Arguments.modifierArguments;
 import static ink.glowing.text.modifier.ModifierFinder.composeModifierFinders;
 import static java.util.function.Function.identity;
 import static net.kyori.adventure.text.Component.empty;
@@ -28,17 +35,19 @@ import static net.kyori.adventure.text.Component.text;
  * Handles placeholders, style modifiers, color codes, and replacement spots.
  */
 @ApiStatus.Internal
-final class Parser { // TODO This is a mess. Tokenizer?
+final class Parser { // TODO This is a total mess. Tokenizer?
     private final String textStr;
     private final int textLength;
+    private final Context context;
     private final TreeSet<Replacer.FoundSpot> replaceSpots;
 
     private int globalIndex;
 
-    private Parser(@NotNull String textStr, @NotNull TreeSet<Replacer.FoundSpot> replaceSpots) {
+    private Parser(@NotNull String textStr, @NotNull Context context) {
         this.textStr = textStr;
         this.textLength = textStr.length();
-        this.replaceSpots = replaceSpots;
+        this.context = context;
+        this.replaceSpots = context.matchReplacements(textStr);
     }
 
     /**
@@ -49,19 +58,35 @@ final class Parser { // TODO This is a mess. Tokenizer?
      */
     static @NotNull Component parse(@NotNull String textStr, @NotNull Context context) {
         if (textStr.isEmpty()) return empty();
-        return new Parser(textStr, context.matchReplacements(textStr))
-                .parseRecursive(0, -1, context)
+        return new Parser(textStr, context)
+                .parseRecursive(0, (ch) -> false, new LinearState())
                 .asComponent();
+    }
+
+    private static class LinearState {
+        Style lastStyle;
+
+        LinearState() {
+            this.lastStyle = Style.empty();
+        }
+    }
+
+    private @NotNull ComponentLike parseRecursive(int from, char untilCh, @NotNull LinearState state) {
+        return parseRecursive(from, (ch) -> ch == untilCh, state);
+    }
+
+    private @NotNull ComponentLike parseRecursive(int from, String untilCh, @NotNull LinearState state) {
+        return parseRecursive(from, (ch) -> untilCh.indexOf(ch) != -1, state);
     }
 
     /**
      * Recursively parses text segments while handling nested syntax structures.
      * @param from starting index for parsing
-     * @param untilCh stopping character
-     * @param context current build context
+     * @param untilCh stopping condition
+     * @param state current state
      * @return component built from the parsed segment
      */
-    private @NotNull ComponentLike parseRecursive(int from, int untilCh, @NotNull Context context) {
+    private @NotNull ComponentLike parseRecursive(int from, IntPredicate untilCh, @NotNull LinearState state) {
         var builder = text();
         for (globalIndex = from; globalIndex < textLength; globalIndex++) {
             char ch = textStr.charAt(globalIndex);
@@ -70,8 +95,8 @@ final class Parser { // TODO This is a mess. Tokenizer?
                 char nextCh = textStr.charAt(globalIndex + 1);
                 switch (nextCh) {
                     case '[' -> { // &[...]
-                        appendSegment(builder, from, globalIndex, context);
-                        builder.append(parseRecursive(globalIndex + 2, ']', context));
+                        appendSegment(builder, from, globalIndex, state);
+                        builder.append(parseRecursive(globalIndex + 2, ']', state));
                         from = globalIndex--;
                     }
 
@@ -82,28 +107,27 @@ final class Parser { // TODO This is a mess. Tokenizer?
                             continue;
                         }
                         var placeholder = placeholderData.placeholder;
-                        appendSegment(builder, from, initIndex, context);
+                        appendSegment(builder, from, initIndex, state);
                         builder.append(prepareModifiers(
-                                context,
                                 composeModifierFinders(context, placeholder::findLocalModifier)
-                        ).apply(placeholder.parse(placeholderData.params)).applyFallbackStyle(context.lastStyle()));
+                        ).apply(placeholder.retrieve(placeholderData.params, context)).applyFallbackStyle(state.lastStyle));
                         from = globalIndex--;
                     }
 
                     case '(' -> { // &(...)
-                        appendSegment(builder, from, globalIndex, context);
+                        appendSegment(builder, from, globalIndex, state);
                         int initIndex = globalIndex;
-                        var modifiers = prepareModifiers(context, context); // Also adjusts globalIndex to last modifier
+                        var modifiers = prepareModifiers(context); // Also adjusts globalIndex to last modifier
                         if (textStr.charAt(globalIndex) != '[') {
                             globalIndex = initIndex;
                             continue;
                         }
-                        builder.append(modifiers.apply(parseRecursive(globalIndex + 1, ']', context).asComponent()));
+                        builder.append(modifiers.apply(parseRecursive(globalIndex + 1, ']', state).asComponent()));
                         from = globalIndex--;
                     }
 
                     case '<' -> { // &<...>
-                        appendSegment(builder, from, globalIndex, context);
+                        appendSegment(builder, from, globalIndex, state);
                         int initIndex = globalIndex;
                         if (!iterateUntil('>')) {
                             globalIndex = initIndex;
@@ -114,15 +138,13 @@ final class Parser { // TODO This is a mess. Tokenizer?
                         from = globalIndex + 1;
                     }
                 }
-            } else if (ch == untilCh && isUnescapedAt(textStr, globalIndex)) {
-                appendSegment(builder, from, globalIndex, context);
-                return untilCh != ')'
-                        ? prepareModifiers(context, context).apply(builder.build())
-                        : builder;
+            } else if (untilCh.test(ch) && isUnescapedAt(textStr, globalIndex)) {
+                appendSegment(builder, from, globalIndex, state);
+                return prepareModifiers(context).apply(builder.build()); // TODO Check if parsing modifiers
             }
         }
         // In case we didn't find the 'untilCh' char
-        appendSegment(builder, from, textLength, context);
+        appendSegment(builder, from, textLength, state);
         return builder;
     }
 
@@ -130,17 +152,17 @@ final class Parser { // TODO This is a mess. Tokenizer?
      * Processes a text segment between specified indices, applying symbolic styles and replacements.
      * @param from start index (inclusive)
      * @param until end index (exclusive)
-     * @param context current build context
+     * @param state current build state
      */
-    private void appendSegment(@NotNull TextComponent.Builder builder, int from, int until, @NotNull Context context) {
+    private void appendSegment(@NotNull TextComponent.Builder builder, int from, int until, @NotNull LinearState state) {
         if (from == until) return;
         int lastAppend = from;
         for (int index = from; index < until; index++) {
             var spot = matchSpot(index, until);
             if (spot != null) {
-                appendPrevious(builder, lastAppend, index, context);
+                appendPrevious(builder, lastAppend, index, state);
                 var replacement = spot.replacement().get();
-                builder.append(replacement.applyFallbackStyle(context.lastStyle()));
+                builder.append(replacement.applyFallbackStyle(state.lastStyle));
                 lastAppend = spot.end();
                 index = lastAppend - 1;
                 continue;
@@ -156,21 +178,21 @@ final class Parser { // TODO This is a mess. Tokenizer?
                     String colorStr = textStr.substring(index + 1, index + charsToSkip);
                     TextColor color = parseHexColor(colorStr, quirky);
                     if (color == null) continue;
-                    appendPrevious(builder, lastAppend, index, context);
-                    context.lastStyle(context.lastStyle().color(color));
+                    appendPrevious(builder, lastAppend, index, state);
+                    state.lastStyle = state.lastStyle.color(color);
                     lastAppend = (index += charsToSkip - 1) + 1;
                 }
                 default -> {
                     SymbolicStyle symbolic = context.findSymbolicStyle(styleCh);
                     if (symbolic == null) continue;
-                    appendPrevious(builder, lastAppend, index, context);
-                    context.lastStyle(symbolic.merge(context.lastStyle()));
+                    appendPrevious(builder, lastAppend, index, state);
+                    state.lastStyle = symbolic.merge(state.lastStyle);
                     lastAppend = (++index) + 1;
                 }
             }
         }
         if (lastAppend < until) {
-            appendPrevious(builder, lastAppend, until, context);
+            appendPrevious(builder, lastAppend, until, state);
         }
     }
 
@@ -179,11 +201,11 @@ final class Parser { // TODO This is a mess. Tokenizer?
      * @param builder target component builder
      * @param start start index (inclusive)
      * @param end end index (exclusive)
-     * @param context current build context with style state
+     * @param state current build state
      */
-    private void appendPrevious(@NotNull TextComponent.Builder builder, int start, int end, @NotNull Context context) {
+    private void appendPrevious(@NotNull TextComponent.Builder builder, int start, int end, @NotNull LinearState state) {
         if (start == end) return;
-        builder.append(text(unescape(textStr.substring(start, end))).applyFallbackStyle(context.lastStyle()));
+        builder.append(text(unescape(textStr.substring(start, end))).applyFallbackStyle(state.lastStyle));
     }
 
     /**
@@ -223,22 +245,19 @@ final class Parser { // TODO This is a mess. Tokenizer?
     }
 
     private @NotNull Function<Component, Component> prepareModifiers(
-            @NotNull Context context,
             @NotNull ModifierFinder modifierFinder
     ) {
-        return prepareModifiers(identity(), context, modifierFinder);
+        return prepareModifiers(identity(), modifierFinder);
     }
 
     /**
      * Parses and prepares style modifiers recursively.
      * @param comp component to modify
-     * @param context current build context
      * @param modifierFinder source of style modifiers
      * @return modified component with all applicable styles
      */
     private @NotNull Function<Component, Component> prepareModifiers(
             @NotNull Function<Component, Component> comp,
-            @NotNull Context context,
             @NotNull ModifierFinder modifierFinder
     ) {
         int from = globalIndex + 1;
@@ -254,132 +273,69 @@ final class Parser { // TODO This is a mess. Tokenizer?
         }
         from = globalIndex + 1;
 
-        var input = prepareInput(from, context);
-        comp = comp.andThen(modifier.prepareModify(input));
-        return prepareModifiers(comp, context, modifierFinder);
+        var arguments = prepareArguments(from, modifier);
+        if (arguments == null) {
+            globalIndex = from;
+            return comp;
+        }
+        comp = comp.andThen(modifier.prepareModification(arguments, context));
+        return prepareModifiers(comp, modifierFinder);
     }
 
-    private Modifier.Tokens prepareInput(int from, Context context) {
-        if (globalIndex >= textLength) return EmptyParametersImpl.FULLY_EMPTY;
+    private @Nullable Modifier.Arguments prepareArguments(int from, Modifier modifier) {
+        if (globalIndex >= textLength) return emptyModifierArguments();
+        String param;
         if (textStr.charAt(globalIndex) != ')' && textStr.charAt(globalIndex) == ':') {
-            String params = extractPlain(from, " )");
-            globalIndex = from + params.length();
+            param = extractPlain(from, " )");
+            globalIndex = from + param.length();
             if (textStr.charAt(globalIndex) == ')') {
-                return new EmptyParametersImpl(params);
-            } else {
-                return new ParametersImpl(params, context);
+                return modifierArguments(param);
             }
         } else {
-            return new ParametersImpl("", context);
+            param = "";
+        }
+        if (textStr.charAt(globalIndex) != ' ') {
+            return null;
+        }
+        globalIndex++;
+        char ch = textStr.charAt(globalIndex);
+        if (ch == '[' || ch == '<') {
+            List<Modifier.Argument> list = new ArrayList<>();
+            collectArguments(list, modifier.unknownArgumentAsString(param));
+            return modifierArguments(param, list);
+        } else {
+            var arguments = modifierArguments(
+                    param,
+                    List.of(modifierArgument(parseRecursive(
+                            globalIndex,
+                            ')',
+                            new LinearState()
+                    ).asComponent()))
+            );
+            globalIndex--;
+            return arguments;
         }
     }
 
-    private record EmptyParametersImpl(@NotNull String parameter) implements Modifier.Tokens {
-        static final Modifier.Tokens FULLY_EMPTY = new EmptyParametersImpl("");
-
-        @Override
-        public @Nullable String nextString() {
-            return null;
-        }
-
-        @Override
-        public @NotNull String remainingString() {
-            return "";
-        }
-
-        @Override
-        public @Nullable Component nextComponent() {
-            return null;
-        }
-
-        @Override
-        public @NotNull Component remainingComponent() {
-            return empty();
-        }
-
-        @Override
-        public boolean hasMore() {
-            return false;
-        }
-    }
-
-    private class ParametersImpl implements Modifier.Tokens {
-        final String param;
-        final Context context;
-        boolean more;
-
-        ParametersImpl(String param, Context context) {
-            this.param = param;
-            this.context = context;
-            this.more = true;
-
-            globalIndex++;
-        }
-
-        @Override
-        public @NotNull String parameter() {
-            return param;
-        }
-
-        @Override
-        public @Nullable String nextString() {
-            if (!more) return null;
-            int from = textStr.charAt(globalIndex) == '&' && globalIndex + 1 < textLength && textStr.charAt(globalIndex + 1) == '<'
-                    ? globalIndex + 1
-                    : globalIndex;
-            if (from >= textLength || textStr.charAt(from) == ')') {
-                char result = textStr.charAt(globalIndex);
-                globalIndex = from;
-                more = false;
-                return Character.toString(result);
+    private void collectArguments(List<Modifier.Argument> list, boolean unknownAsString) {
+        if (globalIndex >= textLength) return;
+        char ch = textStr.charAt(globalIndex);
+        switch (ch) {
+            case '[' -> list.add(modifierArgument(parseRecursive(globalIndex + 1, ']', new LinearState()).asComponent()));
+            case '<' -> list.add(modifierArgument(extractPlainModifierValue(globalIndex + 1, ">)")));
+            case ')' -> {
+                return;
             }
-            char until = textStr.charAt(from) == '<'
-                    ? '>'
-                    : ' ';
-            return postCheck(extractPlainModifierValue(from, until, context));
-        }
-
-        @Override
-        public @NotNull String remainingString() {
-            if (!more || globalIndex >= textLength) return "";
-            return postCheck(extractPlainModifierValue(globalIndex, ')', context));
-        }
-
-        @Override
-        public @Nullable Component nextComponent() {
-            if (!more) return null;
-            int from = textStr.charAt(globalIndex) == '&' && globalIndex + 1 < textLength && textStr.charAt(globalIndex + 1) == '['
-                    ? globalIndex + 1
-                    : globalIndex;
-            if (from >= textLength || textStr.charAt(from) == ')') {
-                char result = textStr.charAt(globalIndex);
-                globalIndex = from;
-                more = false;
-                return text(result);
+            default -> {
+                if (unknownAsString) {
+                    list.add(modifierArgument(extractPlainModifierValue(globalIndex + 1, " )")));
+                } else {
+                    list.add(modifierArgument(parseRecursive(globalIndex + 1, " )", new LinearState()).asComponent()));
+                }
             }
-            char until = textStr.charAt(from) == '['
-                    ? ']'
-                    : ' ';
-            return postCheck(parseRecursive(from, until, context.stylelessCopy()).asComponent());
         }
-
-        @Override
-        public @NotNull Component remainingComponent() {
-            if (!more || globalIndex >= textLength) return empty();
-            return postCheck(parseRecursive(globalIndex, ')', context.stylelessCopy()).asComponent());
-        }
-
-        @Override
-        public boolean hasMore() {
-            return more;
-        }
-
-        private <T> T postCheck(T t) {
-            if (textStr.charAt(globalIndex) != ' ') {
-                more = false;
-            }
-            return t;
-        }
+        globalIndex++;
+        collectArguments(list, unknownAsString);
     }
 
     /**
@@ -402,25 +358,25 @@ final class Parser { // TODO This is a mess. Tokenizer?
      * @param from start index for extraction
      * @return extracted value string
      */
-    private @NotNull String extractPlainModifierValue(int from, char until, @NotNull Context context) {
-        if (globalIndex != textLength && textStr.charAt(globalIndex) != ')') {
-            StringBuilder builder = new StringBuilder();
-            globalIndex = from;
-            int lastIndex = globalIndex;
-            for (;globalIndex < textLength; globalIndex++) {
-                char ch = textStr.charAt(globalIndex);
-                if (ch == until) {
-                    if (isUnescapedAt(textStr, globalIndex)) {
-                        return builder.append(textStr, lastIndex, globalIndex).toString();
-                    }
-                } else if (isSpecial(ch) && isUnescapedAt(textStr, globalIndex)) {
-                    int initIndex = globalIndex;
-                    PlaceholderData data = parsePlaceholder(context);
-                    if (data != null) {
-                        builder.append(textStr, lastIndex, initIndex);
-                        builder.append(data.placeholder.parseInlined(data.params));
-                        lastIndex = globalIndex + 1;
-                    }
+    private @NotNull String extractPlainModifierValue(int from, @NotNull String until) {
+        if (globalIndex == textLength) {
+            return "";
+        }
+        StringBuilder builder = new StringBuilder();
+        globalIndex = from;
+        for (int lastIndex = globalIndex; globalIndex < textLength; globalIndex++) {
+            char ch = textStr.charAt(globalIndex);
+            if (until.indexOf(ch) != -1) {
+                if (isUnescapedAt(textStr, globalIndex)) {
+                    return builder.append(textStr, lastIndex, globalIndex).toString();
+                }
+            } else if (isSpecial(ch) && isUnescapedAt(textStr, globalIndex)) {
+                int initIndex = globalIndex;
+                PlaceholderData data = parsePlaceholder(context);
+                if (data != null) {
+                    builder.append(textStr, lastIndex, initIndex);
+                    builder.append(data.placeholder.retrievePlain(data.params, context));
+                    lastIndex = globalIndex + 1;
                 }
             }
         }

@@ -1,7 +1,8 @@
 package ink.glowing.text.extra.clippapi;
 
+import ink.glowing.text.Context;
 import ink.glowing.text.placeholder.Placeholder;
-import ink.glowing.text.utils.Named.NamePattern;
+import ink.glowing.text.utils.Labeled.LabelPattern;
 import me.clip.placeholderapi.PlaceholderAPIPlugin;
 import me.clip.placeholderapi.expansion.PlaceholderExpansion;
 import net.kyori.adventure.builder.AbstractBuilder;
@@ -26,12 +27,12 @@ public final class PapiPlaceholder {
 
     private record PapiPlaceholderImpl(
             @NotNull Function<String, ExpansionData> dataGetter,
-            @NotNull String name,
+            @NotNull String label,
             @Nullable OfflinePlayer player,
             @NotNull Function<String, Component> resultParser
     ) implements Placeholder {
         @Override
-        public @NotNull Component parse(@NotNull String value) {
+        public @NotNull Component retrieve(@NotNull String value, @NotNull Context context) {
             var data = dataGetter.apply(value);
             if (data == null) return empty();
             String result = data.expansion.onRequest(player, data.params);
@@ -48,13 +49,20 @@ public final class PapiPlaceholder {
             return new ExpansionData(expansion, params);
         };
 
-        private Function<String, ExpansionData> dataGetter = DEFAULT_GETTER;
-        private String prefix = "papi";
-        private OfflinePlayer player = null;
-        private Function<String, Component> resultParser = Component::text;
+        private Function<String, ExpansionData> dataGetter;
+        private String prefix;
+        private OfflinePlayer player;
+        private Function<String, Component> resultParser;
+
+        private Builder() {
+            this.dataGetter = DEFAULT_GETTER;
+            this.prefix = "papi";
+            this.player = null;
+            this.resultParser = Component::text;
+        }
 
         @Contract(value = "_ -> new", pure = true)
-        public @NotNull Builder prefix(@NotNull @NamePattern String prefix) {
+        public @NotNull Builder prefix(@NotNull @LabelPattern String prefix) {
             this.prefix = prefix;
             return this;
         }
@@ -94,9 +102,9 @@ public final class PapiPlaceholder {
         @Contract(value = "-> new", pure = true)
         public @NotNull Function<OfflinePlayer, Placeholder> asPlayerFunction() {
             var dataGetter = this.dataGetter;
-            var name = this.prefix;
+            var label = this.prefix;
             var resultParser = this.resultParser;
-            return (oPlayer) -> new PapiPlaceholderImpl(dataGetter, name, oPlayer, resultParser);
+            return (oPlayer) -> new PapiPlaceholderImpl(dataGetter, label, oPlayer, resultParser);
         }
 
         @Override

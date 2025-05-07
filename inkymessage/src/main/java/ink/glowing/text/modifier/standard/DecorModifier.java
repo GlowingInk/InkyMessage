@@ -11,8 +11,8 @@ import org.jetbrains.annotations.Unmodifiable;
 import java.util.ArrayList;
 import java.util.List;
 
-final class DecorModifier implements Modifier.Plain { private DecorModifier() {}
-    static final DecorModifier INSTANCE = new DecorModifier();
+enum DecorModifier implements Modifier.Plain {
+    INSTANCE;
 
     @Override
     public @NotNull Component modify(@NotNull Component text, @NotNull String param, @NotNull String value) {
@@ -26,7 +26,7 @@ final class DecorModifier implements Modifier.Plain { private DecorModifier() {}
     }
 
     @Override
-    public @NotNull @Unmodifiable List<String> read(@NotNull Component text, @NotNull InkyMessage inkyMessage) {
+    public @NotNull @Unmodifiable List<String> readModifier(@NotNull Component text, @NotNull InkyMessage inkyMessage) {
         var textDecors = text.decorations().entrySet();
         if (textDecors.isEmpty()) return List.of();
         List<String> modifierStr = new ArrayList<>(0);
@@ -39,12 +39,12 @@ final class DecorModifier implements Modifier.Plain { private DecorModifier() {}
     }
 
     @Override
-    public @NotNull @NamePattern String name() {
+    public @NotNull @LabelPattern String label() {
         return "decor";
     }
 
-    private static @Nullable TextDecoration decorByName(@NotNull String name) {
-        return switch (name) {
+    private static @Nullable TextDecoration decorByName(@NotNull String label) {
+        return switch (label) {
             case "bold", "large", "b" ->                        TextDecoration.BOLD;
             case "italic", "cursive", "i", "cur" ->             TextDecoration.ITALIC;
             case "underlined", "underline", "u" ->              TextDecoration.UNDERLINED;

@@ -9,11 +9,11 @@ import org.jetbrains.annotations.NotNull;
 import java.util.function.Supplier;
 
 final class CallbackModifier implements Modifier.Plain {
-    private final @Subst("name") String name;
+    private final @Subst("label") String label;
     private final Supplier<ClickEvent> eventSupplier;
 
-    CallbackModifier(String name, Supplier<ClickEvent> eventSupplier) {
-        this.name = name;
+    CallbackModifier(String label, Supplier<ClickEvent> eventSupplier) {
+        this.label = label;
         this.eventSupplier = eventSupplier;
     }
 
@@ -23,7 +23,7 @@ final class CallbackModifier implements Modifier.Plain {
     }
     
     @Override
-    public @NotNull @NamePattern String name() {
-        return name;
+    public @NotNull @LabelPattern String label() {
+        return label;
     }
 }

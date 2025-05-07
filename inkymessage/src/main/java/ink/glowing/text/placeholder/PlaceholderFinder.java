@@ -8,13 +8,15 @@ import java.util.*;
 
 @FunctionalInterface
 public interface PlaceholderFinder {
+    PlaceholderFinder EMPTY = (label) -> null;
+
     @Contract(pure = true)
-    @Nullable Placeholder findPlaceholder(@NotNull String name);
+    @Nullable Placeholder findPlaceholder(@NotNull String label);
 
     default @NotNull PlaceholderFinder thenPlaceholderFinder(@NotNull PlaceholderFinder placeholderFinder) {
-        return (name) -> {
-            var placeholder = findPlaceholder(name);
-            return placeholder != null ? placeholder : placeholderFinder.findPlaceholder(name);
+        return (label) -> {
+            var placeholder = findPlaceholder(label);
+            return placeholder != null ? placeholder : placeholderFinder.findPlaceholder(label);
         };
     }
 
@@ -24,7 +26,7 @@ public interface PlaceholderFinder {
 
     static @NotNull PlaceholderFinder placeholderFinder(@NotNull SequencedCollection<? extends @NotNull Placeholder> placeholders) {
         return switch (placeholders.size()) {
-            case 0 -> (name) -> null;
+            case 0 -> EMPTY;
             case 1 -> placeholders.getFirst();
             default -> placeholderFinder((Collection<? extends Placeholder>) placeholders);
         };
@@ -32,7 +34,7 @@ public interface PlaceholderFinder {
 
     static @NotNull PlaceholderFinder placeholderFinder(@NotNull Collection<? extends @NotNull Placeholder> placeholders) {
         Map<String, Placeholder> placeholdersMap = new HashMap<>(placeholders.size());
-        for (var placeholder : placeholders) placeholdersMap.put(placeholder.name(), placeholder);
+        for (var placeholder : placeholders) placeholdersMap.put(placeholder.label(), placeholder);
         return placeholdersMap::get;
     }
 
@@ -42,7 +44,7 @@ public interface PlaceholderFinder {
 
     static @NotNull PlaceholderFinder placeholderFinder(@NotNull Iterable<? extends @NotNull Placeholder> placeholders) {
         Map<String, Placeholder> placeholdersMap = new HashMap<>();
-        for (var placeholder : placeholders) placeholdersMap.put(placeholder.name(), placeholder);
+        for (var placeholder : placeholders) placeholdersMap.put(placeholder.label(), placeholder);
         return placeholdersMap::get;
     }
 
@@ -52,7 +54,7 @@ public interface PlaceholderFinder {
 
     static @NotNull PlaceholderFinder composePlaceholderFinders(@NotNull Iterable<? extends @NotNull PlaceholderFinder> placeholderFinders) {
         var iterator = placeholderFinders.iterator();
-        if (!iterator.hasNext()) return (symbol) -> null;
+        if (!iterator.hasNext()) return EMPTY;
         PlaceholderFinder result = iterator.next();
         do {
             result = result.thenPlaceholderFinder(iterator.next());

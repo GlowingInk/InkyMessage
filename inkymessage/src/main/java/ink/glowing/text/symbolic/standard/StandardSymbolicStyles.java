@@ -14,7 +14,9 @@ import static net.kyori.adventure.text.format.NamedTextColor.*;
 import static net.kyori.adventure.text.format.TextColor.color;
 import static net.kyori.adventure.text.format.TextDecoration.*;
 
-public final class StandardSymbolicStyles { private StandardSymbolicStyles() {}
+public final class StandardSymbolicStyles {
+    private StandardSymbolicStyles() {}
+
     private static final Map<TextDecoration, State> RESET_DECORATIONS;
     static {
         Map<TextDecoration, State> resetDecorations = new EnumMap<>(TextDecoration.class);

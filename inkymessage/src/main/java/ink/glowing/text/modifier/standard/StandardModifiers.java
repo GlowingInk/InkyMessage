@@ -2,8 +2,8 @@ package ink.glowing.text.modifier.standard;
 
 import ink.glowing.text.modifier.Modifier;
 import ink.glowing.text.placeholder.StandardPlaceholders;
-import ink.glowing.text.utils.Named;
-import ink.glowing.text.utils.Named.NamePattern;
+import ink.glowing.text.utils.Labeled;
+import ink.glowing.text.utils.Labeled.LabelPattern;
 import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.text.event.ClickCallback;
 import org.intellij.lang.annotations.Pattern;
@@ -20,7 +20,9 @@ import java.util.stream.Collectors;
 import static java.util.function.Function.identity;
 import static net.kyori.adventure.text.event.ClickEvent.callback;
 
-public final class StandardModifiers { private StandardModifiers() {}
+public final class StandardModifiers {
+    private StandardModifiers() {}
+
     private static final Collection<Modifier> STANDARD = Set.of(
             clickModifier(),
             colorModifier(),
@@ -31,7 +33,7 @@ public final class StandardModifiers { private StandardModifiers() {}
             httpsModifier()
     );
     private static final Map<String, Modifier> STANDARD_MAP = Collections.unmodifiableMap(
-            STANDARD.stream().collect(Collectors.toMap(Named::name, identity()))
+            STANDARD.stream().collect(Collectors.toMap(Labeled::label, identity()))
     );
 
     /**
@@ -56,31 +58,31 @@ public final class StandardModifiers { private StandardModifiers() {}
         return STANDARD_MAP;
     }
 
-    public static @NotNull Modifier.Plain clickModifier() {
+    public static @NotNull Modifier clickModifier() {
         return ClickModifier.INSTANCE;
     }
 
-    public static @NotNull Modifier.Plain colorModifier() {
+    public static @NotNull Modifier colorModifier() {
         return ColorModifier.INSTANCE;
     }
 
-    public static @NotNull Modifier.Plain decorModifier() {
+    public static @NotNull Modifier decorModifier() {
         return DecorModifier.INSTANCE;
     }
 
-    public static @NotNull Modifier.Plain fontModifier() {
+    public static @NotNull Modifier fontModifier() {
         return FontModifier.INSTANCE;
     }
 
-    public static @NotNull Modifier.Complex hoverModifier() {
+    public static @NotNull Modifier hoverModifier() {
         return HoverModifier.INSTANCE;
     }
 
-    public static @NotNull Modifier.Plain httpModifier() {
+    public static @NotNull Modifier httpModifier() {
         return UrlModifier.HTTP;
     }
 
-    public static @NotNull Modifier.Plain httpsModifier() {
+    public static @NotNull Modifier httpsModifier() {
         return UrlModifier.HTTPS;
     }
 
@@ -88,7 +90,7 @@ public final class StandardModifiers { private StandardModifiers() {}
      * Creates a modifier that allows to open specified URL using provided scheme.
      * @param scheme scheme (prefix) for the URL
      */
-    public static @NotNull Modifier.Plain urlModifier(@Pattern("[a-z\\d\\+\\-]+") @NotNull String scheme) {
+    public static @NotNull Modifier urlModifier(@Pattern("[a-z\\d\\+\\-]+") @NotNull String scheme) {
         return new UrlModifier(scheme);
     }
 
@@ -96,15 +98,23 @@ public final class StandardModifiers { private StandardModifiers() {}
      * Used for {@link net.kyori.adventure.text.TranslatableComponent}: adds arguments to the component.
      * Local modifier of {@link StandardPlaceholders#langPlaceholder()}.
      */
-    public static @NotNull Modifier.Complex langArgModifier() {
+    public static @NotNull Modifier langArgModifier() {
         return LangModifiers.ArgModifier.INSTANCE;
+    }
+
+    /**
+     * Used for {@link net.kyori.adventure.text.TranslatableComponent}: adds arguments to the component.
+     * Local modifier of {@link StandardPlaceholders#langPlaceholder()}.
+     */
+    public static @NotNull Modifier langArgsModifier() {
+        return LangModifiers.ArgsModifier.INSTANCE;
     }
 
     /**
      * Used for {@link net.kyori.adventure.text.TranslatableComponent}: adds fallback to the component.
      * Local modifier of {@link StandardPlaceholders#langPlaceholder()}.
      */
-    public static @NotNull Modifier.Plain langFallbackModifier() {
+    public static @NotNull Modifier langFallbackModifier() {
         return LangModifiers.FallbackModifier.INSTANCE;
     }
 
@@ -112,66 +122,66 @@ public final class StandardModifiers { private StandardModifiers() {}
      * Used for {@link net.kyori.adventure.text.SelectorComponent}: specifies separator of the component.
      * Local modifier of {@link StandardPlaceholders#selectorPlaceholder()}.
      */
-    public static @NotNull Modifier.Complex selectorSeparatorModifier() {
+    public static @NotNull Modifier selectorSeparatorModifier() {
         return SeparatorModifier.INSTANCE;
     }
 
     /**
      * An extra modifier that repeats the component.
      */
-    public static @NotNull Modifier.Plain repeatModifier() {
+    public static @NotNull Modifier repeatModifier() {
         return RepeatModifier.INSTANCE;
     }
 
     /**
      * Creates a modifier that runs specified action when clicked.
-     * @param name name of modifier
+     * @param label label of modifier
      * @param action action to perform
      */
-    public static @NotNull Modifier.Plain callbackModifier(@NotNull @NamePattern String name,
-                                                           @NotNull Runnable action) {
-        return new CallbackModifier(name, () -> callback(audience -> action.run()));
+    public static @NotNull Modifier callbackModifier(@NotNull @LabelPattern String label,
+                                                     @NotNull Runnable action) {
+        return new CallbackModifier(label, () -> callback(audience -> action.run()));
     }
 
     /**
      * Creates a modifier that runs specified action when clicked.
-     * @param name name of modifier
+     * @param label label of modifier
      * @param action action to perform
      */
-    public static @NotNull Modifier.Plain callbackModifier(@NotNull @NamePattern String name,
-                                                           @NotNull Consumer<Audience> action) {
-        return new CallbackModifier(name, () -> callback(action::accept));
+    public static @NotNull Modifier callbackModifier(@NotNull @LabelPattern String label,
+                                                     @NotNull Consumer<Audience> action) {
+        return new CallbackModifier(label, () -> callback(action::accept));
     }
 
     /**
      * Creates a modifier that runs specified action when clicked.
-     * @param name name of modifier
+     * @param label label of modifier
      * @param action action to perform
      */
-    public static @NotNull Modifier.Plain callbackModifier(@NotNull @NamePattern String name,
-                                                           @NotNull ClickCallback<Audience> action) {
-        return new CallbackModifier(name, () -> callback(action));
+    public static @NotNull Modifier callbackModifier(@NotNull @LabelPattern String label,
+                                                     @NotNull ClickCallback<Audience> action) {
+        return new CallbackModifier(label, () -> callback(action));
     }
 
     /**
      * Creates a modifier that runs specified action when clicked.
-     * @param name name of modifier
+     * @param label label of modifier
      * @param action action to perform
      */
-    public static @NotNull Modifier.Plain callbackModifier(@NotNull @NamePattern String name,
-                                                           @NotNull ClickCallback<Audience> action,
-                                                           @NotNull ClickCallback.Options options) {
-        return new CallbackModifier(name, () -> callback(action, options));
+    public static @NotNull Modifier callbackModifier(@NotNull @LabelPattern String label,
+                                                     @NotNull ClickCallback<Audience> action,
+                                                     @NotNull ClickCallback.Options options) {
+        return new CallbackModifier(label, () -> callback(action, options));
     }
 
     /**
      * Creates a modifier that runs specified action when clicked.
-     * @param name name of modifier
+     * @param label label of modifier
      * @param action action to perform
      */
-    public static @NotNull Modifier.Plain callbackModifier(@NotNull @NamePattern String name,
-                                                           @NotNull ClickCallback<Audience> action,
-                                                           @NotNull Consumer<ClickCallback.Options. @NotNull Builder> optionsBuilder) {
-        return new CallbackModifier(name, () -> callback(action, optionsBuilder));
+    public static @NotNull Modifier callbackModifier(@NotNull @LabelPattern String label,
+                                                     @NotNull ClickCallback<Audience> action,
+                                                     @NotNull Consumer<ClickCallback.Options. @NotNull Builder> optionsBuilder) {
+        return new CallbackModifier(label, () -> callback(action, optionsBuilder));
     }
 }

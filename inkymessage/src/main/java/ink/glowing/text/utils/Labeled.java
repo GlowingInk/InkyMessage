@@ -6,15 +6,15 @@ import org.jetbrains.annotations.NotNull;
 
 import java.lang.annotation.*;
 
-public interface Named {
+public interface Labeled {
     @Language("RegExp")
-    String NAME_PATTERN = "^[^\\sA-Z&(){}\\[\\]:\\\\]+$";
+    String LABEL_PATTERN = "^[^\\s&(){}\\[\\]<>:\\\\]+$";
 
-    @NamePattern @NotNull String name();
+    @LabelPattern @NotNull String label();
 
     @Documented
     @Retention(RetentionPolicy.CLASS)
     @Target({ElementType.METHOD, ElementType.FIELD, ElementType.PARAMETER, ElementType.LOCAL_VARIABLE})
-    @Pattern(Named.NAME_PATTERN)
-    @interface NamePattern {}
+    @Pattern(Labeled.LABEL_PATTERN)
+    @interface LabelPattern {}
 }

@@ -8,13 +8,15 @@ import java.util.*;
 
 @FunctionalInterface
 public interface ModifierFinder {
+    ModifierFinder EMPTY = (label) -> null;
+
     @Contract(pure = true)
-    @Nullable Modifier findModifier(@NotNull String name);
+    @Nullable Modifier findModifier(@NotNull String label);
 
     default @NotNull ModifierFinder thenModifierFinder(@NotNull ModifierFinder modifierFinder) {
-        return (name) -> {
-            var modifier = findModifier(name);
-            return modifier != null ? modifier : modifierFinder.findModifier(name);
+        return (label) -> {
+            var modifier = findModifier(label);
+            return modifier != null ? modifier : modifierFinder.findModifier(label);
         };
     }
 
@@ -24,7 +26,7 @@ public interface ModifierFinder {
 
     static @NotNull ModifierFinder modifierFinder(@NotNull SequencedCollection<? extends @NotNull Modifier> modifiers) {
         return switch (modifiers.size()) {
-            case 0 -> (name) -> null;
+            case 0 -> EMPTY;
             case 1 -> modifiers.getFirst();
             default -> modifierFinder((Collection<? extends Modifier>) modifiers);
         };
@@ -32,13 +34,13 @@ public interface ModifierFinder {
 
     static @NotNull ModifierFinder modifierFinder(@NotNull Collection<? extends @NotNull Modifier> modifiers) {
         Map<String, Modifier> modifiersMap = new HashMap<>(modifiers.size());
-        for (var modifier : modifiers) modifiersMap.put(modifier.name(), modifier);
+        for (var modifier : modifiers) modifiersMap.put(modifier.label(), modifier);
         return modifiersMap::get;
     }
 
     static @NotNull ModifierFinder modifierFinder(@NotNull Iterable<? extends @NotNull Modifier> modifiers) {
         Map<String, Modifier> modifiersMap = new HashMap<>();
-        for (var modifier : modifiers) modifiersMap.put(modifier.name(), modifier);
+        for (var modifier : modifiers) modifiersMap.put(modifier.label(), modifier);
         return modifiersMap::get;
     }
 
@@ -52,7 +54,7 @@ public interface ModifierFinder {
 
     static @NotNull ModifierFinder composeModifierFinders(@NotNull Iterable<? extends @NotNull ModifierFinder> modifierFinders) {
         var iterator = modifierFinders.iterator();
-        if (!iterator.hasNext()) return (symbol) -> null;
+        if (!iterator.hasNext()) return EMPTY;
         ModifierFinder result = iterator.next();
         do {
             result = result.thenModifierFinder(iterator.next());

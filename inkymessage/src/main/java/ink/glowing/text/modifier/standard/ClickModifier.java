@@ -12,8 +12,8 @@ import java.util.List;
 import static ink.glowing.text.InkyMessage.escape;
 import static net.kyori.adventure.text.event.ClickEvent.*;
 
-final class ClickModifier implements Modifier.Plain { private ClickModifier() {}
-    static final ClickModifier INSTANCE = new ClickModifier();
+enum ClickModifier implements Modifier.Plain {
+    INSTANCE;
 
     @Override
     public @NotNull Component modify(@NotNull Component text, @NotNull String param, @NotNull String value) {
@@ -31,7 +31,7 @@ final class ClickModifier implements Modifier.Plain { private ClickModifier() {}
 
     @SuppressWarnings("ConstantConditions")
     @Override
-    public @NotNull @Unmodifiable List<String> read(@NotNull Component text, @NotNull InkyMessage inkyMessage) {
+    public @NotNull @Unmodifiable List<String> readModifier(@NotNull Component text, @NotNull InkyMessage inkyMessage) {
         var click = text.clickEvent();
         if (click != null) {
             if (text.insertion() != null) {
@@ -64,7 +64,7 @@ final class ClickModifier implements Modifier.Plain { private ClickModifier() {}
     }
 
     @Override
-    public @NotNull @NamePattern String name() {
+    public @NotNull @LabelPattern String label() {
         return "click";
     }
 }

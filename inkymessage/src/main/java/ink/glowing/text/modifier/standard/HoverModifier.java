@@ -11,8 +11,8 @@ import java.util.List;
 
 import static net.kyori.adventure.text.event.HoverEvent.showText;
 
-final class HoverModifier implements Modifier.Complex { private HoverModifier() {}
-    static final HoverModifier INSTANCE = new HoverModifier();
+enum HoverModifier implements Modifier.Complex {
+    INSTANCE;
 
     @Override
     public @NotNull Component modify(@NotNull Component text, @NotNull String param, @NotNull Component value) {
@@ -20,7 +20,7 @@ final class HoverModifier implements Modifier.Complex { private HoverModifier() 
     }
 
     @Override
-    public @NotNull @Unmodifiable List<String> read(@NotNull Component text, @NotNull InkyMessage inkyMessage) {
+    public @NotNull @Unmodifiable List<String> readModifier(@NotNull Component text, @NotNull InkyMessage inkyMessage) {
         var hoverEvent = text.hoverEvent();
         return hoverEvent == null || hoverEvent.action() != HoverEvent.Action.SHOW_TEXT
                 ? List.of()
@@ -28,7 +28,7 @@ final class HoverModifier implements Modifier.Complex { private HoverModifier() 
     }
 
     @Override
-    public @NotNull @NamePattern String name() {
+    public @NotNull @LabelPattern String label() {
         return "hover";
     }
 }

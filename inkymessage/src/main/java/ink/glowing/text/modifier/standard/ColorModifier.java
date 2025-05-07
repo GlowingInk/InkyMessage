@@ -20,10 +20,10 @@ import static net.kyori.adventure.text.Component.text;
 import static net.kyori.adventure.text.format.TextColor.color;
 
 // TODO VirtualComponent
-final class ColorModifier implements Modifier.Plain { private ColorModifier() {}
-    private static final Map<String, NamedTextColor> NAMED_COLORS = NamedTextColor.NAMES.keyToValue();
+enum ColorModifier implements Modifier.Plain {
+    INSTANCE;
 
-    static final ColorModifier INSTANCE = new ColorModifier();
+    private static final Map<String, NamedTextColor> NAMED_COLORS = NamedTextColor.NAMES.keyToValue();
 
     @Override
     public @NotNull Component modify(@NotNull Component text, @NotNull String param, @NotNull String value) {
@@ -192,7 +192,7 @@ final class ColorModifier implements Modifier.Plain { private ColorModifier() {}
     }
 
     @Override
-    public @NotNull @NamePattern String name() {
+    public @NotNull @LabelPattern String label() {
         return "color";
     }
 }

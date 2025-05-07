@@ -7,6 +7,8 @@ import org.jetbrains.annotations.Nullable;
 import java.util.*;
 
 public interface SymbolicStyleFinder {
+    SymbolicStyleFinder EMPTY = (symbol) -> null;
+
     /**
      * Find symbolic style by its symbol.
      * @param symbol style symbol
@@ -16,9 +18,9 @@ public interface SymbolicStyleFinder {
     @Nullable SymbolicStyle findSymbolicStyle(char symbol);
 
     default @NotNull SymbolicStyleFinder thenSymbloicStyleFinder(@NotNull SymbolicStyleFinder symbolicStyleFinder) {
-        return (name) -> {
-            var symbolic = findSymbolicStyle(name);
-            return symbolic != null ? symbolic : symbolicStyleFinder.findSymbolicStyle(name);
+        return (label) -> {
+            var symbolic = findSymbolicStyle(label);
+            return symbolic != null ? symbolic : symbolicStyleFinder.findSymbolicStyle(label);
         };
     }
 
@@ -28,7 +30,7 @@ public interface SymbolicStyleFinder {
 
     static @NotNull SymbolicStyleFinder symbolicStyleFinder(@NotNull SequencedCollection<? extends @NotNull SymbolicStyle> symbolicStyles) {
         return switch (symbolicStyles.size()) {
-            case 0 -> (symbol) -> null;
+            case 0 -> EMPTY;
             case 1 -> symbolicStyles.getFirst();
             default -> symbolicStyleFinder((Collection<? extends SymbolicStyle>) symbolicStyles);
         };
@@ -56,7 +58,7 @@ public interface SymbolicStyleFinder {
 
     static @NotNull SymbolicStyleFinder composeSymbolicStyleFinders(@NotNull Iterable<? extends @NotNull SymbolicStyleFinder> symbolicStyleFinders) {
         var iterator = symbolicStyleFinders.iterator();
-        if (!iterator.hasNext()) return (symbol) -> null;
+        if (!iterator.hasNext()) return EMPTY;
         SymbolicStyleFinder result = iterator.next();
         do {
             result = result.thenSymbloicStyleFinder(iterator.next());
