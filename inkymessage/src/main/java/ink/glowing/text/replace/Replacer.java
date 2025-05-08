@@ -31,7 +31,7 @@ public interface Replacer extends Ink, ReplacementMatcher {
     }
 
     static @NotNull Replacer replacer(@NotNull String search, @NotNull Supplier<Component> replacement) {
-        return new LiteralReplacer(search, replacement);
+        return new LiteralReplacerImpl(search, replacement);
     }
 
     static @NotNull Replacer replacer(@NotNull Pattern search, @NotNull String replacement) {
@@ -47,7 +47,7 @@ public interface Replacer extends Ink, ReplacementMatcher {
     }
 
     static @NotNull Replacer replacer(@NotNull Pattern search, @NotNull Function<MatchResult, Component> replacement) {
-        return new RegexReplacer(search, replacement);
+        return new RegexReplacerImpl(search, replacement);
     }
 
     record FoundSpot(int start, int end, @NotNull Supplier<Component> replacement) implements Comparable<FoundSpot> {

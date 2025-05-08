@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.function.Supplier;
 
 @ApiStatus.Internal
-record LiteralReplacer(@NotNull String search, @NotNull Supplier<Component> replacement) implements Replacer {
+record LiteralReplacerImpl(@NotNull String search, @NotNull Supplier<Component> replacement) implements Replacer {
     @Override
     public @NotNull List<FoundSpot> findSpots(@NotNull String input) {
         List<FoundSpot> spots = new ArrayList<>(0);

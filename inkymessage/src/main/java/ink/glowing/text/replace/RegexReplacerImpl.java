@@ -12,8 +12,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 @ApiStatus.Internal
-record RegexReplacer(@NotNull Pattern pattern,
-                            @NotNull Function<MatchResult, Component> replacement) implements Replacer {
+record RegexReplacerImpl(@NotNull Pattern pattern,
+                         @NotNull Function<MatchResult, Component> replacement) implements Replacer {
     @Override
     public @NotNull List<FoundSpot> findSpots(@NotNull String input) {
         Matcher matcher = pattern.matcher(input);

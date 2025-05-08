@@ -27,7 +27,15 @@ public interface Ink {
         }
 
         @SafeVarargs
-        static @NotNull Ink.Provider composeInkProviders(@NotNull Iterable<? extends @NotNull Ink> @NotNull ... inkProviders) {
+        static @NotNull Ink.Provider inkProvider(@NotNull Iterable<? extends @NotNull Ink> @NotNull ... inks) {
+            return new InkProviderImpl(() -> Stream.of(inks)
+                    .<Ink>flatMap(inkCollection -> stream(inkCollection.spliterator(), false))
+                    .iterator()
+            );
+        }
+
+        @SafeVarargs
+        static @NotNull Ink.Provider composeInkProviders(@NotNull Iterable<? extends Ink.@NotNull Provider> @NotNull ... inkProviders) {
             return new InkProviderImpl(() -> Stream.of(inkProviders)
                     .<Ink>flatMap(provider -> stream(provider.spliterator(), false))
                     .iterator()
