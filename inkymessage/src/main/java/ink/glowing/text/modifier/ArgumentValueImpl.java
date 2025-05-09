@@ -6,10 +6,10 @@ import org.jetbrains.annotations.NotNull;
 
 import static net.kyori.adventure.text.Component.text;
 
-final class ArgumentImpl {
-    private ArgumentImpl() { }
+final class ArgumentValueImpl {
+    private ArgumentValueImpl() { }
     
-    enum EmptyArgument implements Modifier.Argument {
+    enum EmptyArgument implements Modifier.ArgumentValue {
         INSTANCE;
         
         @Override
@@ -23,14 +23,14 @@ final class ArgumentImpl {
         }
     };
     
-    record StringArgument(@NotNull String asString) implements Modifier.Argument {
+    record StringArgument(@NotNull String asString) implements Modifier.ArgumentValue {
         @Override
         public @NotNull Component asComponent() {
             return text(asString);
         }
     }
     
-    record ComponentArgument(@NotNull Component asComponent) implements Modifier.Argument {
+    record ComponentArgument(@NotNull Component asComponent) implements Modifier.ArgumentValue {
         @Override
         public @NotNull String asString() {
             StringBuilder builder = new StringBuilder();

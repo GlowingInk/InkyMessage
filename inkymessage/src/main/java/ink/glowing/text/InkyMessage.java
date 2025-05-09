@@ -649,7 +649,7 @@ public sealed interface InkyMessage extends ComponentSerializer<Component, Compo
                     new HashMap<>(placeholders),
                     new HashMap<>(symbolics),
                     new HashSet<>(replacers),
-                    Objects.requireNonNull(symbolicReset, "Resolver requires symbolic reset to be provided")
+                    Objects.requireNonNull(symbolicReset, "Resolver requires symbolic reset to be provided") // TODO Reset should not be required for serialization
             );
         }
     }

@@ -18,27 +18,27 @@ final class ArgumentsImpl {
         }
 
         @Override
-        public @Unmodifiable @NotNull List<Modifier.@NotNull Argument> list() {
+        public @Unmodifiable @NotNull List<Modifier.@NotNull ArgumentValue> list() {
             return List.of();
         }
 
         @Override
-        public @NotNull Modifier.Argument get(@Range(from = 0, to = Integer.MAX_VALUE) int index) {
-            return Modifier.Argument.emptyModifierArgument();
+        public @NotNull Modifier.ArgumentValue get(@Range(from = 0, to = Integer.MAX_VALUE) int index) {
+            return Modifier.ArgumentValue.empty();
         }
     }
 
     record ParameterArguments(@NotNull String parameter) implements Modifier.Arguments {
         @Override
-        public @Unmodifiable @NotNull List<Modifier.@NotNull Argument> list() {
+        public @Unmodifiable @NotNull List<Modifier.@NotNull ArgumentValue> list() {
             return List.of();
         }
 
         @Override
-        public Modifier.@NotNull Argument get(@Range(from = 0, to = Integer.MAX_VALUE) int index) {
-            return ArgumentImpl.EmptyArgument.INSTANCE;
+        public Modifier.@NotNull ArgumentValue get(@Range(from = 0, to = Integer.MAX_VALUE) int index) {
+            return ArgumentValueImpl.EmptyArgument.INSTANCE;
         }
     }
 
-    record ListedArguments(@NotNull String parameter, @Unmodifiable @NotNull List<Modifier.@NotNull Argument> list) implements Modifier.Arguments {}
+    record ListedArguments(@NotNull String parameter, @Unmodifiable @NotNull List<Modifier.@NotNull ArgumentValue> list) implements Modifier.Arguments {}
 }

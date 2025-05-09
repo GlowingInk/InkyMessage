@@ -4,12 +4,10 @@ import ink.glowing.text.Context;
 import ink.glowing.text.Ink;
 import ink.glowing.text.InkyMessage;
 import ink.glowing.text.utils.Labeled;
+import ink.glowing.text.utils.OptionalFloat;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.util.TriState;
-import org.jetbrains.annotations.ApiStatus;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Range;
-import org.jetbrains.annotations.Unmodifiable;
+import org.jetbrains.annotations.*;
 
 import java.util.*;
 import java.util.function.Function;
@@ -25,11 +23,14 @@ public interface Modifier extends Ink, Labeled, ModifierFinder {
     }
 
     @Override
+    @ApiStatus.NonExtendable
     default Modifier findModifier(@NotNull String label) {
         return label.equals(label()) ? this : null;
     }
 
-    boolean unknownArgumentAsString(@NotNull String parameter);
+    default boolean unknownArgumentAsString(@NotNull String parameter) {
+        return true;
+    }
 
     @ApiStatus.Internal
     default @NotNull String asFormatted(@NotNull String param, @NotNull String value) {
@@ -77,52 +78,52 @@ public interface Modifier extends Ink, Labeled, ModifierFinder {
     }
 
     interface Arguments {
-        static @NotNull Arguments emptyModifierArguments() {
+        static @NotNull Arguments empty() {
             return ArgumentsImpl.EmptyArguments.INSTANCE;
         }
 
-        static @NotNull Arguments modifierArguments(@NotNull String parameter) {
+        static @NotNull Arguments arguments(@NotNull String parameter) {
             return new ArgumentsImpl.ParameterArguments(parameter);
         }
 
-        static @NotNull Arguments modifierArguments(@NotNull List<@NotNull Argument> arguments) {
-            return modifierArguments("", arguments);
+        static @NotNull Arguments arguments(@NotNull List<@NotNull ArgumentValue> arguments) {
+            return arguments("", arguments);
         }
 
-        static @NotNull Arguments modifierArguments(@NotNull String parameter, @NotNull List<@NotNull Argument> arguments) {
+        static @NotNull Arguments arguments(@NotNull String parameter, @NotNull List<@NotNull ArgumentValue> arguments) {
             return new ArgumentsImpl.ListedArguments(parameter, unmodifiableList(arguments));
         }
 
         @NotNull String parameter();
 
-        @Unmodifiable @NotNull List<@NotNull Argument> list();
+        @Unmodifiable @NotNull List<@NotNull ArgumentValue> list();
 
-        default @NotNull Argument get(@Range(from = 0, to = Integer.MAX_VALUE) int index) {
+        default @NotNull Modifier.ArgumentValue get(@Range(from = 0, to = Integer.MAX_VALUE) int index) {
             var list = list();
             return list.size() > index
                     ? list.get(index)
-                    : Argument.emptyModifierArgument();
+                    : ArgumentValue.empty();
         }
     }
 
-    interface Argument {
-        static @NotNull Argument emptyModifierArgument() {
-            return ArgumentImpl.EmptyArgument.INSTANCE;
-        }
-        
-        static @NotNull Argument modifierArgument(@NotNull String value) {
-            return new ArgumentImpl.StringArgument(value);
+    interface ArgumentValue {
+        static @NotNull ArgumentValue empty() {
+            return ArgumentValueImpl.EmptyArgument.INSTANCE;
         }
 
-        static @NotNull Argument modifierArgument(@NotNull Component value) {
-            return new ArgumentImpl.ComponentArgument(value);
+        static @NotNull ArgumentValue argumentValue(@NotNull String value) {
+            return new ArgumentValueImpl.StringArgument(value);
+        }
+
+        static @NotNull ArgumentValue argumentValue(@NotNull Component value) {
+            return new ArgumentValueImpl.ComponentArgument(value);
         }
 
         @NotNull Component asComponent();
 
         @NotNull String asString();
 
-        default <T> @NotNull T as(@NotNull Function<@NotNull String, @NotNull T> funct) {
+        default <T> @UnknownNullability T as(@NotNull Function<@NotNull String, T> funct) {
             return funct.apply(asString());
         }
 
@@ -150,6 +151,16 @@ public interface Modifier extends Ink, Labeled, ModifierFinder {
                     return OptionalLong.of(Long.parseLong(string));
                 } catch (NumberFormatException ex) {
                     return OptionalLong.empty();
+                }
+            });
+        }
+
+        default @NotNull OptionalFloat asFloat() {
+            return as(string -> {
+                try {
+                    return OptionalFloat.of(Float.parseFloat(string));
+                } catch (NumberFormatException ex) {
+                    return OptionalFloat.empty();
                 }
             });
         }

@@ -1,6 +1,8 @@
 package ink.glowing.text;
 
 import ink.glowing.text.modifier.Modifier;
+import ink.glowing.text.modifier.Modifier.ArgumentValue;
+import ink.glowing.text.modifier.Modifier.Arguments;
 import ink.glowing.text.modifier.ModifierFinder;
 import ink.glowing.text.placeholder.Placeholder;
 import ink.glowing.text.placeholder.PlaceholderFinder;
@@ -22,9 +24,8 @@ import java.util.function.Function;
 import java.util.function.IntPredicate;
 
 import static ink.glowing.text.InkyMessage.*;
-import static ink.glowing.text.modifier.Modifier.Argument.modifierArgument;
-import static ink.glowing.text.modifier.Modifier.Arguments.emptyModifierArguments;
-import static ink.glowing.text.modifier.Modifier.Arguments.modifierArguments;
+import static ink.glowing.text.modifier.Modifier.ArgumentValue.argumentValue;
+import static ink.glowing.text.modifier.Modifier.Arguments.arguments;
 import static ink.glowing.text.modifier.ModifierFinder.composeModifierFinders;
 import static java.util.function.Function.identity;
 import static net.kyori.adventure.text.Component.empty;
@@ -282,14 +283,14 @@ final class Parser { // TODO This is a total mess. Tokenizer?
         return prepareModifiers(comp, modifierFinder);
     }
 
-    private @Nullable Modifier.Arguments prepareArguments(int from, Modifier modifier) {
-        if (globalIndex >= textLength) return emptyModifierArguments();
+    private @Nullable Arguments prepareArguments(int from, Modifier modifier) {
+        if (globalIndex >= textLength) return Arguments.empty();
         String param;
         if (textStr.charAt(globalIndex) != ')' && textStr.charAt(globalIndex) == ':') {
             param = extractPlain(from, " )");
             globalIndex = from + param.length();
             if (textStr.charAt(globalIndex) == ')') {
-                return modifierArguments(param);
+                return arguments(param);
             }
         } else {
             param = "";
@@ -300,13 +301,13 @@ final class Parser { // TODO This is a total mess. Tokenizer?
         globalIndex++;
         char ch = textStr.charAt(globalIndex);
         if (ch == '[' || ch == '<') {
-            List<Modifier.Argument> list = new ArrayList<>();
+            List<ArgumentValue> list = new ArrayList<>();
             collectArguments(list, modifier.unknownArgumentAsString(param));
-            return modifierArguments(param, list);
+            return arguments(param, list);
         } else {
-            var arguments = modifierArguments(
+            var arguments = arguments(
                     param,
-                    List.of(modifierArgument(parseRecursive(
+                    List.of(argumentValue(parseRecursive(
                             globalIndex,
                             ')',
                             new LinearState()
@@ -317,20 +318,20 @@ final class Parser { // TODO This is a total mess. Tokenizer?
         }
     }
 
-    private void collectArguments(List<Modifier.Argument> list, boolean unknownAsString) {
+    private void collectArguments(List<ArgumentValue> list, boolean unknownAsString) {
         if (globalIndex >= textLength) return;
         char ch = textStr.charAt(globalIndex);
         switch (ch) {
-            case '[' -> list.add(modifierArgument(parseRecursive(globalIndex + 1, ']', new LinearState()).asComponent()));
-            case '<' -> list.add(modifierArgument(extractPlainModifierValue(globalIndex + 1, ">)")));
+            case '[' -> list.add(argumentValue(parseRecursive(globalIndex + 1, ']', new LinearState()).asComponent()));
+            case '<' -> list.add(ArgumentValue.argumentValue(extractPlainModifierValue(globalIndex + 1, ">)")));
             case ')' -> {
                 return;
             }
             default -> {
                 if (unknownAsString) {
-                    list.add(modifierArgument(extractPlainModifierValue(globalIndex + 1, " )")));
+                    list.add(ArgumentValue.argumentValue(extractPlainModifierValue(globalIndex + 1, " )")));
                 } else {
-                    list.add(modifierArgument(parseRecursive(globalIndex + 1, " )", new LinearState()).asComponent()));
+                    list.add(argumentValue(parseRecursive(globalIndex + 1, " )", new LinearState()).asComponent()));
                 }
             }
         }
