@@ -21,7 +21,7 @@ final class ArgumentValueImpl {
         public @NotNull String asString() {
             return "";
         }
-    };
+    }
     
     record StringArgument(@NotNull String asString) implements Modifier.ArgumentValue {
         @Override
@@ -29,7 +29,7 @@ final class ArgumentValueImpl {
             return text(asString);
         }
     }
-    
+
     record ComponentArgument(@NotNull Component asComponent) implements Modifier.ArgumentValue {
         @Override
         public @NotNull String asString() {

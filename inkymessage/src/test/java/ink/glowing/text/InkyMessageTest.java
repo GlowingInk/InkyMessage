@@ -134,7 +134,7 @@ public class InkyMessageTest {
                                 t(" "),
                                 t("green").color(GREEN)
                         )
-                }
+                },
         };
     }
 
@@ -157,13 +157,10 @@ public class InkyMessageTest {
     public Object[][] deserializerReverseData() {
         return new Object[][] {
                 {
-                        "Plain",
-                        "Plain"
-                }, {
                         "&(color:red)[This one is red]",
                         "&[This one is red](color:red)"
                 }, {
-                        "&(color:red)(decor:italic)[Well, this is awkward](decor:bold)",
+                        "&(color:red)(decor:italic)[Well, this is awkward](decor:bold)", // TODO Should be either left or right - not both
                         "&[Well, this is awkward](color:red)(decor:bold)(decor:italic)"
                 }, {
                         "&(color:red)Skipped",

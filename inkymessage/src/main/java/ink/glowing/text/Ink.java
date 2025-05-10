@@ -15,6 +15,7 @@ import static java.util.stream.StreamSupport.stream;
 public interface Ink {
     /**
      * Something that can provide Ink(s). Extendable.
+     * The static creation methods don't create a new array/Collection.
      */
     @FunctionalInterface
     interface Provider extends Ink {
@@ -36,10 +37,7 @@ public interface Ink {
 
         @SafeVarargs
         static @NotNull Ink.Provider composeInkProviders(@NotNull Iterable<? extends Ink.@NotNull Provider> @NotNull ... inkProviders) {
-            return new InkProviderImpl(() -> Stream.of(inkProviders)
-                    .<Ink>flatMap(provider -> stream(provider.spliterator(), false))
-                    .iterator()
-            );
+            return composeInkProviders(Arrays.asList(inkProviders));
         }
 
         static @NotNull Ink.Provider composeInkProviders(@NotNull Iterable<? extends Iterable<? extends Ink.@NotNull Provider>> inkProviders) {

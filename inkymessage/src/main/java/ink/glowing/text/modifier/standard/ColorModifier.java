@@ -1,5 +1,6 @@
 package ink.glowing.text.modifier.standard;
 
+import ink.glowing.text.Context;
 import ink.glowing.text.modifier.Modifier;
 import ink.glowing.text.utils.function.FloatFunction;
 import net.kyori.adventure.text.Component;
@@ -14,19 +15,24 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 import java.util.concurrent.ThreadLocalRandom;
+import java.util.function.UnaryOperator;
 import java.util.random.RandomGenerator;
 
 import static net.kyori.adventure.text.Component.text;
 import static net.kyori.adventure.text.format.TextColor.color;
 
 // TODO VirtualComponent
-enum ColorModifier implements Modifier.Plain {
+enum ColorModifier implements Modifier {
     INSTANCE;
 
     private static final Map<String, NamedTextColor> NAMED_COLORS = NamedTextColor.NAMES.keyToValue();
 
     @Override
-    public @NotNull Component modify(@NotNull Component text, @NotNull String param, @NotNull String value) {
+    public @NotNull UnaryOperator<Component> prepareModification(@NotNull Arguments arguments, @NotNull Context context) {
+        return text -> modify(text, arguments.parameter(), arguments.get(0).asString());
+    }
+
+    private @NotNull Component modify(@NotNull Component text, @NotNull String param, @NotNull String value) {
         FloatFunction<TextColor> colorGetter;
         int indexedLength;
         boolean pastel = value.equals("pastel");

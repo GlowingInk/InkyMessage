@@ -36,7 +36,7 @@ import static net.kyori.adventure.text.Component.text;
  * Handles placeholders, style modifiers, color codes, and replacement spots.
  */
 @ApiStatus.Internal
-final class Parser { // TODO This is a total mess. Tokenizer?
+final class Parser {
     private final String textStr;
     private final int textLength;
     private final Context context;
@@ -323,13 +323,13 @@ final class Parser { // TODO This is a total mess. Tokenizer?
         char ch = textStr.charAt(globalIndex);
         switch (ch) {
             case '[' -> list.add(argumentValue(parseRecursive(globalIndex + 1, ']', new LinearState()).asComponent()));
-            case '<' -> list.add(ArgumentValue.argumentValue(extractPlainModifierValue(globalIndex + 1, ">)")));
+            case '<' -> list.add(argumentValue(extractPlainModifierValue(globalIndex + 1, ">)")));
             case ')' -> {
                 return;
             }
             default -> {
                 if (unknownAsString) {
-                    list.add(ArgumentValue.argumentValue(extractPlainModifierValue(globalIndex + 1, " )")));
+                    list.add(argumentValue(extractPlainModifierValue(globalIndex + 1, " )")));
                 } else {
                     list.add(argumentValue(parseRecursive(globalIndex + 1, " )", new LinearState()).asComponent()));
                 }
