@@ -126,7 +126,7 @@ final class Parser {
                         builder.append(modifiers.apply(parseRecursive(globalIndex + 1, ']', state).asComponent()));
                         from = globalIndex--;
                     }
-
+                    // TODO In arguments, we do parse placeholders in plain text. Either remove plain syntax here, or parse placeholder
                     case '<' -> { // &<...>
                         appendSegment(builder, from, globalIndex, state);
                         int initIndex = globalIndex;
@@ -235,7 +235,7 @@ final class Parser {
             var spot = iterator.next();
             if (spot.start() == index) {
                 iterator.remove();
-                return spot.end() <= end ? spot : null;
+                if (spot.end() <= end) return spot;
             } else if (spot.start() < index) {
                 iterator.remove();
             } else {
@@ -302,7 +302,7 @@ final class Parser {
         char ch = textStr.charAt(globalIndex);
         if (ch == '[' || ch == '<') {
             List<ArgumentValue> list = new ArrayList<>();
-            collectArguments(list, modifier.unknownArgumentAsString(param));
+            collectArguments(list, modifier.unknownArgumentType(param) == ArgumentValue.Type.STRING);
             return arguments(param, list);
         } else {
             var arguments = arguments(

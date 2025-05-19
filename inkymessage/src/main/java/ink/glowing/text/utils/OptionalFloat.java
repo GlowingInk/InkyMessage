@@ -36,7 +36,7 @@ public sealed interface OptionalFloat permits OptionalFloatImpl.PresentOptionalF
     }
 
     static @NotNull OptionalFloat ofNullable(@Nullable Float value) {
-        return value == null ? empty() : of(value);
+        return value == null ? empty() : of((float) value);
     }
 
     static @NotNull OptionalFloat empty() {

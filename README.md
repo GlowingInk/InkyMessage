@@ -33,6 +33,8 @@ bound to them, which are different from the default ones.
 - Arbitrary type and amount of modifiers values
 - Shadow color modifier
 - Aliases system
+- Improve replacements behavior
+- Better dynamic Inks
 - Better API for marking (de)serializable elements / precise escaping API
 ## Plans (1.0.0+)
 - Better serialization (`Component` to `String`)

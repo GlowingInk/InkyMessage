@@ -28,8 +28,8 @@ public interface Modifier extends Ink, Labeled, ModifierFinder {
         return label.equals(label()) ? this : null;
     }
 
-    default boolean unknownArgumentAsString(@NotNull String parameter) {
-        return true;
+    default @NotNull ArgumentValue.Type unknownArgumentType(@NotNull String parameter) {
+        return ArgumentValue.Type.STRING;
     }
 
     @ApiStatus.Internal
@@ -57,8 +57,8 @@ public interface Modifier extends Ink, Labeled, ModifierFinder {
         @NotNull Component modify(@NotNull Component text, @NotNull String param, @NotNull String value);
 
         @Override
-        default boolean unknownArgumentAsString(@NotNull String parameter) {
-            return false;
+        default ArgumentValue.@NotNull Type unknownArgumentType(@NotNull String parameter) {
+            return ArgumentValue.Type.STRING;
         }
     }
 
@@ -72,8 +72,8 @@ public interface Modifier extends Ink, Labeled, ModifierFinder {
         @NotNull Component modify(@NotNull Component text, @NotNull String param, @NotNull Component value);
 
         @Override
-        default boolean unknownArgumentAsString(@NotNull String parameter) {
-            return true;
+        default ArgumentValue.@NotNull Type unknownArgumentType(@NotNull String parameter) {
+            return ArgumentValue.Type.COMPONENT;
         }
     }
 
@@ -236,6 +236,10 @@ public interface Modifier extends Ink, Labeled, ModifierFinder {
             } catch (NumberFormatException ex) {
                 return def;
             }
+        }
+
+        enum Type {
+            STRING, COMPONENT;
         }
     }
 }

@@ -36,4 +36,8 @@ public final class Helper {
     public static TextComponent.Builder tb(ComponentLike... texts) {
         return text().append(texts);
     }
+
+    public static void println(Object obj) {
+        System.out.println(obj);
+    }
 }

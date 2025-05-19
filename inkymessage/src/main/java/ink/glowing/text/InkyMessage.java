@@ -20,6 +20,7 @@ import org.jetbrains.annotations.*;
 import java.util.*;
 
 import static ink.glowing.text.symbolic.standard.StandardSymbolicStyles.simpleReset;
+import static ink.glowing.text.utils.GeneralUtils.indexOf;
 
 /**
  * User-friendly component (de)serializer with legacy-inspired format.
@@ -91,6 +92,26 @@ public sealed interface InkyMessage extends ComponentSerializer<Component, Compo
     }
 
     /**
+     * Escapes special characters with slashes.
+     * @param textArray character array containing text to escape
+     * @param from starting index (inclusive)
+     * @param to ending index (exclusive)
+     * @return escaped string
+     */
+    @Contract(value = "_, _, _ -> new", pure = true)
+    static @NotNull String escape(char[] textArray, int from, int to) {
+        StringBuilder builder = new StringBuilder(to - from);
+        for (int index = from; index < to; index++) {
+            char ch = textArray[index];
+            if (isSpecial(ch)) {
+                builder.append('\\');
+            }
+            builder.append(ch);
+        }
+        return builder.toString();
+    }
+
+    /**
      * Unescapes special characters.
      * @param text text to unescape
      * @return unescaped string
@@ -120,6 +141,35 @@ public sealed interface InkyMessage extends ComponentSerializer<Component, Compo
     }
 
     /**
+     * Unescapes special characters.
+     * @param textArray character array containing text to unescape
+     * @param from starting index (inclusive)
+     * @param to ending index (exclusive)
+     * @return unescaped string
+     */
+    @Contract(value = "_, _, _ -> new", pure = true)
+    static @NotNull String unescape(char @NotNull [] textArray, int from, int to) {
+        int nextIndex = indexOf(textArray, '\\', from, to);
+        if (nextIndex == -1) return new String(textArray, from, to - from);
+        StringBuilder builder = new StringBuilder(to - from);
+        for (
+                int index = from;
+                index < to;
+                index = nextIndex + 2, nextIndex = indexOf(textArray, '\\', index, to)
+        ) {
+            if (nextIndex == -1 || nextIndex + 1 >= to) {
+                builder.append(textArray, index, to - index);
+                break;
+            }
+            builder.append(textArray, index, nextIndex - index);
+            char nextCh = textArray[nextIndex + 1];
+            if (isNotSpecial(nextCh)) builder.append('\\');
+            builder.append(nextCh);
+        }
+        return builder.toString();
+    }
+
+    /**
      * Checks if character is escaped.
      * @param input text to check in
      * @param index index of character to check
@@ -133,6 +183,31 @@ public sealed interface InkyMessage extends ComponentSerializer<Component, Compo
     }
 
     /**
+     * Checks if character is escaped.
+     * @param textArray character array containing text to check in
+     * @param index index of character to check
+     * @return is character escaped
+     */
+    @Contract(pure = true)
+    static boolean isEscapedAt(char @NotNull [] textArray, int index) {
+        return isEscapedAt(textArray, index, -1);
+    }
+
+    /**
+     * Checks if character is escaped.
+     * @param textArray character array containing text to check in
+     * @param index index of character to check
+     * @param from starting index of the text (inclusive)
+     * @return is character escaped
+     */
+    @Contract(pure = true)
+    static boolean isEscapedAt(char @NotNull [] textArray, int index, int from) {
+        boolean escaped = false;
+        while (--index >= from && textArray[index] == '\\') escaped = !escaped;
+        return escaped;
+    }
+
+    /**
      * Checks if character is not escaped.
      * @param input text to check in
      * @param index index of character to check
@@ -141,6 +216,29 @@ public sealed interface InkyMessage extends ComponentSerializer<Component, Compo
     @Contract(pure = true)
     static boolean isUnescapedAt(@NotNull String input, int index) {
         return !isEscapedAt(input, index);
+    }
+
+    /**
+     * Checks if character is not escaped.
+     * @param textArray character array containing text to check in
+     * @param index index of character to check
+     * @return is character unescaped
+     */
+    @Contract(pure = true)
+    static boolean isUnescapedAt(char[] textArray, int index) {
+        return !isEscapedAt(textArray, index, -1);
+    }
+
+    /**
+     * Checks if character is not escaped.
+     * @param textArray character array containing text to check in
+     * @param index index of character to check
+     * @param from starting index of the text (inclusive)
+     * @return is character unescaped
+     */
+    @Contract(pure = true)
+    static boolean isUnescapedAt(char[] textArray, int index, int from) {
+        return !isEscapedAt(textArray, index, from);
     }
 
     /**
@@ -637,6 +735,12 @@ public sealed interface InkyMessage extends ComponentSerializer<Component, Compo
 
         @Contract("_ -> this")
         public @NotNull InkyMessage.Builder removeSymbolics(@NotNull Iterable<? extends @NotNull Character> symbolicSymbols) {
+            for (var symbolicSymbol : symbolicSymbols) removeSymbolic(symbolicSymbol);
+            return this;
+        }
+
+        @Contract("_ -> this")
+        public @NotNull InkyMessage.Builder removeSymbolics(char @NotNull ... symbolicSymbols) {
             for (var symbolicSymbol : symbolicSymbols) removeSymbolic(symbolicSymbol);
             return this;
         }

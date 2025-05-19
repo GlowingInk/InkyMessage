@@ -58,4 +58,11 @@ public final class GeneralUtils {
             indexConsumer.accept(index);
         }
     }
+
+    public static int indexOf(char @NotNull [] array, char ch, int from, int to) {
+        for (int i = from; i < to; i++) {
+            if (array[i] == ch) return i;
+        }
+        return -1;
+    }
 }

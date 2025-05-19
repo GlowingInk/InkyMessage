@@ -37,12 +37,12 @@ final class LangModifiers {
         }
 
         @Override
-        public boolean unknownArgumentAsString(@NotNull String parameter) {
-            return false;
+        public @NotNull Modifier.ArgumentValue.Type unknownArgumentType(@NotNull String parameter) {
+            return ArgumentValue.Type.COMPONENT;
         }
 
         @Override
-        public @NotNull String label() {
+        public @LabelPattern @NotNull String label() {
             return "args";
         }
     }

@@ -4,6 +4,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
@@ -11,11 +12,12 @@ public final class Caching {
     private Caching() {}
 
     public static <T, R> @NotNull Function<T, R> caching(@NotNull Function<T, R> function) {
-        return new CFunction<>(function, new HashMap<>());
+        Map<T, R> cacheMap = new HashMap<>();
+        return new CFunction<>(function, cacheMap::computeIfAbsent);
     }
 
-    public static <T, R> @NotNull Function<T, R> caching(@NotNull Function<T, R> function, @NotNull Map<T, R> cacheMap) {
-        return new CFunction<>(function, cacheMap);
+    public static <T, R> @NotNull Function<T, R> caching(@NotNull Function<T, R> function, @NotNull BiFunction<T, Function<T, R>, R> computeFunction) {
+        return new CFunction<>(function, computeFunction);
     }
 
     public static <R> @NotNull Supplier<R> caching(@NotNull Supplier<R> supplier) {
@@ -24,16 +26,16 @@ public final class Caching {
 
     private static final class CFunction<T, R> implements Function<T, R> {
         private final Function<T, R> origin;
-        private final Map<T, R> cache;
+        private final BiFunction<T, Function<T, R>, R> computeFunction;
 
-        private CFunction(@NotNull Function<T, R> origin, @NotNull Map<T, R> cache) {
+        private CFunction(@NotNull Function<T, R> origin, @NotNull BiFunction<T, Function<T, R>, R> computeFunction) {
             this.origin = origin;
-            this.cache = cache;
+            this.computeFunction = computeFunction;
         }
 
         @Override
         public R apply(T t) {
-            return cache.computeIfAbsent(t, origin);
+            return computeFunction.apply(t, origin);
         }
     }
 
