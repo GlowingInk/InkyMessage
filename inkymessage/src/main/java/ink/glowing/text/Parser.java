@@ -119,24 +119,22 @@ final class Parser {
                         appendSegment(builder, from, globalIndex, state);
                         int initIndex = globalIndex;
                         var modifiers = prepareModifiers(context); // Also adjusts globalIndex to last modifier
-                        if (textStr.charAt(globalIndex) != '[') {
-                            globalIndex = initIndex;
+                        if (textStr.charAt(globalIndex) == '[') {
+                            builder.append(modifiers.apply(parseRecursive(globalIndex + 1, ']', state).asComponent()));
+                            from = globalIndex--;
                             continue;
+                        } if (textStr.charAt(globalIndex) == '{') {
+                            var placeholderData = parsePlaceholder(context);
+                            if (placeholderData != null) {
+                                var placeholder = placeholderData.placeholder;
+                                builder.append(prepareModifiers(
+                                        composeModifierFinders(context, placeholder::findLocalModifier)
+                                ).apply(placeholder.retrieve(placeholderData.params, context)).applyFallbackStyle(state.lastStyle));
+                                from = globalIndex--;
+                                continue;
+                            }
                         }
-                        builder.append(modifiers.apply(parseRecursive(globalIndex + 1, ']', state).asComponent()));
-                        from = globalIndex--;
-                    }
-                    // TODO In arguments, we do parse placeholders in plain text. Either remove plain syntax here, or parse placeholder
-                    case '<' -> { // &<...>
-                        appendSegment(builder, from, globalIndex, state);
-                        int initIndex = globalIndex;
-                        if (!iterateUntil('>')) {
-                            globalIndex = initIndex;
-                            continue;
-                        }
-                        String sub = unescape(textStr.substring(initIndex + 2, globalIndex));
-                        builder.append(text(sub));
-                        from = globalIndex + 1;
+                        globalIndex = initIndex;
                     }
                 }
             } else if (untilCh.test(ch) && isUnescapedAt(textStr, globalIndex)) {

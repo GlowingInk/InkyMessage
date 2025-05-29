@@ -127,14 +127,7 @@ public class InkyMessageTest {
                 }, {
                         "&{lang:test}(arg:4 four args)",
                         tb(translatable("test").arguments(empty(), empty(), empty(), tb(t("four args"))))
-                }, {
-                        "&<&aPlain text\\> &[This one too](color:green)> &agreen",
-                        tb(
-                                t("&aPlain text> &[This one too](color:green)"),
-                                t(" "),
-                                t("green").color(GREEN)
-                        )
-                },
+                }
         };
     }
 
