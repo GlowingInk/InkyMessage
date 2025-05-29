@@ -51,12 +51,10 @@ public class InkyMessageChatPaper extends JavaPlugin implements Listener { // TO
                         }
                         String add = match.group(2);
 
-                        if (add != null) {
-                            if (add.length() > 13) {
-                                add = add.substring(0, 5) + "..." + add.substring(add.length() - 5);
-                            }
-                        } else {
+                        if (add == null) {
                             add = "";
+                        } else if (add.length() > 13) {
+                            add = add.substring(0, 5) + "..." + add.substring(add.length() - 5);
                         }
 
                         return text(domain + add).style((builder) -> builder

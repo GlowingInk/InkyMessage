@@ -50,13 +50,13 @@ public class InkyMessageTest {
                         "&[Fully clickable\\]](click:run /helloworld)",
                         tb(tb(t("Fully clickable]")).clickEvent(runCommand("/helloworld")))
                 }, {
-                        "&aGreen, &[clickable&c red](click:url http://glowing.ink/), red again",
+                        "&aGreen, &[clickable&c red](click:url https://github.com/GlowingInk), red again",
                         tb(
                                 t("Green, ").color(GREEN),
                                 tb(
                                         t("clickable").color(GREEN),
                                         t(" red").color(RED)
-                                ).clickEvent(openUrl("http://glowing.ink/")),
+                                ).clickEvent(openUrl("https://github.com/GlowingInk")),
                                 t(", red again").color(RED)
                         )
                 }, {
@@ -145,7 +145,7 @@ public class InkyMessageTest {
         try {
             assertEquals(
                     inky(text),
-                    expected
+                    expected.compact()
             );
         } catch (Throwable throwable) {
             if (!DEBUG) debugDeserializer(text, expected);
@@ -221,7 +221,7 @@ public class InkyMessageTest {
         Component expected = expectedLike.asComponent();
         assertEquals(
                 inkyMessage().deserialize(text, inks),
-                expected
+                expected.compact()
         );
     }
 

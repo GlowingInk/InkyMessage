@@ -5,6 +5,8 @@ import ink.glowing.text.placeholder.Placeholder;
 import ink.glowing.text.replace.ReplacementMatcher;
 import ink.glowing.text.replace.Replacer;
 import ink.glowing.text.symbolic.SymbolicStyle;
+import ink.glowing.text.utils.processor.DecodeProcessors;
+import ink.glowing.text.utils.processor.EncodeProcessors;
 import net.kyori.adventure.text.Component;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -23,6 +25,7 @@ import static ink.glowing.text.replace.ReplacementMatcher.replacementMatcher;
 import static ink.glowing.text.replace.StandardReplacers.urlReplacer;
 import static ink.glowing.text.symbolic.standard.StandardSymbolicStyles.notchianFormat;
 import static ink.glowing.text.symbolic.standard.StandardSymbolicStyles.standardResetSymbol;
+import static ink.glowing.text.utils.processor.DecodeProcessors.decodePostProcessor;
 import static java.util.Collections.unmodifiableCollection;
 import static java.util.Collections.unmodifiableMap;
 
@@ -33,6 +36,7 @@ final class InkyMessageImpl implements InkyMessage {
             .addSymbolics(notchianFormat())
             .symbolicReset(standardResetSymbol())
             .addReplacer(urlReplacer())
+            .decodeProcessors(decodePostProcessor(Component::compact))
             .build();
     
     private final Map<String, Modifier> modifiers;
@@ -44,12 +48,18 @@ final class InkyMessageImpl implements InkyMessage {
     private final Context baseContext;
     private final ReplacementMatcher replacementMatcher;
 
+    private final EncodeProcessors encodeProcessors;
+    private final DecodeProcessors decodeProcessors;
+
     InkyMessageImpl(
             @NotNull Map<String, Modifier> modifiers,
             @NotNull Map<String, Placeholder> placeholders,
             @NotNull Map<Character, SymbolicStyle> symbolics,
             @NotNull Collection<Replacer> replacers,
-            @NotNull SymbolicStyle symbolicReset
+            @NotNull SymbolicStyle symbolicReset,
+
+            EncodeProcessors encodeProcessors,
+            DecodeProcessors decodeProcessors
     ) {
         this.modifiers = unmodifiableMap(modifiers);
         this.placeholders = unmodifiableMap(placeholders);
@@ -58,6 +68,9 @@ final class InkyMessageImpl implements InkyMessage {
         this.symbolicReset = symbolicReset;
 
         this.replacementMatcher = replacementMatcher(replacers);
+
+        this.encodeProcessors = encodeProcessors;
+        this.decodeProcessors = decodeProcessors;
 
         Map<String, Placeholder> adjustedPlaceholders = new HashMap<>(placeholders);
         adjustedPlaceholders.putAll(requiredPlaceholdersMap());
@@ -152,13 +165,33 @@ final class InkyMessageImpl implements InkyMessage {
      * @param context context to use
      * @return converted text component
      */
-    private static @NotNull Component deserialize(@NotNull String inputText,
-                                                  @NotNull Context context) {
-        return Parser.parse(inputText, context);
+    private @NotNull Component deserialize(@NotNull String inputText,
+                                           @NotNull Context context) {
+        return decodeProcessors.postProcess(
+                Parser.parse(
+                    decodeProcessors.preProcess(inputText),
+                    context
+                )
+        );
     }
 
     @Override
     public @NotNull String serialize(@NotNull Component text) {
-        return stringify(text, this);
+        return encodeProcessors.postProcess(
+                stringify(
+                        encodeProcessors.preProcess(text),
+                        this
+                )
+        );
+    }
+
+    @Override
+    public @NotNull EncodeProcessors encodeProcessors() {
+        return encodeProcessors;
+    }
+
+    @Override
+    public @NotNull DecodeProcessors decodeProcessors() {
+        return decodeProcessors;
     }
 }

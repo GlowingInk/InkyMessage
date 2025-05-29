@@ -98,6 +98,12 @@ public final class StandardSymbolicStyles {
             BEDROCK_COLORS, BEDROCK_DECORATIONS
     );
 
+    private static @NotNull SymbolicStyle STANDARD_RESET = simpleReset('r');
+
+    public static @NotNull SymbolicStyle standardReset() {
+        return STANDARD_RESET;
+    }
+
     public static char standardResetSymbol() {
         return 'r';
     }
@@ -107,6 +113,7 @@ public final class StandardSymbolicStyles {
      * @return notchian decorations
      * @see StandardSymbolicStyles#chainedDecoration(char, TextDecoration)
      */
+    @Contract(pure = true)
     public static @NotNull @Unmodifiable Collection<SymbolicStyle> notchianDecorations() {
         return NOTCHIAN_DECORATIONS;
     }
@@ -116,6 +123,7 @@ public final class StandardSymbolicStyles {
      * @return notchian colors
      * @see StandardSymbolicStyles#resettingColor(char, TextColor)
      */
+    @Contract(pure = true)
     public static @NotNull @Unmodifiable Collection<SymbolicStyle> notchianColors() {
         return NOTCHIAN_COLORS;
     }
@@ -125,6 +133,7 @@ public final class StandardSymbolicStyles {
      * @see StandardSymbolicStyles#notchianColors()
      * @see StandardSymbolicStyles#notchianDecorations()
      */
+    @Contract(pure = true)
     public static @NotNull @Unmodifiable Collection<SymbolicStyle> notchianFormat() {
         return NOTCHIAN_FORMAT;
     }
@@ -134,6 +143,7 @@ public final class StandardSymbolicStyles {
      * @return bedrock decorations
      * @see StandardSymbolicStyles#chainedDecoration(char, TextDecoration)
      */
+    @Contract(pure = true)
     public static @NotNull @Unmodifiable Collection<SymbolicStyle> bedrockDecorations() {
         return BEDROCK_DECORATIONS;
     }
@@ -143,6 +153,7 @@ public final class StandardSymbolicStyles {
      * @return bedrock colors
      * @see StandardSymbolicStyles#chainedColor(char, TextColor)
      */
+    @Contract(pure = true)
     public static @NotNull @Unmodifiable Collection<SymbolicStyle> bedrockColors() {
         return BEDROCK_COLORS;
     }
@@ -152,6 +163,7 @@ public final class StandardSymbolicStyles {
      * @see StandardSymbolicStyles#bedrockColors()
      * @see StandardSymbolicStyles#bedrockDecorations()
      */
+    @Contract(pure = true)
     public static @NotNull @Unmodifiable Collection<SymbolicStyle> bedrockFormat() {
         return BEDROCK_FORMAT;
     }
@@ -189,11 +201,13 @@ public final class StandardSymbolicStyles {
         return new ChainedSymbolicColor(symbol, color);
     }
 
+    @Contract(value = "_ -> new", pure = true)
     public static @NotNull SymbolicStyle simpleReset(char symbol) {
         return new SimpleSymbolicReset(symbol);
     }
 
-    public static @NotNull Map<TextDecoration, State> resetDecorations() {
+    @Contract(pure = true)
+    public static @NotNull @Unmodifiable Map<TextDecoration, State> resetDecorations() {
         return RESET_DECORATIONS;
     }
 }

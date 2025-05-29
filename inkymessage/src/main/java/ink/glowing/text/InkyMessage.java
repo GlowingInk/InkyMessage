@@ -12,15 +12,22 @@ import ink.glowing.text.replace.StandardReplacers;
 import ink.glowing.text.symbolic.SymbolicStyle;
 import ink.glowing.text.symbolic.SymbolicStyleFinder;
 import ink.glowing.text.symbolic.standard.StandardSymbolicStyles;
+import ink.glowing.text.utils.processor.DecodeProcessors;
+import ink.glowing.text.utils.processor.EncodeProcessors;
 import net.kyori.adventure.builder.AbstractBuilder;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.ComponentSerializer;
-import org.jetbrains.annotations.*;
+import org.jetbrains.annotations.ApiStatus;
+import org.jetbrains.annotations.Contract;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Unmodifiable;
 
 import java.util.*;
 
 import static ink.glowing.text.symbolic.standard.StandardSymbolicStyles.simpleReset;
 import static ink.glowing.text.utils.GeneralUtils.indexOf;
+import static ink.glowing.text.utils.processor.DecodeProcessors.identityDecodePreProcessors;
+import static ink.glowing.text.utils.processor.EncodeProcessors.identityEncodePreprocessors;
 
 /**
  * User-friendly component (de)serializer with legacy-inspired format.
@@ -382,6 +389,10 @@ public sealed interface InkyMessage extends ComponentSerializer<Component, Compo
         return with(inks).serialize(text);
     }
 
+    @NotNull EncodeProcessors encodeProcessors();
+
+    @NotNull DecodeProcessors decodeProcessors();
+    
     @Contract(value = "_ -> new", pure = true)
     default @NotNull InkyMessage with(@NotNull Ink ink) {
         return toBuilder().addInk(ink).build();
@@ -408,7 +419,9 @@ public sealed interface InkyMessage extends ComponentSerializer<Component, Compo
                 new HashMap<>(placeholders()),
                 new HashMap<>(symbolics()),
                 new HashSet<>(replacers()),
-                symbolicReset()
+                symbolicReset(),
+                encodeProcessors(),
+                decodeProcessors()
         );
     }
 
@@ -428,25 +441,37 @@ public sealed interface InkyMessage extends ComponentSerializer<Component, Compo
         private Collection<Replacer> replacers;
         private SymbolicStyle symbolicReset;
 
+        private EncodeProcessors encodeProcessors;
+        private DecodeProcessors decodeProcessors;
+
         Builder() {
             this.modifiers = new HashMap<>();
             this.placeholders = new HashMap<>();
             this.symbolics = new HashMap<>();
             this.replacers = new HashSet<>();
+
+            this.encodeProcessors = identityEncodePreprocessors();
+            this.decodeProcessors = identityDecodePreProcessors();
         }
 
         Builder(
-                @NotNull Map<String, Modifier> modifiers,
-                @NotNull Map<String, Placeholder> placeholders,
-                @NotNull Map<Character, SymbolicStyle> symbolics,
-                @NotNull Collection<Replacer> replacers,
-                @Nullable SymbolicStyle symbolicReset
+                Map<String, Modifier> modifiers,
+                Map<String, Placeholder> placeholders,
+                Map<Character, SymbolicStyle> symbolics,
+                Collection<Replacer> replacers,
+                SymbolicStyle symbolicReset,
+
+                EncodeProcessors encodeProcessors,
+                DecodeProcessors decodeProcessors
         ) {
             this.modifiers = modifiers;
             this.placeholders = placeholders;
             this.symbolics = symbolics;
             this.replacers = replacers;
             this.symbolicReset = symbolicReset;
+
+            this.encodeProcessors = encodeProcessors;
+            this.decodeProcessors = decodeProcessors;
         }
 
         @Contract("_ -> this")
@@ -745,6 +770,28 @@ public sealed interface InkyMessage extends ComponentSerializer<Component, Compo
             return this;
         }
 
+        @Contract(pure = true)
+        public @NotNull EncodeProcessors encodeProcessors() {
+            return encodeProcessors;
+        }
+
+        @Contract("_ -> this")
+        public @NotNull InkyMessage.Builder encodeProcessors(@NotNull EncodeProcessors encodeProcessors) {
+            this.encodeProcessors = encodeProcessors;
+            return this;
+        }
+
+        @Contract(pure = true)
+        public @NotNull DecodeProcessors decodeProcessors() {
+            return decodeProcessors;
+        }
+
+        @Contract("_ -> this")
+        public @NotNull InkyMessage.Builder decodeProcessors(@NotNull DecodeProcessors decodeProcessors) {
+            this.decodeProcessors = decodeProcessors;
+            return this;
+        }
+
         @Contract("-> new")
         @Override
         public @NotNull InkyMessage build() {
@@ -753,7 +800,9 @@ public sealed interface InkyMessage extends ComponentSerializer<Component, Compo
                     new HashMap<>(placeholders),
                     new HashMap<>(symbolics),
                     new HashSet<>(replacers),
-                    Objects.requireNonNull(symbolicReset, "Resolver requires symbolic reset to be provided") // TODO Reset should not be required for serialization
+                    Objects.requireNonNull(symbolicReset, "Resolver requires symbolic reset to be provided"), // TODO Reset should not be required for serialization
+                    encodeProcessors,
+                    decodeProcessors
             );
         }
     }
