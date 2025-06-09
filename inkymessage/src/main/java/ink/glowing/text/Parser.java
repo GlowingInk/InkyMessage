@@ -38,6 +38,8 @@ import static net.kyori.adventure.text.Component.text;
 @ApiStatus.Internal
 final class Parser {
     private final String textStr;
+    private final char[] textArr;
+    
     private final int textLength;
     private final Context context;
     private final TreeSet<Replacer.FoundSpot> replaceSpots;
@@ -46,7 +48,8 @@ final class Parser {
 
     private Parser(@NotNull String textStr, @NotNull Context context) {
         this.textStr = textStr;
-        this.textLength = textStr.length();
+        this.textArr = textStr.toCharArray();
+        this.textLength = textArr.length;
         this.context = context;
         this.replaceSpots = context.matchReplacements(textStr);
     }
@@ -90,10 +93,10 @@ final class Parser {
     private @NotNull ComponentLike parseRecursive(int from, IntPredicate untilCh, @NotNull LinearState state) {
         var builder = text();
         for (globalIndex = from; globalIndex < textLength; globalIndex++) {
-            char ch = textStr.charAt(globalIndex);
+            char ch = textArr[globalIndex];
             if (isSpecial(ch)) {
-                if (isEscapedAt(textStr, globalIndex) || globalIndex + 1 >= textLength) continue;
-                char nextCh = textStr.charAt(globalIndex + 1);
+                if (isEscapedAt(textArr, globalIndex) || globalIndex + 1 >= textLength) continue;
+                char nextCh = textArr[globalIndex + 1];
                 switch (nextCh) {
                     case '[' -> { // &[...]
                         appendSegment(builder, from, globalIndex, state);
@@ -119,11 +122,11 @@ final class Parser {
                         appendSegment(builder, from, globalIndex, state);
                         int initIndex = globalIndex;
                         var modifiers = prepareModifiers(context); // Also adjusts globalIndex to last modifier
-                        if (textStr.charAt(globalIndex) == '[') {
+                        if (textArr[globalIndex] == '[') { // &(...)[...]
                             builder.append(modifiers.apply(parseRecursive(globalIndex + 1, ']', state).asComponent()));
                             from = globalIndex--;
                             continue;
-                        } if (textStr.charAt(globalIndex) == '{') {
+                        } if (textArr[globalIndex] == '{') { // &(...){...}
                             var placeholderData = parsePlaceholder(context);
                             if (placeholderData != null) {
                                 var placeholder = placeholderData.placeholder;
@@ -137,7 +140,7 @@ final class Parser {
                         globalIndex = initIndex;
                     }
                 }
-            } else if (untilCh.test(ch) && isUnescapedAt(textStr, globalIndex)) {
+            } else if (untilCh.test(ch) && isUnescapedAt(textArr, globalIndex)) {
                 appendSegment(builder, from, globalIndex, state);
                 return prepareModifiers(context).apply(builder.build()); // TODO Check if parsing modifiers
             }
@@ -166,9 +169,9 @@ final class Parser {
                 index = lastAppend - 1;
                 continue;
             }
-            char ch = textStr.charAt(index);
-            if (!isSpecial(ch) || index + 1 == until || isEscapedAt(textStr, index)) continue;
-            char styleCh = textStr.charAt(index + 1);
+            char ch = textArr[index];
+            if (!isSpecial(ch) || index + 1 == until || isEscapedAt(textArr, index)) continue;
+            char styleCh = textArr[index + 1];
             switch (styleCh) {
                 case '#', 'x' -> {
                     boolean quirky = styleCh == 'x';
@@ -204,7 +207,7 @@ final class Parser {
      */
     private void appendPrevious(@NotNull TextComponent.Builder builder, int start, int end, @NotNull LinearState state) {
         if (start == end) return;
-        builder.append(text(unescape(textStr.substring(start, end))).applyFallbackStyle(state.lastStyle));
+        builder.append(text(unescape(textArr, start, end)).applyFallbackStyle(state.lastStyle));
     }
 
     /**
@@ -260,7 +263,7 @@ final class Parser {
             @NotNull ModifierFinder modifierFinder
     ) {
         int from = globalIndex + 1;
-        if (from >= textLength || textStr.charAt(from) != '(') {
+        if (from >= textLength || textArr[from] != '(') {
             globalIndex = from;
             return comp;
         }
@@ -284,20 +287,20 @@ final class Parser {
     private @Nullable Arguments prepareArguments(int from, Modifier modifier) {
         if (globalIndex >= textLength) return Arguments.empty();
         String param;
-        if (textStr.charAt(globalIndex) != ')' && textStr.charAt(globalIndex) == ':') {
+        if (textArr[globalIndex] != ')' && textArr[globalIndex] == ':') {
             param = extractPlain(from, " )");
             globalIndex = from + param.length();
-            if (textStr.charAt(globalIndex) == ')') {
+            if (textArr[globalIndex] == ')') {
                 return arguments(param);
             }
         } else {
             param = "";
         }
-        if (textStr.charAt(globalIndex) != ' ') {
+        if (textArr[globalIndex] != ' ') {
             return null;
         }
         globalIndex++;
-        char ch = textStr.charAt(globalIndex);
+        char ch = textArr[globalIndex];
         if (ch == '[' || ch == '<') {
             List<ArgumentValue> list = new ArrayList<>();
             collectArguments(list, modifier.unknownArgumentType(param) == ArgumentValue.Type.STRING);
@@ -318,7 +321,7 @@ final class Parser {
 
     private void collectArguments(List<ArgumentValue> list, boolean unknownAsString) {
         if (globalIndex >= textLength) return;
-        char ch = textStr.charAt(globalIndex);
+        char ch = textArr[globalIndex];
         switch (ch) {
             case '[' -> list.add(argumentValue(parseRecursive(globalIndex + 1, ']', new LinearState()).asComponent()));
             case '<' -> list.add(argumentValue(extractPlainModifierValue(globalIndex + 1, ">)")));
@@ -347,7 +350,7 @@ final class Parser {
     private @NotNull String extractPlain(int from, @NotNull String until) {
         globalIndex = from;
         if (iterateUntil(until)) {
-            return unescape(textStr.substring(from, globalIndex));
+            return unescape(textArr, from, globalIndex);
         }
         return "";
     }
@@ -364,16 +367,16 @@ final class Parser {
         StringBuilder builder = new StringBuilder();
         globalIndex = from;
         for (int lastIndex = globalIndex; globalIndex < textLength; globalIndex++) {
-            char ch = textStr.charAt(globalIndex);
+            char ch = textArr[globalIndex];
             if (until.indexOf(ch) != -1) {
-                if (isUnescapedAt(textStr, globalIndex)) {
-                    return builder.append(textStr, lastIndex, globalIndex).toString();
+                if (isUnescapedAt(textArr, globalIndex)) {
+                    return builder.append(textArr, lastIndex, globalIndex - lastIndex).toString();
                 }
-            } else if (isSpecial(ch) && isUnescapedAt(textStr, globalIndex)) {
+            } else if (isSpecial(ch) && isUnescapedAt(textArr, globalIndex)) {
                 int initIndex = globalIndex;
                 PlaceholderData data = parsePlaceholder(context);
                 if (data != null) {
-                    builder.append(textStr, lastIndex, initIndex);
+                    builder.append(textArr, lastIndex, initIndex - lastIndex);
                     builder.append(data.placeholder.retrievePlain(data.params, context));
                     lastIndex = globalIndex + 1;
                 }
@@ -388,13 +391,13 @@ final class Parser {
             globalIndex = initIndex;
             return null;
         }
-        Placeholder placeholder = placeholders.findPlaceholder(unescape(textStr.substring(initIndex + 2, globalIndex)));
+        Placeholder placeholder = placeholders.findPlaceholder(unescape(textArr, initIndex + 2, globalIndex));
         if (placeholder == null) {
             globalIndex = initIndex;
             return null;
         }
         String params;
-        if (textStr.charAt(globalIndex) == '}') {
+        if (textArr[globalIndex] == '}') {
             params = "";
         } else {
             int paramsIndex = (++globalIndex);
@@ -402,7 +405,7 @@ final class Parser {
                 globalIndex = initIndex;
                 return null;
             }
-            params = unescape(textStr.substring(paramsIndex, globalIndex));
+            params = unescape(textArr, paramsIndex, globalIndex);
         }
         return new PlaceholderData(placeholder, params);
     }
@@ -432,7 +435,7 @@ final class Parser {
      */
     private boolean iterateUntil(@NotNull String until) {
         for (; globalIndex < textLength; globalIndex++) {
-            if (until.indexOf(textStr.charAt(globalIndex)) != -1 && isUnescapedAt(textStr, globalIndex)) return true;
+            if (until.indexOf(textArr[globalIndex]) != -1 && isUnescapedAt(textArr, globalIndex)) return true;
         }
         return false;
     }

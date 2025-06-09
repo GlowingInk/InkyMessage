@@ -6,6 +6,7 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.ComponentLike;
 import net.kyori.adventure.text.event.ClickEvent;
 import net.kyori.adventure.text.format.TextColor;
+import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
@@ -25,7 +26,6 @@ import static net.kyori.adventure.text.format.NamedTextColor.GREEN;
 import static net.kyori.adventure.text.format.NamedTextColor.RED;
 import static net.kyori.adventure.text.format.TextDecoration.BOLD;
 import static net.kyori.adventure.text.format.TextDecoration.ITALIC;
-import static net.kyori.adventure.text.minimessage.MiniMessage.miniMessage;
 import static org.testng.Assert.assertEquals;
 
 public class InkyMessageTest {
@@ -429,7 +429,7 @@ public class InkyMessageTest {
         int test = 10000;
 
         var inkyMessage = inkyMessage();
-        var miniMessage = miniMessage();
+        var miniMessage = MiniMessage.builder().emitVirtuals(false).build();
         for (int i = 0; i < warmup; i++) {
             inkyMessage.deserialize(inky);
             miniMessage.deserialize(mini);

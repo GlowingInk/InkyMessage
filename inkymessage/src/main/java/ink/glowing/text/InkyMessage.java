@@ -197,7 +197,7 @@ public sealed interface InkyMessage extends ComponentSerializer<Component, Compo
      */
     @Contract(pure = true)
     static boolean isEscapedAt(char @NotNull [] textArray, int index) {
-        return isEscapedAt(textArray, index, -1);
+        return isEscapedAt(textArray, index, 0);
     }
 
     /**
@@ -233,7 +233,7 @@ public sealed interface InkyMessage extends ComponentSerializer<Component, Compo
      */
     @Contract(pure = true)
     static boolean isUnescapedAt(char[] textArray, int index) {
-        return !isEscapedAt(textArray, index, -1);
+        return !isEscapedAt(textArray, index, 0);
     }
 
     /**
