@@ -30,7 +30,7 @@ import static java.util.Collections.unmodifiableCollection;
 import static java.util.Collections.unmodifiableMap;
 
 final class InkyMessageImpl implements InkyMessage {
-    static final InkyMessage STANDARD = InkyMessage.builder()
+    static final InkyMessage STANDARD = InkyMessage.emptyBuilder()
             .addPlaceholder(newlinePlaceholder())
             .addModifiers(standardModifiers())
             .addSymbolics(notchianFormat())

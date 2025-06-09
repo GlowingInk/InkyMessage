@@ -54,6 +54,7 @@ public sealed interface InkyMessage extends ComponentSerializer<Component, Compo
      * Creates new instance of InkyMessage with the provided style ink.
      * @param ink style ink to use
      * @return the new instance
+     * @see InkyMessage#builder()
      */
     @Contract(value = "_, _ -> new", pure = true)
     static @NotNull InkyMessage inkyMessage(char reset, @NotNull Ink ink) {
@@ -64,6 +65,7 @@ public sealed interface InkyMessage extends ComponentSerializer<Component, Compo
      * Creates new instance of InkyMessage with the provided style ink.
      * @param inks style inks to use
      * @return the new instance
+     * @see InkyMessage#builder()
      */
     @Contract(value = "_, _ -> new", pure = true)
     static @NotNull InkyMessage inkyMessage(char reset, @NotNull Ink @NotNull ... inks) {
@@ -74,6 +76,7 @@ public sealed interface InkyMessage extends ComponentSerializer<Component, Compo
      * Creates new instance of InkyMessage with the provided style ink.
      * @param inks style inks to use
      * @return the new instance
+     * @see InkyMessage#builder()
      */
     @Contract(value = "_, _ -> new", pure = true)
     static @NotNull InkyMessage inkyMessage(char reset, @NotNull Iterable<? extends @NotNull Ink> inks) {
@@ -426,12 +429,22 @@ public sealed interface InkyMessage extends ComponentSerializer<Component, Compo
     }
 
     /**
-     * Creates a new InkyMessage builder.
+     * Creates a new empty InkyMessage builder.
      * @return a builder
      */
     @Contract(value = "-> new", pure = true)
-    static @NotNull InkyMessage.Builder builder() {
+    static @NotNull InkyMessage.Builder emptyBuilder() {
         return new Builder();
+    }
+
+    /**
+     * Creates a new InkyMessage builder using standard {@link Ink}s.
+     * @return a builder
+     * @see InkyMessage#inkyMessage()
+     */
+    @Contract(value = "-> new", pure = true)
+    static @NotNull InkyMessage.Builder builder() {
+        return InkyMessageImpl.STANDARD.toBuilder();
     }
 
     class Builder implements AbstractBuilder<InkyMessage> {
