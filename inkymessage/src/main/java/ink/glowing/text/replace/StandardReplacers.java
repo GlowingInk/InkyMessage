@@ -18,7 +18,7 @@ public final class StandardReplacers {
 
     private static final Replacer URL = replacer(
             URL_PATTERN,
-            (match) -> {
+            match -> {
                 String url = match.group();
                 return text(url).clickEvent(openUrl(url));
             }

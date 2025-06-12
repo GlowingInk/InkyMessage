@@ -7,14 +7,14 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.Supplier;
+import java.util.function.IntFunction;
 
 @ApiStatus.Internal
-record LiteralReplacerImpl(@NotNull String search, @NotNull Supplier<Component> replacement) implements Replacer {
+record LiteralReplacerImpl(@NotNull String search, @NotNull IntFunction<Component> replacement) implements Replacer {
     @Override
     public @NotNull List<FoundSpot> findSpots(@NotNull String input) {
         List<FoundSpot> spots = new ArrayList<>(0);
-        GeneralUtils.findEach(input, search, (index) -> spots.add(new FoundSpot(index, search.length(), replacement)));
+        GeneralUtils.findEach(input, search, (count) -> spots.add(new FoundSpot(count, search.length(), count, replacement)));
         return spots;
     }
 }

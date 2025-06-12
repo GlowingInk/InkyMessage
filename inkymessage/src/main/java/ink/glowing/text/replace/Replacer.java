@@ -1,6 +1,7 @@
 package ink.glowing.text.replace;
 
 import ink.glowing.text.Ink;
+import ink.glowing.text.utils.function.IntObjectFunction;
 import net.kyori.adventure.text.Component;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Unmodifiable;
@@ -8,6 +9,7 @@ import org.jetbrains.annotations.Unmodifiable;
 import java.util.List;
 import java.util.TreeSet;
 import java.util.function.Function;
+import java.util.function.IntFunction;
 import java.util.function.Supplier;
 import java.util.regex.MatchResult;
 import java.util.regex.Pattern;
@@ -27,10 +29,14 @@ public interface Replacer extends Ink, ReplacementMatcher {
     }
 
     static @NotNull Replacer replacer(@NotNull String search, @NotNull Component replacement) {
-        return replacer(search, () -> replacement);
+        return replacerCounting(search, i -> replacement);
     }
 
     static @NotNull Replacer replacer(@NotNull String search, @NotNull Supplier<Component> replacement) {
+        return replacerCounting(search, i -> replacement.get());
+    }
+
+    static @NotNull Replacer replacerCounting(@NotNull String search, @NotNull IntFunction<Component> replacement) {
         return new LiteralReplacerImpl(search, replacement);
     }
 
@@ -39,18 +45,26 @@ public interface Replacer extends Ink, ReplacementMatcher {
     }
 
     static @NotNull Replacer replacer(@NotNull Pattern search, @NotNull Component replacement) {
-        return replacer(search, (MatchResult match) -> replacement);
+        return replacerCounting(search, (i, match) -> replacement);
     }
 
     static @NotNull Replacer replacer(@NotNull Pattern search, @NotNull Supplier<Component> replacement) {
-        return replacer(search, (MatchResult match) -> replacement.get());
+        return replacerCounting(search, (i, match) -> replacement.get());
+    }
+
+    static @NotNull Replacer replacerCounting(@NotNull Pattern search, @NotNull IntFunction<Component> replacement) {
+        return replacerCounting(search, (i,  match) -> replacement.apply(i));
     }
 
     static @NotNull Replacer replacer(@NotNull Pattern search, @NotNull Function<MatchResult, Component> replacement) {
+        return replacerCounting(search, (i, match) -> replacement.apply(match));
+    }
+
+    static @NotNull Replacer replacerCounting(@NotNull Pattern search, @NotNull IntObjectFunction<MatchResult, Component> replacement) {
         return new RegexReplacerImpl(search, replacement);
     }
 
-    record FoundSpot(int start, int end, @NotNull Supplier<Component> replacement) implements Comparable<FoundSpot> {
+    record FoundSpot(int start, int end, int count, @NotNull IntFunction<Component> replacement) implements Comparable<FoundSpot> {
         @Override
         public int compareTo(@NotNull Replacer.FoundSpot o) {
             if (start == o.start) {

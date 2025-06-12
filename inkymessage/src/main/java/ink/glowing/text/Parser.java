@@ -163,7 +163,7 @@ final class Parser {
             var spot = matchSpot(index, until);
             if (spot != null) {
                 appendPrevious(builder, lastAppend, index, state);
-                var replacement = spot.replacement().get();
+                var replacement = spot.replacement().apply(spot.count());
                 builder.append(replacement.applyFallbackStyle(state.lastStyle));
                 lastAppend = spot.end();
                 index = lastAppend - 1;
