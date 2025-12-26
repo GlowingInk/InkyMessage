@@ -26,7 +26,7 @@ enum ClickModifier implements Modifier {
             case "run", "run_command" ->                        asMod(runCommand(value));
             case "suggest", "suggest_command" ->                asMod(suggestCommand(value));
             case "copy", "clipboard", "copy_to_clipboard" ->    asMod(copyToClipboard(value));
-            case "page", "change_page" ->                       asMod(changePage(value));
+            case "page", "change_page" ->                       asMod(changePage(arguments.get(0).asInt(0)));
             case "file", "open_file" ->                         asMod(openFile(value));
             case "insert", "shift", "insertion" ->              text -> text.insertion(value);
             default -> identity();
@@ -67,7 +67,13 @@ enum ClickModifier implements Modifier {
                     case COPY_TO_CLIPBOARD -> "copy";
                     default -> "unknown"; // Who knows what future holds
                 },
-                escape(click.value())
+                escape(switch (click.payload()) {
+                    case ClickEvent.Payload.Text textPl -> textPl.value();
+                    case ClickEvent.Payload.Int intPl -> Integer.toString(intPl.integer());
+                    case ClickEvent.Payload.Custom customPl -> customPl.key() + " " +
+                            customPl.nbt().string();
+                    default -> "unknown";
+                })
         );
     }
 

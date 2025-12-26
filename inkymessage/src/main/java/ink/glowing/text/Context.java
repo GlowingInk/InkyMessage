@@ -10,7 +10,6 @@ import ink.glowing.text.symbolic.SymbolicStyle;
 import ink.glowing.text.symbolic.SymbolicStyleFinder;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.ComponentDecoder;
-import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -19,32 +18,12 @@ import java.util.*;
 import static ink.glowing.text.replace.ReplacementMatcher.composeReplacementMatchers;
 import static ink.glowing.text.replace.ReplacementMatcher.replacementMatcher;
 
-public final class Context implements ModifierFinder, PlaceholderFinder, SymbolicStyleFinder, ReplacementMatcher,
-        ComponentDecoder<String, Component> {
-    private final InkyMessage inkyMessage;
-
-    private final ModifierFinder modifiers;
-    private final PlaceholderFinder placeholders;
-    private final SymbolicStyleFinder symbolics;
-    private final ReplacementMatcher replacers;
-    private final SymbolicStyle symbolicReset;
-
-    Context(
-            @NotNull InkyMessage inkyMessage,
-            @NotNull ModifierFinder modifiers,
-            @NotNull PlaceholderFinder placeholders,
-            @NotNull SymbolicStyleFinder symbolics,
-            @NotNull ReplacementMatcher replacers,
-            @NotNull SymbolicStyle symbolicReset
-    ) {
-        this.inkyMessage = inkyMessage;
-        this.modifiers = modifiers;
-        this.placeholders = placeholders;
-        this.symbolics = symbolics;
-        this.replacers = replacers;
-        this.symbolicReset = symbolicReset;
-    }
-
+public record Context(
+        InkyMessage inkyMessage, ModifierFinder modifiers, PlaceholderFinder placeholders,
+        SymbolicStyleFinder symbolics, ReplacementMatcher replacers,
+        SymbolicStyle symbolicReset
+) implements ModifierFinder, PlaceholderFinder, SymbolicStyleFinder,
+             ReplacementMatcher, ComponentDecoder<String, Component> {
     @Override
     public @NotNull Component deserialize(@NotNull String textStr) {
         return Parser.parse(textStr, this);
@@ -70,16 +49,6 @@ public final class Context implements ModifierFinder, PlaceholderFinder, Symboli
         return replacers.matchReplacements(input);
     }
 
-    @Contract(pure = true)
-    public @NotNull InkyMessage inkyMessage() {
-        return inkyMessage;
-    }
-
-    @Contract(pure = true)
-    public @NotNull SymbolicStyle symbolicReset() {
-        return symbolicReset;
-    }
-
     public @NotNull Context with(@NotNull Ink ink) {
         var modifiers = this.modifiers;
         var placeholders = this.placeholders;
@@ -87,10 +56,10 @@ public final class Context implements ModifierFinder, PlaceholderFinder, Symboli
         var replacers = this.replacers;
 
         switch (ink) {
-            case Modifier mod    -> modifiers = modifiers.thenModifierFinder(mod);
-            case Placeholder ph     -> placeholders = placeholders.thenPlaceholderFinder(ph);
-            case SymbolicStyle sym  -> symbolics = symbolics.thenSymbloicStyleFinder(sym);
-            case Replacer rep       -> replacers = composeReplacementMatchers(rep, replacers);
+            case Modifier mod -> modifiers = modifiers.thenModifierFinder(mod);
+            case Placeholder ph -> placeholders = placeholders.thenPlaceholderFinder(ph);
+            case SymbolicStyle sym -> symbolics = symbolics.thenSymbolicStyleFinder(sym);
+            case Replacer rep -> replacers = composeReplacementMatchers(rep, replacers);
             default -> throw new IllegalArgumentException("Unknown ink type: " + ink.getClass().getSimpleName());
         }
 
@@ -121,7 +90,7 @@ public final class Context implements ModifierFinder, PlaceholderFinder, Symboli
             placeholders = placeholders.thenPlaceholderFinder(placeholdersMap::get);
         }
         if (!symbolicsMap.isEmpty()) {
-            symbolics = symbolics.thenSymbloicStyleFinder(symbolicsMap::get);
+            symbolics = symbolics.thenSymbolicStyleFinder(symbolicsMap::get);
         }
         if (!replacersSet.isEmpty()) {
             replacers = composeReplacementMatchers(replacers, replacementMatcher(replacersSet));
@@ -130,11 +99,13 @@ public final class Context implements ModifierFinder, PlaceholderFinder, Symboli
         return new Context(this.inkyMessage, modifiers, placeholders, symbolics, replacers, this.symbolicReset);
     }
 
-    private static void with(@NotNull Iterable<? extends @NotNull Ink> inks,
-                             @NotNull Map<String, Modifier> modifiersMap,
-                             @NotNull Map<String, Placeholder> placeholdersMap,
-                             @NotNull Map<Character, SymbolicStyle> symbolicsMap,
-                             @NotNull Set<Replacer> replacersSet) {
+    private static void with(
+            @NotNull Iterable<? extends @NotNull Ink> inks,
+            @NotNull Map<String, Modifier> modifiersMap,
+            @NotNull Map<String, Placeholder> placeholdersMap,
+            @NotNull Map<Character, SymbolicStyle> symbolicsMap,
+            @NotNull Set<Replacer> replacersSet
+    ) {
         for (Ink ink : inks) {
             switch (ink) {
                 case Modifier mod -> modifiersMap.put(mod.label(), mod);
@@ -142,7 +113,7 @@ public final class Context implements ModifierFinder, PlaceholderFinder, Symboli
                 case SymbolicStyle sym -> symbolicsMap.put(sym.symbol(), sym);
                 case Replacer rep -> replacersSet.add(rep);
                 case Ink.Provider pr -> with(pr.inks(), modifiersMap, placeholdersMap, symbolicsMap, replacersSet);
-                default-> throw new IllegalArgumentException("Unknown ink type: " + ink.getClass().getSimpleName());
+                default -> throw new IllegalArgumentException("Unknown ink type: " + ink.getClass().getSimpleName());
             }
         }
     }

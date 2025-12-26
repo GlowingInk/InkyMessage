@@ -2,11 +2,11 @@ package ink.glowing.text;
 
 import ink.glowing.text.modifier.Modifier;
 import ink.glowing.text.placeholder.Placeholder;
+import ink.glowing.text.processor.DecodeProcessors;
+import ink.glowing.text.processor.EncodeProcessors;
 import ink.glowing.text.replace.ReplacementMatcher;
 import ink.glowing.text.replace.Replacer;
 import ink.glowing.text.symbolic.SymbolicStyle;
-import ink.glowing.text.utils.processor.DecodeProcessors;
-import ink.glowing.text.utils.processor.EncodeProcessors;
 import net.kyori.adventure.text.Component;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -21,11 +21,11 @@ import static ink.glowing.text.Stringifier.stringify;
 import static ink.glowing.text.modifier.standard.StandardModifiers.standardModifiers;
 import static ink.glowing.text.placeholder.StandardPlaceholders.newlinePlaceholder;
 import static ink.glowing.text.placeholder.StandardPlaceholders.requiredPlaceholdersMap;
+import static ink.glowing.text.processor.DecodeProcessors.decodePostProcessor;
 import static ink.glowing.text.replace.ReplacementMatcher.replacementMatcher;
 import static ink.glowing.text.replace.StandardReplacers.urlReplacer;
 import static ink.glowing.text.symbolic.standard.StandardSymbolicStyles.notchianFormat;
 import static ink.glowing.text.symbolic.standard.StandardSymbolicStyles.standardResetSymbol;
-import static ink.glowing.text.utils.processor.DecodeProcessors.decodePostProcessor;
 import static java.util.Collections.unmodifiableCollection;
 import static java.util.Collections.unmodifiableMap;
 
@@ -58,8 +58,8 @@ final class InkyMessageImpl implements InkyMessage {
             @NotNull Collection<Replacer> replacers,
             @NotNull SymbolicStyle symbolicReset,
 
-            EncodeProcessors encodeProcessors,
-            DecodeProcessors decodeProcessors
+            @NotNull EncodeProcessors encodeProcessors,
+            @NotNull DecodeProcessors decodeProcessors
     ) {
         this.modifiers = unmodifiableMap(modifiers);
         this.placeholders = unmodifiableMap(placeholders);

@@ -6,14 +6,14 @@ import ink.glowing.text.modifier.standard.StandardModifiers;
 import ink.glowing.text.placeholder.Placeholder;
 import ink.glowing.text.placeholder.PlaceholderFinder;
 import ink.glowing.text.placeholder.StandardPlaceholders;
+import ink.glowing.text.processor.DecodeProcessors;
+import ink.glowing.text.processor.EncodeProcessors;
 import ink.glowing.text.replace.ReplacementMatcher;
 import ink.glowing.text.replace.Replacer;
 import ink.glowing.text.replace.StandardReplacers;
 import ink.glowing.text.symbolic.SymbolicStyle;
 import ink.glowing.text.symbolic.SymbolicStyleFinder;
 import ink.glowing.text.symbolic.standard.StandardSymbolicStyles;
-import ink.glowing.text.utils.processor.DecodeProcessors;
-import ink.glowing.text.utils.processor.EncodeProcessors;
 import net.kyori.adventure.builder.AbstractBuilder;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.ComponentSerializer;
@@ -24,10 +24,10 @@ import org.jetbrains.annotations.Unmodifiable;
 
 import java.util.*;
 
+import static ink.glowing.text.processor.DecodeProcessors.identityDecodePreProcessors;
+import static ink.glowing.text.processor.EncodeProcessors.identityEncodePreprocessors;
 import static ink.glowing.text.symbolic.standard.StandardSymbolicStyles.simpleReset;
 import static ink.glowing.text.utils.GeneralUtils.indexOf;
-import static ink.glowing.text.utils.processor.DecodeProcessors.identityDecodePreProcessors;
-import static ink.glowing.text.utils.processor.EncodeProcessors.identityEncodePreprocessors;
 
 /**
  * User-friendly component (de)serializer with legacy-inspired format.

@@ -1,4 +1,4 @@
-package ink.glowing.text.utils.processor;
+package ink.glowing.text.processor;
 
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;

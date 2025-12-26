@@ -1,4 +1,4 @@
-package ink.glowing.text.utils.processor;
+package ink.glowing.text.processor;
 
 import net.kyori.adventure.text.Component;
 import org.jetbrains.annotations.Contract;

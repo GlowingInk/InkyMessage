@@ -11,13 +11,7 @@ import java.util.function.Supplier;
 final class OptionalFloatImpl {
     private OptionalFloatImpl() {}
 
-    static final class PresentOptionalFloat implements OptionalFloat {
-        private final float value;
-
-        PresentOptionalFloat(float value) {
-            this.value = value;
-        }
-
+    record PresentOptionalFloat(float value) implements OptionalFloat {
         @Override
         public boolean isPresent() {
             return true;
@@ -55,8 +49,8 @@ final class OptionalFloatImpl {
 
         @Override
         public boolean equals(Object obj) {
-            return obj instanceof PresentOptionalFloat other &&
-                    Float.compare(this.value, other.value) == 0;
+            return obj instanceof PresentOptionalFloat(float otherValue) &&
+                    Float.compare(this.value, otherValue) == 0;
         }
 
         @Override
@@ -65,7 +59,7 @@ final class OptionalFloatImpl {
         }
 
         @Override
-        public String toString() {
+        public @NotNull String toString() {
             return "OptionalFloat[" + value + "]";
         }
     }

@@ -36,7 +36,7 @@ import static net.kyori.adventure.text.Component.text;
  * Handles placeholders, style modifiers, color codes, and replacement spots.
  */
 @ApiStatus.Internal
-final class Parser {
+final class Parser { // TODO Should probably be refactored as a token-based parser
     private final String textStr;
     private final char[] textArr;
     

@@ -3,7 +3,6 @@ package ink.glowing.text.utils.function;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.HashMap;
-import java.util.Map;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -12,8 +11,7 @@ public final class Caching {
     private Caching() {}
 
     public static <T, R> @NotNull Function<T, R> caching(@NotNull Function<T, R> function) {
-        Map<T, R> cacheMap = new HashMap<>();
-        return new CFunction<>(function, cacheMap::computeIfAbsent);
+        return new CFunction<>(function, new HashMap<T, R>()::computeIfAbsent);
     }
 
     public static <T, R> @NotNull Function<T, R> caching(@NotNull Function<T, R> function, @NotNull BiFunction<T, Function<T, R>, R> computeFunction) {

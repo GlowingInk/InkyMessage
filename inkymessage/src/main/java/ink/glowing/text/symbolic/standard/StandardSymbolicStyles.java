@@ -98,7 +98,7 @@ public final class StandardSymbolicStyles {
             BEDROCK_COLORS, BEDROCK_DECORATIONS
     );
 
-    private static @NotNull SymbolicStyle STANDARD_RESET = simpleReset('r');
+    private static final @NotNull SymbolicStyle STANDARD_RESET = simpleReset('r');
 
     public static @NotNull SymbolicStyle standardReset() {
         return STANDARD_RESET;

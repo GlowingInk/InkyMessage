@@ -83,6 +83,6 @@ public class InkyMessageChatPaper extends JavaPlugin implements Listener { // TO
                         ))
                 )
         );
-        event.renderer(viewerUnaware((player, displayName, message) -> result));
+        event.renderer(viewerUnaware((_, _, _) -> result));
     }
 }

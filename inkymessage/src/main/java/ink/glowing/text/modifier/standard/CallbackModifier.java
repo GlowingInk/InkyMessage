@@ -10,18 +10,9 @@ import org.jetbrains.annotations.NotNull;
 import java.util.function.Supplier;
 import java.util.function.UnaryOperator;
 
-final class CallbackModifier implements Modifier {
-    private final @Subst("label") String label;
-    private final UnaryOperator<Component> mod;
-
-    CallbackModifier(String label, Supplier<ClickEvent> eventSupplier) {
-        this.label = label;
-        this.mod = text -> text.clickEvent(eventSupplier.get());
-    }
-    
-    @Override
-    public @NotNull @LabelPattern String label() {
-        return label;
+record CallbackModifier(@NotNull @Subst("label") String label, UnaryOperator<Component> mod) implements Modifier {
+    CallbackModifier(String label, Supplier<ClickEvent> mod) {
+        this(label, text -> text.clickEvent(mod.get()));
     }
 
     @Override

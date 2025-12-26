@@ -23,7 +23,7 @@ public interface ReplacementMatcher {
 
     static @NotNull ReplacementMatcher replacementMatcher(@NotNull SequencedCollection<? extends @NotNull Replacer> replacers) {
         return switch (replacers.size()) {
-            case 0 -> (input) -> new TreeSet<>();
+            case 0 -> (_) -> new TreeSet<>();
             case 1 -> replacers.getFirst();
             default -> replacementMatcher((Collection<? extends Replacer>) replacers);
         };

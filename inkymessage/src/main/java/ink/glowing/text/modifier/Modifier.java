@@ -239,7 +239,7 @@ public interface Modifier extends Ink, Labeled, ModifierFinder {
         }
 
         enum Type {
-            STRING, COMPONENT;
+            STRING, COMPONENT
         }
     }
 }

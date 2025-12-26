@@ -16,9 +16,9 @@
 
     <properties>
         <annotations.version>24.0.1</annotations.version>
-        <adventure.version>4.20.0</adventure.version>
-        <paper.version>1.21.5-R0.1-SNAPSHOT</paper.version>
-        <java.version>21</java.version>
+        <adventure.version>4.25.0</adventure.version>
+        <paper.version>1.21.11-R0.1-SNAPSHOT</paper.version>
+        <java.version>25</java.version>
 
         <maven.compiler.source>${java.version}</maven.compiler.source>
         <maven.compiler.target>${java.version}</maven.compiler.target>
@@ -32,7 +32,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-javadoc-plugin</artifactId>
-                <version>3.11.2</version>
+                <version>3.12.0</version>
                 <configuration>
                     <links>
                         <link>https://jd.advntr.dev/api/${adventure.version}/</link>

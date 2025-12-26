@@ -17,7 +17,7 @@ public interface SymbolicStyleFinder {
     @Contract(pure = true)
     @Nullable SymbolicStyle findSymbolicStyle(char symbol);
 
-    default @NotNull SymbolicStyleFinder thenSymbloicStyleFinder(@NotNull SymbolicStyleFinder symbolicStyleFinder) {
+    default @NotNull SymbolicStyleFinder thenSymbolicStyleFinder(@NotNull SymbolicStyleFinder symbolicStyleFinder) {
         return (label) -> {
             var symbolic = findSymbolicStyle(label);
             return symbolic != null ? symbolic : symbolicStyleFinder.findSymbolicStyle(label);
@@ -61,7 +61,7 @@ public interface SymbolicStyleFinder {
         if (!iterator.hasNext()) return EMPTY;
         SymbolicStyleFinder result = iterator.next();
         do {
-            result = result.thenSymbloicStyleFinder(iterator.next());
+            result = result.thenSymbolicStyleFinder(iterator.next());
         } while (iterator.hasNext());
         return result;
     }
