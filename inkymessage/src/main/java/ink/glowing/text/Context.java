@@ -19,7 +19,8 @@ import static ink.glowing.text.replace.ReplacementMatcher.composeReplacementMatc
 import static ink.glowing.text.replace.ReplacementMatcher.replacementMatcher;
 
 public record Context(
-        InkyMessage inkyMessage, ModifierFinder modifiers, PlaceholderFinder placeholders,
+        InkyMessage inkyMessage,
+        ModifierFinder modifiers, PlaceholderFinder placeholders,
         SymbolicStyleFinder symbolics, ReplacementMatcher replacers,
         SymbolicStyle symbolicReset
 ) implements ModifierFinder, PlaceholderFinder, SymbolicStyleFinder,

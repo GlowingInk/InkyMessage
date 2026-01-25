@@ -1,7 +1,7 @@
 package ink.glowing.text.symbolic.standard;
 
 import ink.glowing.text.symbolic.SymbolicStyle;
-import ink.glowing.text.utils.GeneralUtils;
+import ink.glowing.text.utils.CollectionsUtils;
 import net.kyori.adventure.text.format.TextColor;
 import net.kyori.adventure.text.format.TextDecoration;
 import org.jetbrains.annotations.Contract;
@@ -51,7 +51,7 @@ public final class StandardSymbolicStyles {
             chainedDecoration('o', ITALIC)
     );
 
-    private static final List<SymbolicStyle> NOTCHIAN_FORMAT = GeneralUtils.concat(
+    private static final List<SymbolicStyle> NOTCHIAN_FORMAT = CollectionsUtils.concat(
             ArrayList::new, Collections::unmodifiableList,
             NOTCHIAN_COLORS, NOTCHIAN_DECORATIONS
     );
@@ -93,7 +93,7 @@ public final class StandardSymbolicStyles {
             chainedDecoration('o', ITALIC)
     );
 
-    private static final List<SymbolicStyle> BEDROCK_FORMAT = GeneralUtils.concat(
+    private static final List<SymbolicStyle> BEDROCK_FORMAT = CollectionsUtils.concat(
             ArrayList::new, Collections::unmodifiableList,
             BEDROCK_COLORS, BEDROCK_DECORATIONS
     );

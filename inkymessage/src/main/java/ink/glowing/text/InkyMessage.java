@@ -27,7 +27,7 @@ import java.util.*;
 import static ink.glowing.text.processor.DecodeProcessors.identityDecodePreProcessors;
 import static ink.glowing.text.processor.EncodeProcessors.identityEncodePreprocessors;
 import static ink.glowing.text.symbolic.standard.StandardSymbolicStyles.simpleReset;
-import static ink.glowing.text.utils.GeneralUtils.indexOf;
+import static ink.glowing.text.utils.TextUtils.indexOf;
 
 /**
  * User-friendly component (de)serializer with legacy-inspired format.

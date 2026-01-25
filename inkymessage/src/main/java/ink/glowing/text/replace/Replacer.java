@@ -29,11 +29,11 @@ public interface Replacer extends Ink, ReplacementMatcher {
     }
 
     static @NotNull Replacer replacer(@NotNull String search, @NotNull Component replacement) {
-        return replacerCounting(search, i -> replacement);
+        return replacerCounting(search, _ -> replacement);
     }
 
     static @NotNull Replacer replacer(@NotNull String search, @NotNull Supplier<Component> replacement) {
-        return replacerCounting(search, i -> replacement.get());
+        return replacerCounting(search, _ -> replacement.get());
     }
 
     static @NotNull Replacer replacerCounting(@NotNull String search, @NotNull IntFunction<Component> replacement) {
@@ -45,19 +45,19 @@ public interface Replacer extends Ink, ReplacementMatcher {
     }
 
     static @NotNull Replacer replacer(@NotNull Pattern search, @NotNull Component replacement) {
-        return replacerCounting(search, (i, match) -> replacement);
+        return replacerCounting(search, (_, _) -> replacement);
     }
 
     static @NotNull Replacer replacer(@NotNull Pattern search, @NotNull Supplier<Component> replacement) {
-        return replacerCounting(search, (i, match) -> replacement.get());
+        return replacerCounting(search, (_, _) -> replacement.get());
     }
 
     static @NotNull Replacer replacerCounting(@NotNull Pattern search, @NotNull IntFunction<Component> replacement) {
-        return replacerCounting(search, (i,  match) -> replacement.apply(i));
+        return replacerCounting(search, (i, _) -> replacement.apply(i));
     }
 
     static @NotNull Replacer replacer(@NotNull Pattern search, @NotNull Function<MatchResult, Component> replacement) {
-        return replacerCounting(search, (i, match) -> replacement.apply(match));
+        return replacerCounting(search, (_, match) -> replacement.apply(match));
     }
 
     static @NotNull Replacer replacerCounting(@NotNull Pattern search, @NotNull IntObjectFunction<MatchResult, Component> replacement) {

@@ -9,7 +9,7 @@ import static net.kyori.adventure.text.Component.text;
 import static net.kyori.adventure.text.event.ClickEvent.openUrl;
 
 public final class StandardReplacers {
-    public static final Pattern URL_PATTERN = Pattern.compile(
+    public static final Pattern URL_PATTERN = Pattern.compile( // TODO Use MC's one?
             "[hH][tT][tT][pP][sS]?://" +                    // https://
             "((?:\\.?[\\w\\-]+)+(?::\\d{1,5})?)" +          // domain.com:80
             "([/#]\\S*?(?=[()\\[\\].,!?]?(?=\\s|$)))?",     // /params

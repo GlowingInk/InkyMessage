@@ -26,6 +26,7 @@ public sealed interface OptionalFloat permits OptionalFloatImpl.PresentOptionalF
     @Contract(value = "-> new", pure = true)
     @NotNull Optional<Float> toBoxed();
 
+    @Contract(pure = true)
     static @NotNull OptionalFloat of(float value) {
         return new OptionalFloatImpl.PresentOptionalFloat(value);
     }
@@ -36,7 +37,9 @@ public sealed interface OptionalFloat permits OptionalFloatImpl.PresentOptionalF
     }
 
     static @NotNull OptionalFloat ofNullable(@Nullable Float value) {
-        return value == null ? empty() : of((float) value);
+        return value == null
+                ? empty()
+                : of((float) value);
     }
 
     static @NotNull OptionalFloat empty() {

@@ -8,6 +8,8 @@ import ink.glowing.text.placeholder.Placeholder;
 import ink.glowing.text.placeholder.PlaceholderFinder;
 import ink.glowing.text.replace.Replacer;
 import ink.glowing.text.symbolic.SymbolicStyle;
+import ink.glowing.text.utils.TextUtils;
+import ink.glowing.text.utils.function.CharPredicate;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.ComponentLike;
 import net.kyori.adventure.text.TextComponent;
@@ -21,12 +23,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.TreeSet;
 import java.util.function.Function;
-import java.util.function.IntPredicate;
 
 import static ink.glowing.text.InkyMessage.*;
 import static ink.glowing.text.modifier.Modifier.ArgumentValue.argumentValue;
 import static ink.glowing.text.modifier.Modifier.Arguments.arguments;
 import static ink.glowing.text.modifier.ModifierFinder.composeModifierFinders;
+import static ink.glowing.text.utils.TextUtils.indexOf;
 import static java.util.function.Function.identity;
 import static net.kyori.adventure.text.Component.empty;
 import static net.kyori.adventure.text.Component.text;
@@ -36,7 +38,10 @@ import static net.kyori.adventure.text.Component.text;
  * Handles placeholders, style modifiers, color codes, and replacement spots.
  */
 @ApiStatus.Internal
-final class Parser { // TODO Should probably be refactored as a token-based parser
+final class Parser { // TODO Should probably be refactored as a token-based parser?
+    private static final CharPredicate SEGMENT_END = CharPredicate.of(']');
+    private static final CharPredicate MODIFIER_END = CharPredicate.of(')');
+
     private final String textStr;
     private final char[] textArr;
     
@@ -63,7 +68,7 @@ final class Parser { // TODO Should probably be refactored as a token-based pars
     static @NotNull Component parse(@NotNull String textStr, @NotNull Context context) {
         if (textStr.isEmpty()) return empty();
         return new Parser(textStr, context)
-                .parseRecursive(0, (ch) -> false, new LinearState())
+                .parseRecursive(0, CharPredicate.FALSE, new LinearState())
                 .asComponent();
     }
 
@@ -75,14 +80,6 @@ final class Parser { // TODO Should probably be refactored as a token-based pars
         }
     }
 
-    private @NotNull ComponentLike parseRecursive(int from, char untilCh, @NotNull LinearState state) {
-        return parseRecursive(from, (ch) -> ch == untilCh, state);
-    }
-
-    private @NotNull ComponentLike parseRecursive(int from, String untilCh, @NotNull LinearState state) {
-        return parseRecursive(from, (ch) -> untilCh.indexOf(ch) != -1, state);
-    }
-
     /**
      * Recursively parses text segments while handling nested syntax structures.
      * @param from starting index for parsing
@@ -90,7 +87,7 @@ final class Parser { // TODO Should probably be refactored as a token-based pars
      * @param state current state
      * @return component built from the parsed segment
      */
-    private @NotNull ComponentLike parseRecursive(int from, IntPredicate untilCh, @NotNull LinearState state) {
+    private @NotNull ComponentLike parseRecursive(int from, CharPredicate untilCh, @NotNull LinearState state) {
         var builder = text();
         for (globalIndex = from; globalIndex < textLength; globalIndex++) {
             char ch = textArr[globalIndex];
@@ -98,13 +95,13 @@ final class Parser { // TODO Should probably be refactored as a token-based pars
                 if (isEscapedAt(textArr, globalIndex) || globalIndex + 1 >= textLength) continue;
                 char nextCh = textArr[globalIndex + 1];
                 switch (nextCh) {
-                    case '[' -> { // &[...]
+                    case '[' -> { // Segment &[...]
                         appendSegment(builder, from, globalIndex, state);
-                        builder.append(parseRecursive(globalIndex + 2, ']', state));
+                        builder.append(parseRecursive(globalIndex + 2, SEGMENT_END, state));
                         from = globalIndex--;
                     }
 
-                    case '{' -> { // &{placeholder} | &{placeholder:...}
+                    case '{' -> { // Placeholder &{...}
                         int initIndex = globalIndex;
                         var placeholderData = parsePlaceholder(context);
                         if (placeholderData == null) {
@@ -118,15 +115,15 @@ final class Parser { // TODO Should probably be refactored as a token-based pars
                         from = globalIndex--;
                     }
 
-                    case '(' -> { // &(...)
+                    case '(' -> { // Modifier &(...)
                         appendSegment(builder, from, globalIndex, state);
                         int initIndex = globalIndex;
                         var modifiers = prepareModifiers(context); // Also adjusts globalIndex to last modifier
-                        if (textArr[globalIndex] == '[') { // &(...)[...]
-                            builder.append(modifiers.apply(parseRecursive(globalIndex + 1, ']', state).asComponent()));
+                        if (textArr[globalIndex] == '[') { // Modifier+Segment &(...)[...]
+                            builder.append(modifiers.apply(parseRecursive(globalIndex + 1, SEGMENT_END, state).asComponent()));
                             from = globalIndex--;
                             continue;
-                        } if (textArr[globalIndex] == '{') { // &(...){...}
+                        } if (textArr[globalIndex] == '{') { // Modifier+Placeholder &(...){...}
                             var placeholderData = parsePlaceholder(context);
                             if (placeholderData != null) {
                                 var placeholder = placeholderData.placeholder;
@@ -175,14 +172,15 @@ final class Parser { // TODO Should probably be refactored as a token-based pars
             switch (styleCh) {
                 case '#', 'x' -> {
                     boolean quirky = styleCh == 'x';
-                    int charsToSkip = quirky ? 14 : 8; // &x&1&2&3&4&5&6 | &#123456
-                    if (index + charsToSkip >= until) continue;
-                    String colorStr = textStr.substring(index + 1, index + charsToSkip);
-                    TextColor color = parseHexColor(colorStr, quirky);
+                    int end = index + (quirky ? 14 : 8);
+                    if (end >= until) continue;
+                    TextColor color = quirky
+                            ? parseQuirkyColor(TextUtils.subarray(textArr, index + 1, end))
+                            : TextColor.fromCSSHexString(textStr.substring(index + 1, end));
                     if (color == null) continue;
                     appendPrevious(builder, lastAppend, index, state);
                     state.lastStyle = state.lastStyle.color(color);
-                    lastAppend = (index += charsToSkip - 1) + 1;
+                    index = (lastAppend = end) - 1;
                 }
                 default -> {
                     SymbolicStyle symbolic = context.findSymbolicStyle(styleCh);
@@ -210,19 +208,8 @@ final class Parser { // TODO Should probably be refactored as a token-based pars
         builder.append(text(unescape(textArr, start, end)).applyFallbackStyle(state.lastStyle));
     }
 
-    /**
-     * Attempts to parse a hexadecimal color code from text input.
-     * @param text hex color string
-     * @param quirky whether to use Bungee format parsing (&x&1&2&3&4&5&6)
-     * @return parsed TextColor or null if invalid
-     */
-    private static @Nullable TextColor parseHexColor(@NotNull String text, boolean quirky) {
-        return quirky
-                ? TextColor.fromHexString("#" +
-                        text.charAt(2) + text.charAt(4) +
-                        text.charAt(6) + text.charAt(8) +
-                        text.charAt(10) + text.charAt(12))
-                : TextColor.fromCSSHexString(text);
+    private static @Nullable TextColor parseQuirkyColor(char @NotNull [] color) {
+        return TextColor.fromHexString("#" + color[2] + color[4] + color[6] + color[8] + color[10] + color[12]);
     }
 
     /**
@@ -252,6 +239,7 @@ final class Parser { // TODO Should probably be refactored as a token-based pars
         return prepareModifiers(identity(), modifierFinder);
     }
 
+    private static final CharPredicate MOD_CHECKPOINT = CharPredicate.anyOf(":) ");
     /**
      * Parses and prepares style modifiers recursively.
      * @param comp component to modify
@@ -267,7 +255,7 @@ final class Parser { // TODO Should probably be refactored as a token-based pars
             globalIndex = from;
             return comp;
         }
-        String modifierStr = extractPlain(from + 1, ":) ");
+        String modifierStr = plainText(from + 1, MOD_CHECKPOINT);
         Modifier modifier = modifierFinder.findModifier(modifierStr);
         if (modifier == null) {
             globalIndex = from;
@@ -284,11 +272,12 @@ final class Parser { // TODO Should probably be refactored as a token-based pars
         return prepareModifiers(comp, modifierFinder);
     }
 
+    private static final CharPredicate ARG_CHECKPOINT = CharPredicate.anyOf(" )");
     private @Nullable Arguments prepareArguments(int from, Modifier modifier) {
         if (globalIndex >= textLength) return Arguments.empty();
         String param;
         if (textArr[globalIndex] != ')' && textArr[globalIndex] == ':') {
-            param = extractPlain(from, " )");
+            param = plainText(from, ARG_CHECKPOINT);
             globalIndex = from + param.length();
             if (textArr[globalIndex] == ')') {
                 return arguments(param);
@@ -310,7 +299,7 @@ final class Parser { // TODO Should probably be refactored as a token-based pars
                     param,
                     List.of(argumentValue(parseRecursive(
                             globalIndex,
-                            ')',
+                            MODIFIER_END,
                             new LinearState()
                     ).asComponent()))
             );
@@ -319,22 +308,21 @@ final class Parser { // TODO Should probably be refactored as a token-based pars
         }
     }
 
+    private static final CharPredicate PLAIN_ARG_CHECKPOINT = CharPredicate.anyOf(">)");
+    private static final CharPredicate UNK_ARG_CHECKPOINT = CharPredicate.anyOf(" )");
     private void collectArguments(List<ArgumentValue> list, boolean unknownAsString) {
         if (globalIndex >= textLength) return;
         char ch = textArr[globalIndex];
         switch (ch) {
-            case '[' -> list.add(argumentValue(parseRecursive(globalIndex + 1, ']', new LinearState()).asComponent()));
-            case '<' -> list.add(argumentValue(extractPlainModifierValue(globalIndex + 1, ">)")));
+            case '[' -> list.add(argumentValue(parseRecursive(globalIndex + 1, SEGMENT_END, new LinearState()).asComponent()));
+            case '<' -> list.add(argumentValue(plainModifierValue(globalIndex + 1, PLAIN_ARG_CHECKPOINT)));
             case ')' -> {
                 return;
             }
-            default -> {
-                if (unknownAsString) {
-                    list.add(argumentValue(extractPlainModifierValue(globalIndex + 1, " )")));
-                } else {
-                    list.add(argumentValue(parseRecursive(globalIndex + 1, " )", new LinearState()).asComponent()));
-                }
-            }
+            default -> list.add(unknownAsString
+                    ? argumentValue(plainModifierValue(globalIndex + 1, UNK_ARG_CHECKPOINT))
+                    : argumentValue(parseRecursive(globalIndex + 1, UNK_ARG_CHECKPOINT, new LinearState()).asComponent())
+            );
         }
         globalIndex++;
         collectArguments(list, unknownAsString);
@@ -347,7 +335,7 @@ final class Parser { // TODO Should probably be refactored as a token-based pars
      * @param until set of stopping characters
      * @return extracted substring (excludes delimiters)
      */
-    private @NotNull String extractPlain(int from, @NotNull String until) {
+    private @NotNull String plainText(int from, @NotNull CharPredicate until) {
         globalIndex = from;
         if (iterateUntil(until)) {
             return unescape(textArr, from, globalIndex);
@@ -360,7 +348,7 @@ final class Parser { // TODO Should probably be refactored as a token-based pars
      * @param from start index for extraction
      * @return extracted value string
      */
-    private @NotNull String extractPlainModifierValue(int from, @NotNull String until) {
+    private @NotNull String plainModifierValue(int from, @NotNull CharPredicate until) {
         if (globalIndex == textLength) {
             return "";
         }
@@ -368,7 +356,7 @@ final class Parser { // TODO Should probably be refactored as a token-based pars
         globalIndex = from;
         for (int lastIndex = globalIndex; globalIndex < textLength; globalIndex++) {
             char ch = textArr[globalIndex];
-            if (until.indexOf(ch) != -1) {
+            if (until.test(ch)) {
                 if (isUnescapedAt(textArr, globalIndex)) {
                     return builder.append(textArr, lastIndex, globalIndex - lastIndex).toString();
                 }
@@ -385,9 +373,10 @@ final class Parser { // TODO Should probably be refactored as a token-based pars
         return "";
     }
 
+    private static final CharPredicate PH_CHECKPOINT = CharPredicate.anyOf(":}");
     private @Nullable PlaceholderData parsePlaceholder(PlaceholderFinder placeholders) {
         int initIndex = globalIndex;
-        if (!iterateUntil(":}")) {
+        if (!iterateUntil(PH_CHECKPOINT)) {
             globalIndex = initIndex;
             return null;
         }
@@ -418,8 +407,12 @@ final class Parser { // TODO Should probably be refactored as a token-based pars
      * @return true if character found, false otherwise
      */
     private boolean iterateUntil(char until) {
-        for (int index = textStr.indexOf(until, globalIndex); index >= 0; index = textStr.indexOf(until, index + 1)) {
-            if (isUnescapedAt(textStr, index)) {
+        for (
+                int index = indexOf(textArr, until, globalIndex);
+                index >= 0;
+                index = indexOf(textArr, until, index + 1)
+        ) {
+            if (isUnescapedAt(textArr, index)) {
                 globalIndex = index;
                 return true;
             }
@@ -433,9 +426,9 @@ final class Parser { // TODO Should probably be refactored as a token-based pars
      * @param until set of target characters
      * @return true if any character found, false otherwise
      */
-    private boolean iterateUntil(@NotNull String until) {
+    private boolean iterateUntil(@NotNull CharPredicate until) {
         for (; globalIndex < textLength; globalIndex++) {
-            if (until.indexOf(textArr[globalIndex]) != -1 && isUnescapedAt(textArr, globalIndex)) return true;
+            if (until.test(textArr[globalIndex]) && isUnescapedAt(textArr, globalIndex)) return true;
         }
         return false;
     }

@@ -8,7 +8,7 @@ import java.util.*;
 
 @FunctionalInterface
 public interface PlaceholderFinder {
-    PlaceholderFinder EMPTY = (label) -> null;
+    PlaceholderFinder EMPTY = (_) -> null;
 
     @Contract(pure = true)
     @Nullable Placeholder findPlaceholder(@NotNull String label);

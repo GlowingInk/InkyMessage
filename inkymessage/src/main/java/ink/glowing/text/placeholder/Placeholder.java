@@ -34,27 +34,27 @@ public interface Placeholder extends Ink, Labeled, PlaceholderFinder {
     }
 
     static @NotNull Placeholder placeholder(@NotNull String label, @NotNull Component result) {
-        return placeholder(label, (v, c) -> result, ModifierFinder.EMPTY);
+        return placeholder(label, (_, _) -> result, ModifierFinder.EMPTY);
     }
 
     static @NotNull Placeholder placeholder(@NotNull String label, @NotNull Component result, @NotNull ModifierFinder localModifiers) {
-        return placeholder(label, (v, c) -> result, localModifiers);
+        return placeholder(label, (_, _) -> result, localModifiers);
     }
 
     static @NotNull Placeholder placeholder(@NotNull String label, @NotNull Supplier<@NotNull Component> result) {
-        return placeholder(label, (v, c) -> result.get(), ModifierFinder.EMPTY);
+        return placeholder(label, (_, _) -> result.get(), ModifierFinder.EMPTY);
     }
 
     static @NotNull Placeholder placeholder(@NotNull String label, @NotNull Supplier<@NotNull Component> result, @NotNull ModifierFinder localModifiers) {
-        return placeholder(label, (v, c) -> result.get(), localModifiers);
+        return placeholder(label, (_, _) -> result.get(), localModifiers);
     }
 
     static @NotNull Placeholder placeholder(@NotNull String label, @NotNull Function<@NotNull String, @NotNull Component> resultFunct) {
-        return placeholder(label, (v, c) -> resultFunct.apply(v), ModifierFinder.EMPTY);
+        return placeholder(label, (v, _) -> resultFunct.apply(v), ModifierFinder.EMPTY);
     }
 
     static @NotNull Placeholder placeholder(@NotNull String label, @NotNull Function<@NotNull String, @NotNull Component> resultFunct, @NotNull ModifierFinder localModifiers) {
-        return placeholder(label, (v, c) -> resultFunct.apply(v), localModifiers);
+        return placeholder(label, (v, _) -> resultFunct.apply(v), localModifiers);
     }
 
     static @NotNull Placeholder placeholder(@NotNull String label, @NotNull BiFunction<@NotNull String, @NotNull Context, @NotNull Component> resultFunct) {
@@ -66,15 +66,15 @@ public interface Placeholder extends Ink, Labeled, PlaceholderFinder {
     }
 
     static @NotNull Placeholder literalPlaceholder(@NotNull String label, @NotNull String result) {
-        return literalPlaceholder(label, (v, c) -> result);
+        return literalPlaceholder(label, (_, _) -> result);
     }
 
     static @NotNull Placeholder literalPlaceholder(@NotNull String label, @NotNull Supplier<@NotNull String> result) {
-        return literalPlaceholder(label, (v, c) -> result.get());
+        return literalPlaceholder(label, (_, _) -> result.get());
     }
 
     static @NotNull Placeholder literalPlaceholder(@NotNull String label, @NotNull Function<@NotNull String, @NotNull String> result) {
-        return literalPlaceholder(label, (v, c) -> result.apply(v));
+        return literalPlaceholder(label, (v, _) -> result.apply(v));
     }
 
     static @NotNull Placeholder literalPlaceholder(@NotNull String label, @NotNull BiFunction<@NotNull String, @NotNull Context, @NotNull String> result) {
@@ -94,15 +94,15 @@ public interface Placeholder extends Ink, Labeled, PlaceholderFinder {
     }
 
     static @NotNull Placeholder parsingPlaceholder(@NotNull String label, @NotNull Supplier<@NotNull String> result, @NotNull ModifierFinder localModifiers) {
-        return parsingPlaceholder(label, (v, c) -> result.get(), localModifiers);
+        return parsingPlaceholder(label, (_, _) -> result.get(), localModifiers);
     }
 
     static @NotNull Placeholder parsingPlaceholder(@NotNull String label, @NotNull Function<@NotNull String, @NotNull String> result) {
-        return parsingPlaceholder(label, (v, c) -> result.apply(v), ModifierFinder.EMPTY);
+        return parsingPlaceholder(label, (v, _) -> result.apply(v), ModifierFinder.EMPTY);
     }
 
     static @NotNull Placeholder parsingPlaceholder(@NotNull String label, @NotNull Function<@NotNull String, @NotNull String> result, @NotNull ModifierFinder localModifiers) {
-        return parsingPlaceholder(label, (v, c) -> result.apply(v), localModifiers);
+        return parsingPlaceholder(label, (v, _) -> result.apply(v), localModifiers);
     }
 
     static @NotNull Placeholder parsingPlaceholder(@NotNull String label, @NotNull BiFunction<@NotNull String, @NotNull Context, @NotNull String> result) {

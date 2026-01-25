@@ -22,15 +22,10 @@ public final class Caching {
         return new CSupplier<>(supplier);
     }
 
-    private static final class CFunction<T, R> implements Function<T, R> {
-        private final Function<T, R> origin;
-        private final BiFunction<T, Function<T, R>, R> computeFunction;
-
-        private CFunction(@NotNull Function<T, R> origin, @NotNull BiFunction<T, Function<T, R>, R> computeFunction) {
-            this.origin = origin;
-            this.computeFunction = computeFunction;
-        }
-
+    private record CFunction<T, R>(
+            @NotNull Function<T, R> origin,
+            @NotNull BiFunction<T, Function<T, R>, R> computeFunction
+    ) implements Function<T, R> {
         @Override
         public R apply(T t) {
             return computeFunction.apply(t, origin);
