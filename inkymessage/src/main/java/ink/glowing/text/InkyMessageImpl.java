@@ -19,8 +19,8 @@ import java.util.TreeSet;
 
 import static ink.glowing.text.Stringifier.stringify;
 import static ink.glowing.text.modifier.standard.StandardModifiers.standardModifiers;
-import static ink.glowing.text.placeholder.StandardPlaceholders.newlinePlaceholder;
 import static ink.glowing.text.placeholder.StandardPlaceholders.requiredPlaceholdersMap;
+import static ink.glowing.text.placeholder.StandardPlaceholders.standardPlaceholders;
 import static ink.glowing.text.processor.DecodeProcessors.decodePostProcessor;
 import static ink.glowing.text.replace.ReplacementMatcher.replacementMatcher;
 import static ink.glowing.text.replace.StandardReplacers.urlReplacer;
@@ -31,7 +31,7 @@ import static java.util.Collections.unmodifiableMap;
 
 final class InkyMessageImpl implements InkyMessage {
     static final InkyMessage STANDARD = InkyMessage.emptyBuilder()
-            .addPlaceholder(newlinePlaceholder())
+            .addPlaceholders(standardPlaceholders())
             .addModifiers(standardModifiers())
             .addSymbolics(notchianFormat())
             .symbolicReset(standardResetSymbol())

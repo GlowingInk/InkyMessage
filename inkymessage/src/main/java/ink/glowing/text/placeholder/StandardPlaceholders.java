@@ -1,14 +1,13 @@
 package ink.glowing.text.placeholder;
 
 import ink.glowing.text.utils.Labeled;
+import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.object.ObjectContents;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Unmodifiable;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static ink.glowing.text.modifier.ModifierFinder.modifierFinder;
@@ -23,7 +22,6 @@ import static net.kyori.adventure.text.Component.*;
  */
 public final class StandardPlaceholders {
     private StandardPlaceholders() {}
-
     private static final Placeholder LANG = placeholder(
             "lang",
             value -> translatable(value),
@@ -45,9 +43,37 @@ public final class StandardPlaceholders {
     private static final Placeholder NEWLINE = placeholder(
             "newline", Component.newline()
     );
+    private static final Placeholder HEAD = placeholder(
+            "head",
+            value -> {
+                try {
+                    UUID uuid = UUID.fromString(value);
+                    return Component.object(ObjectContents.playerHead(uuid));
+                } catch (IllegalArgumentException _) {
+                    return Component.object(ObjectContents.playerHead(value));
+                }
+            }
+    );
+    @SuppressWarnings("PatternValidation")
+    private static final Placeholder SPRITE = placeholder(
+            "sprite",
+            value -> {
+                String[] parts = value.split(" ", 2);
+                if (parts.length == 1) {
+                    String sprite = parts[0];
+                    if (!Key.parseable(sprite)) return Component.empty();
+                    return Component.object(ObjectContents.sprite(Key.key(sprite)));
+                } else {
+                    String atlas = parts[0];
+                    String sprite = parts[1];
+                    if (!Key.parseable(atlas) || !Key.parseable(sprite)) return Component.empty();
+                    return Component.object(ObjectContents.sprite(Key.key(atlas), Key.key(sprite)));
+                }
+            }
+    );
 
     private static final Set<Placeholder> REQUIRED = Set.of(
-            LANG, KEYBIND, SCORE, SELECTOR
+            LANG, KEYBIND, SCORE, SELECTOR, HEAD, SPRITE
     );
     private static final Map<String, Placeholder> REQUIRED_MAP = Collections.unmodifiableMap(
             REQUIRED.stream().collect(Collectors.toMap(Labeled::label, identity()))
@@ -92,5 +118,13 @@ public final class StandardPlaceholders {
 
     public static @NotNull Placeholder newlinePlaceholder() {
         return NEWLINE;
+    }
+
+    public static @NotNull Placeholder headPlaceholder() {
+        return HEAD;
+    }
+
+    public static @NotNull Placeholder spritePlaceholder() {
+        return SPRITE;
     }
 }
