@@ -15,7 +15,7 @@ import java.util.function.UnaryOperator;
 
 import static java.util.Collections.unmodifiableList;
 
-public interface Modifier extends Ink, Labeled, ModifierFinder {
+public non-sealed interface Modifier extends Ink, Labeled, ModifierFinder {
     @NotNull UnaryOperator<Component> prepareModification(@NotNull Modifier.Arguments arguments, @NotNull Context context);
 
     default @NotNull @Unmodifiable List<String> readModifier(@NotNull Component text, @NotNull InkyMessage inkyMessage) { // TODO Return Arguments too?

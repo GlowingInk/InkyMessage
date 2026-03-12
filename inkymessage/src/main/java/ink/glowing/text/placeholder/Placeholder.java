@@ -15,7 +15,7 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 
 // TODO VirtualComponent?
-public interface Placeholder extends Ink, Labeled, PlaceholderFinder {
+public non-sealed interface Placeholder extends Ink, Labeled, PlaceholderFinder {
     @NotNull Component retrieve(@NotNull String value, @NotNull Context context);
     
     default @NotNull String retrievePlain(@NotNull String value, @NotNull Context context) {

@@ -1,5 +1,9 @@
 package ink.glowing.text;
 
+import ink.glowing.text.modifier.Modifier;
+import ink.glowing.text.placeholder.Placeholder;
+import ink.glowing.text.replace.Replacer;
+import ink.glowing.text.symbolic.SymbolicStyle;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 
@@ -12,13 +16,13 @@ import static java.util.stream.StreamSupport.stream;
  * An atom of style.
  */
 @ApiStatus.NonExtendable
-public interface Ink {
+public sealed interface Ink permits Ink.Provider, Placeholder, Modifier, Replacer, SymbolicStyle {
     /**
-     * Something that can provide Ink(s). Extendable.
-     * The static creation methods don't create a new array/Collection.
+     * Something that can provide Ink(s).
+     * Beware: the static creation methods don't create new arrays or collections.
      */
     @FunctionalInterface
-    interface Provider extends Ink {
+    non-sealed interface Provider extends Ink {
         static @NotNull Ink.Provider inkProvider(@NotNull Ink @NotNull ... inks) {
             return inkProvider(Arrays.asList(inks));
         }
