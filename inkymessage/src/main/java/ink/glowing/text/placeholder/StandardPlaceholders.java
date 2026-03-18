@@ -43,7 +43,7 @@ public final class StandardPlaceholders {
     private static final Placeholder NEWLINE = placeholder(
             "newline", Component.newline()
     );
-    private static final Placeholder HEAD = placeholder(
+    private static final Placeholder HEAD = placeholder( // TODO hat
             "head",
             value -> {
                 try {

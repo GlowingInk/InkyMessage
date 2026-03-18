@@ -4,6 +4,8 @@ import ink.glowing.text.symbolic.SymbolicStyle;
 import net.kyori.adventure.text.*;
 import net.kyori.adventure.text.format.Style;
 import net.kyori.adventure.text.format.TextColor;
+import net.kyori.adventure.text.object.PlayerHeadObjectContents;
+import net.kyori.adventure.text.object.SpriteObjectContents;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 
@@ -106,6 +108,17 @@ final class Stringifier { private Stringifier() {}
                         .append('}');
                 for (var modifier : selectorSeparatorModifier().readModifier(selector, inkyMessage)) {
                     builder.append(modifier);
+                }
+            }
+
+            case ObjectComponent object -> {
+                switch (object.contents()) {
+                    case PlayerHeadObjectContents head -> builder.append("&{head:").append(head.id()).append("}");
+                    case SpriteObjectContents sprite -> builder
+                            .append("&{sprite:")
+                            .append(sprite.atlas()).append(' ').append(sprite.sprite())
+                            .append("}");
+                    default -> builder.append('?');
                 }
             }
 
