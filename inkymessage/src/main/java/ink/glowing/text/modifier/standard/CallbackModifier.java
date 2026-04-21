@@ -11,7 +11,7 @@ import java.util.function.Supplier;
 import java.util.function.UnaryOperator;
 
 record CallbackModifier(@NotNull @Subst("label") String label, UnaryOperator<Component> mod) implements Modifier {
-    CallbackModifier(String label, Supplier<ClickEvent> mod) {
+    CallbackModifier(String label, Supplier<ClickEvent<?>> mod) {
         this(label, text -> text.clickEvent(mod.get()));
     }
 

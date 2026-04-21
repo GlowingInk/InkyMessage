@@ -13,6 +13,7 @@ import java.util.function.UnaryOperator;
 
 import static ink.glowing.text.InkyMessage.escape;
 import static java.util.function.UnaryOperator.identity;
+import static net.kyori.adventure.text.event.ClickEvent.Action.*;
 import static net.kyori.adventure.text.event.ClickEvent.*;
 
 enum ClickModifier implements Modifier {
@@ -33,7 +34,7 @@ enum ClickModifier implements Modifier {
         };
     }
     
-    private static UnaryOperator<Component> asMod(ClickEvent event) {
+    private static UnaryOperator<Component> asMod(ClickEvent<?> event) {
         return text -> text.clickEvent(event);
     }
 
@@ -56,22 +57,27 @@ enum ClickModifier implements Modifier {
         return List.of();
     }
 
-    private String asPreparedClick(@NotNull ClickEvent click) {
+    private String asPreparedClick(@NotNull ClickEvent<?> click) {
         return asFormatted(
                 switch (click.action()) {
-                    case OPEN_URL -> "url";
-                    case OPEN_FILE -> "file";
-                    case RUN_COMMAND -> "run";
-                    case SUGGEST_COMMAND -> "suggest";
-                    case CHANGE_PAGE -> "page";
-                    case COPY_TO_CLIPBOARD -> "copy";
+                    case OpenUrl _ -> "url";
+                    case OpenFile _ -> "file";
+                    case RunCommand _ -> "run";
+                    case SuggestCommand _ -> "suggest";
+                    case ChangePage _ -> "page";
+                    case CopyToClipboard _ -> "copy";
                     default -> "unknown"; // Who knows what future holds
                 },
                 escape(switch (click.payload()) {
                     case ClickEvent.Payload.Text textPl -> textPl.value();
                     case ClickEvent.Payload.Int intPl -> Integer.toString(intPl.integer());
-                    case ClickEvent.Payload.Custom customPl -> customPl.key() + " " +
-                            customPl.nbt().string();
+                    // TODO Dialogue?
+                    case ClickEvent.Payload.Custom customPl -> { // TODO This isn't quite right
+                        var nbt = customPl.nbt();
+                        yield nbt == null
+                                ? customPl.key().asString()
+                                : customPl.key() + " " + nbt.string();
+                    }
                     default -> "unknown";
                 })
         );

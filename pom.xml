@@ -16,7 +16,7 @@
 
     <properties>
         <annotations.version>24.0.1</annotations.version>
-        <adventure.version>4.26.1</adventure.version>
+        <adventure.version>5.0.1</adventure.version>
         <paper.version>1.21.11-R0.1-SNAPSHOT</paper.version>
         <java.version>25</java.version>
 
@@ -35,7 +35,7 @@
                 <version>3.12.0</version>
                 <configuration>
                     <links>
-                        <link>https://jd.advntr.dev/api/${adventure.version}/</link>
+                        <link>https://jd.papermc.io/adventure/${adventure.version}/</link>
                         <ling>https://javadoc.io/doc/org.jetbrains/annotations/${annotations.version}/</ling>
                     </links>
                     <skip>${skip-deploy}</skip>
