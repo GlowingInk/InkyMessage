@@ -11,10 +11,6 @@
 
     <artifactId>inkymessage-extra-paper</artifactId>
 
-    <properties>
-        <skip-deploy>false</skip-deploy>
-    </properties>
-
     <repositories>
         <repository>
             <id>papermc</id>

@@ -11,10 +11,6 @@
 
     <artifactId>inkymessage</artifactId>
 
-    <properties>
-        <skip-deploy>false</skip-deploy>
-    </properties>
-
     <dependencies>
         <dependency>
             <groupId>net.kyori</groupId>
