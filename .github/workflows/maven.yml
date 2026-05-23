@@ -15,6 +15,7 @@ jobs:
         with:
           distribution: 'temurin'
           java-version: '25'
+          cache: 'maven'
           server-id: glowing-ink
           server-username: MAVEN_USERNAME
           server-password: MAVEN_PASSWORD
