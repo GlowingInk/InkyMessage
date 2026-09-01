@@ -16,8 +16,8 @@
 
     <properties>
         <annotations.version>24.0.1</annotations.version>
-        <adventure.version>5.1.1</adventure.version>
-        <paper.version>1.21.11-R0.1-SNAPSHOT</paper.version>
+        <adventure.version>5.2.0</adventure.version>
+        <paper.version>[26.2.build,)</paper.version>
         <java.version>25</java.version>
 
         <maven.compiler.release>${java.version}</maven.compiler.release>
