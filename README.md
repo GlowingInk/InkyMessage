@@ -30,7 +30,6 @@ bound to them, which are different from the default ones.
 | `selector` | Selector                 | Shows results of selection. Use `separator` (rich) modifier                   | `Mobs nearby: &{selector:@e[distance..10]}(separator &e, )`                                                 |
 
 ## Plans (until 1.0.0 release)
-- Arbitrary type and amount of modifiers values
 - Shadow color modifier
 - Aliases system
 - Improve replacements behavior
