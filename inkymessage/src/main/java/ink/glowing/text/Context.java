@@ -76,6 +76,9 @@ public record Context(
             case Placeholder ph -> placeholders = placeholders.thenPlaceholderFinder(ph);
             case SymbolicStyle sym -> symbolics = symbolics.thenSymbolicStyleFinder(sym);
             case Replacer rep -> replacers = composeReplacementMatchers(rep, replacers);
+            case Ink.Provider pr -> {
+                return with(pr.inks());
+            }
             default -> throw new IllegalArgumentException("Unknown ink type: " + ink.getClass().getSimpleName());
         }
 
