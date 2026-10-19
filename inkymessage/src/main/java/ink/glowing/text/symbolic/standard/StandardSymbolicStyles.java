@@ -52,7 +52,7 @@ public final class StandardSymbolicStyles {
     );
 
     private static final List<SymbolicStyle> NOTCHIAN_FORMAT = CollectionsUtils.concat(
-            ArrayList::new, Collections::unmodifiableList,
+            ArrayList::new, List::copyOf,
             NOTCHIAN_COLORS, NOTCHIAN_DECORATIONS
     );
 
@@ -94,7 +94,7 @@ public final class StandardSymbolicStyles {
     );
 
     private static final List<SymbolicStyle> BEDROCK_FORMAT = CollectionsUtils.concat(
-            ArrayList::new, Collections::unmodifiableList,
+            ArrayList::new, List::copyOf,
             BEDROCK_COLORS, BEDROCK_DECORATIONS
     );
 
