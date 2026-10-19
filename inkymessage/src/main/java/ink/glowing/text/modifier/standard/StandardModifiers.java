@@ -20,8 +20,11 @@ import java.util.stream.Collectors;
 import static java.util.function.Function.identity;
 import static net.kyori.adventure.text.event.ClickEvent.callback;
 
+/**
+ * Modifiers provided by InkyMessage.
+ */
 public final class StandardModifiers {
-    private StandardModifiers() {}
+    private StandardModifiers() { }
 
     private static final Collection<Modifier> STANDARD = Set.of(
             clickModifier(),
@@ -38,6 +41,7 @@ public final class StandardModifiers {
 
     /**
      * A list of modifiers that are used by the standard InkyMessage instance.
+     * @return standard modifiers
      * @see StandardModifiers#clickModifier()
      * @see StandardModifiers#colorModifier()
      * @see StandardModifiers#decorModifier()
@@ -52,36 +56,71 @@ public final class StandardModifiers {
 
     /**
      * A map of modifiers that are used by the standard InkyMessage instance.
+     * @return map of standard modifiers by their labels
      * @see StandardModifiers#standardModifiers()
      */
     public static @NotNull @Unmodifiable Map<String, Modifier> standardModifiersMap() {
         return STANDARD_MAP;
     }
 
+    /**
+     * Modifier that sets click event or insertion of the text, e.g. {@code (click:run /help)}.
+     * Parameter is the action: {@code url}, {@code run}, {@code suggest}, {@code copy}, {@code page}, {@code file} or {@code insert}.
+     * @return the modifier
+     */
     public static @NotNull Modifier clickModifier() {
         return ClickModifier.INSTANCE;
     }
 
+    /**
+     * Modifier that sets color of the text, e.g. {@code (color:red)}.
+     * Parameter is a color name, hex color, several of them joined with {@code -} for a gradient, {@code spectrum} or {@code random}.
+     * Value {@code pastel} makes colors paler.
+     * @return the modifier
+     */
     public static @NotNull Modifier colorModifier() {
         return ColorModifier.INSTANCE;
     }
 
+    /**
+     * Modifier that sets decoration of the text, e.g. {@code (decor:bold)}.
+     * Value {@code false} or {@code unset} removes or unsets the decoration.
+     * @return the modifier
+     */
     public static @NotNull Modifier decorModifier() {
         return DecorModifier.INSTANCE;
     }
 
+    /**
+     * Modifier that sets font of the text, e.g. {@code (font:minecraft:uniform)}.
+     * @return the modifier
+     */
     public static @NotNull Modifier fontModifier() {
         return FontModifier.INSTANCE;
     }
 
+    /**
+     * Modifier that sets text shown on hover, e.g. {@code (hover &cWarning!)}.
+     * @return the modifier
+     */
     public static @NotNull Modifier hoverModifier() {
         return HoverModifier.INSTANCE;
     }
 
+    /**
+     * Modifier that opens HTTP URL on click, e.g. {@code (http://example.com)}.
+     * @return the modifier
+     * @see StandardModifiers#urlModifier(String)
+     */
     public static @NotNull Modifier httpModifier() {
         return UrlModifier.HTTP;
     }
 
+    /**
+     * Modifier that opens HTTPS URL on click, e.g. {@code (https://example.com)}.
+     * @return the modifier
+     * @see StandardModifiers#urlModifier(String)
+     */
     public static @NotNull Modifier httpsModifier() {
         return UrlModifier.HTTPS;
     }
@@ -89,22 +128,26 @@ public final class StandardModifiers {
     /**
      * Creates a modifier that allows to open specified URL using provided scheme.
      * @param scheme scheme (prefix) for the URL
+     * @return a new modifier
      */
     public static @NotNull Modifier urlModifier(@Pattern("[a-z\\d+\\-]+") @NotNull String scheme) {
         return new UrlModifier(scheme);
     }
 
     /**
-     * Used for {@link net.kyori.adventure.text.TranslatableComponent}: adds arguments to the component.
+     * Used for {@link net.kyori.adventure.text.TranslatableComponent}: adds an argument to the component.
+     * Parameter optionally specifies the one-based position of argument.
      * Local modifier of {@link StandardPlaceholders#langPlaceholder()}.
+     * @return the modifier
      */
     public static @NotNull Modifier langArgModifier() {
         return LangModifiers.ArgModifier.INSTANCE;
     }
 
     /**
-     * Used for {@link net.kyori.adventure.text.TranslatableComponent}: adds arguments to the component.
+     * Used for {@link net.kyori.adventure.text.TranslatableComponent}: replaces all arguments of the component.
      * Local modifier of {@link StandardPlaceholders#langPlaceholder()}.
+     * @return the modifier
      */
     public static @NotNull Modifier langArgsModifier() {
         return LangModifiers.ArgsModifier.INSTANCE;
@@ -113,6 +156,7 @@ public final class StandardModifiers {
     /**
      * Used for {@link net.kyori.adventure.text.TranslatableComponent}: adds fallback to the component.
      * Local modifier of {@link StandardPlaceholders#langPlaceholder()}.
+     * @return the modifier
      */
     public static @NotNull Modifier langFallbackModifier() {
         return LangModifiers.FallbackModifier.INSTANCE;
@@ -121,6 +165,7 @@ public final class StandardModifiers {
     /**
      * Used for {@link net.kyori.adventure.text.SelectorComponent}: specifies separator of the component.
      * Local modifier of {@link StandardPlaceholders#selectorPlaceholder()}.
+     * @return the modifier
      */
     public static @NotNull Modifier selectorSeparatorModifier() {
         return SeparatorModifier.INSTANCE;
@@ -128,6 +173,8 @@ public final class StandardModifiers {
 
     /**
      * An extra modifier that repeats the component.
+     * Parameter is the number of additional repetitions.
+     * @return the modifier
      */
     public static @NotNull Modifier repeatModifier() {
         return RepeatModifier.INSTANCE;
@@ -137,6 +184,7 @@ public final class StandardModifiers {
      * Creates a modifier that runs specified action when clicked.
      * @param label label of modifier
      * @param action action to perform
+     * @return a new modifier
      */
     public static @NotNull Modifier callbackModifier(@NotNull @LabelPattern String label,
                                                      @NotNull Runnable action) {
@@ -147,6 +195,7 @@ public final class StandardModifiers {
      * Creates a modifier that runs specified action when clicked.
      * @param label label of modifier
      * @param action action to perform
+     * @return a new modifier
      */
     public static @NotNull Modifier callbackModifier(@NotNull @LabelPattern String label,
                                                      @NotNull Consumer<Audience> action) {
@@ -157,6 +206,7 @@ public final class StandardModifiers {
      * Creates a modifier that runs specified action when clicked.
      * @param label label of modifier
      * @param action action to perform
+     * @return a new modifier
      */
     public static @NotNull Modifier callbackModifier(@NotNull @LabelPattern String label,
                                                      @NotNull ClickCallback<Audience> action) {
@@ -167,6 +217,8 @@ public final class StandardModifiers {
      * Creates a modifier that runs specified action when clicked.
      * @param label label of modifier
      * @param action action to perform
+     * @param options callback options
+     * @return a new modifier
      */
     public static @NotNull Modifier callbackModifier(@NotNull @LabelPattern String label,
                                                      @NotNull ClickCallback<Audience> action,
@@ -178,6 +230,8 @@ public final class StandardModifiers {
      * Creates a modifier that runs specified action when clicked.
      * @param label label of modifier
      * @param action action to perform
+     * @param optionsBuilder configurator of callback options
+     * @return a new modifier
      */
     public static @NotNull Modifier callbackModifier(@NotNull @LabelPattern String label,
                                                      @NotNull ClickCallback<Audience> action,

@@ -40,5 +40,5 @@ final class ArgumentsImpl {
         }
     }
 
-    record ListedArguments(@NotNull String parameter, @Unmodifiable @NotNull List<Modifier.@NotNull ArgumentValue> list) implements Modifier.Arguments {}
+    record ListedArguments(@NotNull String parameter, @Unmodifiable @NotNull List<Modifier.@NotNull ArgumentValue> list) implements Modifier.Arguments { }
 }

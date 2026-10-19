@@ -18,6 +18,15 @@ import java.util.*;
 import static ink.glowing.text.replace.ReplacementMatcher.composeReplacementMatchers;
 import static ink.glowing.text.replace.ReplacementMatcher.replacementMatcher;
 
+/**
+ * Context of (de)serialization, holding the inks available to the parser.
+ * @param inkyMessage InkyMessage instance that created this context
+ * @param modifiers finder of available modifiers
+ * @param placeholders finder of available placeholders
+ * @param symbolics finder of available symbolic styles
+ * @param replacers matcher of available replacers
+ * @param symbolicReset symbolic style used as reset
+ */
 public record Context(
         InkyMessage inkyMessage,
         ModifierFinder modifiers, PlaceholderFinder placeholders,
@@ -50,6 +59,12 @@ public record Context(
         return replacers.matchReplacements(input);
     }
 
+    /**
+     * Creates new context with the provided ink added.
+     * Added ink takes priority over the existing ones.
+     * @param ink style ink to add
+     * @return the new context
+     */
     public @NotNull Context with(@NotNull Ink ink) {
         var modifiers = this.modifiers;
         var placeholders = this.placeholders;
@@ -67,10 +82,22 @@ public record Context(
         return new Context(this.inkyMessage, modifiers, placeholders, symbolics, replacers, this.symbolicReset);
     }
 
+    /**
+     * Creates new context with the provided inks added.
+     * Added inks take priority over the existing ones.
+     * @param inks style inks to add
+     * @return the new context
+     */
     public @NotNull Context with(@NotNull Ink @NotNull ... inks) {
         return with(Arrays.asList(inks));
     }
 
+    /**
+     * Creates new context with the provided inks added.
+     * Added inks take priority over the existing ones.
+     * @param inks style inks to add
+     * @return the new context
+     */
     public @NotNull Context with(@NotNull Iterable<? extends @NotNull Ink> inks) {
         var modifiers = this.modifiers;
         var placeholders = this.placeholders;

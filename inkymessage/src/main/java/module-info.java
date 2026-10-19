@@ -1,3 +1,6 @@
+/**
+ * User-friendly Adventure component (de)serializer with legacy-inspired format.
+ */
 module inkymessage {
     requires net.kyori.adventure.key;
     requires net.kyori.adventure.api;

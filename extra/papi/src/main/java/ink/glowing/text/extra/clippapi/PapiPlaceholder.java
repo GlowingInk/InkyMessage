@@ -18,9 +18,16 @@ import java.util.function.Function;
 
 import static net.kyori.adventure.text.Component.empty;
 
+/**
+ * Placeholders based on PlaceholderAPI expansions.
+ */
 public final class PapiPlaceholder {
     private PapiPlaceholder() { }
 
+    /**
+     * Creates a new PlaceholderAPI placeholder builder.
+     * @return a builder
+     */
     public static @NotNull PapiPlaceholder.Builder builder() {
         return new PapiPlaceholder.Builder();
     }
@@ -40,6 +47,11 @@ public final class PapiPlaceholder {
         }
     }
 
+    /**
+     * Builder of PlaceholderAPI placeholders.
+     * By default, placeholder is labeled {@code papi}, has no player, takes expansion name from the parameter
+     * (e.g. {@code &{papi:player_name}}), and inserts the result as plain text.
+     */
     public static final class Builder implements AbstractBuilder<Placeholder> {
         private static final Function<String, ExpansionData> DEFAULT_GETTER = (value) -> {
             String[] split = value.split("_", 2);
@@ -61,13 +73,23 @@ public final class PapiPlaceholder {
             this.resultParser = Component::text;
         }
 
-        @Contract(value = "_ -> new", pure = true)
+        /**
+         * Sets label of placeholder.
+         * @param prefix label of placeholder
+         * @return this builder
+         */
+        @Contract("_ -> this")
         public @NotNull Builder prefix(@NotNull @LabelPattern String prefix) {
             this.prefix = prefix;
             return this;
         }
 
-        @Contract(value = "_ -> new", pure = true)
+        /**
+         * Sets expansion to use for every request, so the whole parameter is passed to it.
+         * @param expansionName name of expansion, or {@code null} to take it from the parameter before the first {@code _}
+         * @return this builder
+         */
+        @Contract("_ -> this")
         public @NotNull Builder expansionName(@Nullable String expansionName) {
             if (expansionName == null) {
                 this.dataGetter = DEFAULT_GETTER;
@@ -81,24 +103,44 @@ public final class PapiPlaceholder {
             return this;
         }
 
-        @Contract(value = "_ -> new", pure = true)
+        /**
+         * Sets player to request placeholders for.
+         * @param player player to request for, or {@code null} for none
+         * @return this builder
+         */
+        @Contract("_ -> this")
         public @NotNull Builder player(@Nullable OfflinePlayer player) {
             this.player = player;
             return this;
         }
 
-        @Contract(value = "_ -> new", pure = true)
+        /**
+         * Sets function converting the expansion result into component.
+         * @param resultParser result converting function
+         * @return this builder
+         */
+        @Contract("_ -> this")
         public @NotNull Builder resultParser(@NotNull Function<String, Component> resultParser) {
             this.resultParser = resultParser;
             return this;
         }
 
-        @Contract(value = "_ -> new", pure = true)
+        /**
+         * Sets decoder converting the expansion result into component.
+         * @param resultParser result decoder
+         * @return this builder
+         */
+        @Contract("_ -> this")
         public @NotNull Builder resultParser(@NotNull ComponentDecoder<String, ? extends Component> resultParser) {
             this.resultParser = resultParser::deserialize;
             return this;
         }
 
+        /**
+         * Creates a function building placeholders for the provided player with current settings.
+         * The configured player is ignored.
+         * @return function creating placeholders for players
+         */
         @Contract(value = "-> new", pure = true)
         public @NotNull Function<OfflinePlayer, Placeholder> asPlayerFunction() {
             var dataGetter = this.dataGetter;
@@ -107,6 +149,10 @@ public final class PapiPlaceholder {
             return (oPlayer) -> new PapiPlaceholderImpl(dataGetter, label, oPlayer, resultParser);
         }
 
+        /**
+         * Builds new placeholder.
+         * @return the new placeholder
+         */
         @Override
         @Contract(value = "-> new", pure = true)
         public @NotNull Placeholder build() {

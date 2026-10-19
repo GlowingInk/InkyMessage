@@ -19,7 +19,7 @@ import static net.kyori.adventure.text.Component.empty;
 import static net.kyori.adventure.text.TranslationArgument.component;
 
 final class LangModifiers {
-    private LangModifiers() {}
+    private LangModifiers() { }
 
     @TestOnly
     enum ArgsModifier implements Modifier { // TODO Merge with Arg

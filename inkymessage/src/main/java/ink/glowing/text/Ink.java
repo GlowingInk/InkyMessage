@@ -23,14 +23,29 @@ public sealed interface Ink permits Ink.Provider, Placeholder, Modifier, Replace
      */
     @FunctionalInterface
     non-sealed interface Provider extends Ink {
+        /**
+         * Creates an ink provider of the provided inks.
+         * @param inks inks to provide
+         * @return the ink provider
+         */
         static @NotNull Ink.Provider inkProvider(@NotNull Ink @NotNull ... inks) {
             return inkProvider(Arrays.asList(inks));
         }
 
+        /**
+         * Creates an ink provider of the provided inks.
+         * @param inks inks to provide
+         * @return the ink provider
+         */
         static @NotNull Ink.Provider inkProvider(@NotNull Iterable<? extends @NotNull Ink> inks) {
             return new InkProviderImpl(inks);
         }
 
+        /**
+         * Creates an ink provider of the provided ink collections.
+         * @param inks ink collections to provide
+         * @return the ink provider
+         */
         @SafeVarargs
         static @NotNull Ink.Provider inkProvider(@NotNull Iterable<? extends @NotNull Ink> @NotNull ... inks) {
             return new InkProviderImpl(() -> Stream.of(inks)
@@ -39,11 +54,21 @@ public sealed interface Ink permits Ink.Provider, Placeholder, Modifier, Replace
             );
         }
 
+        /**
+         * Composes collections of ink providers into a single provider.
+         * @param inkProviders ink provider collections to compose
+         * @return the composed ink provider
+         */
         @SafeVarargs
         static @NotNull Ink.Provider composeInkProviders(@NotNull Iterable<? extends Ink.@NotNull Provider> @NotNull ... inkProviders) {
             return composeInkProviders(Arrays.asList(inkProviders));
         }
 
+        /**
+         * Composes collections of ink providers into a single provider.
+         * @param inkProviders ink provider collections to compose
+         * @return the composed ink provider
+         */
         static @NotNull Ink.Provider composeInkProviders(@NotNull Iterable<? extends Iterable<? extends Ink.@NotNull Provider>> inkProviders) {
             return new InkProviderImpl(() -> stream(inkProviders.spliterator(), false)
                     .<Ink>flatMap(provider -> stream(provider.spliterator(), false))
@@ -51,6 +76,10 @@ public sealed interface Ink permits Ink.Provider, Placeholder, Modifier, Replace
             );
         }
 
+        /**
+         * Inks that this provider provides.
+         * @return provided inks
+         */
         @NotNull Iterable<? extends @NotNull Ink> inks();
     }
 }

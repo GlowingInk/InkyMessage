@@ -8,7 +8,15 @@ import static ink.glowing.text.replace.Replacer.replacer;
 import static net.kyori.adventure.text.Component.text;
 import static net.kyori.adventure.text.event.ClickEvent.openUrl;
 
+/**
+ * Replacers provided by InkyMessage.
+ */
 public final class StandardReplacers {
+    private StandardReplacers() { }
+
+    /**
+     * Pattern matching HTTP(S) URLs.
+     */
     public static final Pattern URL_PATTERN = Pattern.compile( // TODO Use MC's one?
             "[hH][tT][tT][pP][sS]?://" +                    // https://
             "((?:\\.?[\\w\\-]+)+(?::\\d{1,5})?)" +          // domain.com:80
@@ -24,6 +32,11 @@ public final class StandardReplacers {
             }
     );
 
+    /**
+     * Replacer that makes HTTP(S) URLs clickable.
+     * @return the replacer
+     * @see #URL_PATTERN
+     */
     public static @NotNull Replacer urlReplacer() {
         return URL;
     }

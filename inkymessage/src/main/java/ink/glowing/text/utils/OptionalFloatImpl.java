@@ -9,7 +9,7 @@ import java.util.Optional;
 import java.util.function.Supplier;
 
 final class OptionalFloatImpl {
-    private OptionalFloatImpl() {}
+    private OptionalFloatImpl() { }
 
     record PresentOptionalFloat(float value) implements OptionalFloat {
         @Override

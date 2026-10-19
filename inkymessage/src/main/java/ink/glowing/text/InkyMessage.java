@@ -52,6 +52,7 @@ public sealed interface InkyMessage extends ComponentSerializer<Component, Compo
 
     /**
      * Creates new instance of InkyMessage with the provided style ink.
+     * @param reset symbol of symbolic reset
      * @param ink style ink to use
      * @return the new instance
      * @see InkyMessage#builder()
@@ -62,7 +63,8 @@ public sealed interface InkyMessage extends ComponentSerializer<Component, Compo
     }
 
     /**
-     * Creates new instance of InkyMessage with the provided style ink.
+     * Creates new instance of InkyMessage with the provided style inks.
+     * @param reset symbol of symbolic reset
      * @param inks style inks to use
      * @return the new instance
      * @see InkyMessage#builder()
@@ -73,7 +75,8 @@ public sealed interface InkyMessage extends ComponentSerializer<Component, Compo
     }
 
     /**
-     * Creates new instance of InkyMessage with the provided style ink.
+     * Creates new instance of InkyMessage with the provided style inks.
+     * @param reset symbol of symbolic reset
      * @param inks style inks to use
      * @return the new instance
      * @see InkyMessage#builder()
@@ -392,20 +395,43 @@ public sealed interface InkyMessage extends ComponentSerializer<Component, Compo
         return with(inks).serialize(text);
     }
 
+    /**
+     * Processors applied during serialization.
+     * @return encode processors
+     */
     @NotNull EncodeProcessors encodeProcessors();
 
+    /**
+     * Processors applied during deserialization.
+     * @return decode processors
+     */
     @NotNull DecodeProcessors decodeProcessors();
     
+    /**
+     * Creates new instance of InkyMessage with the provided style ink added.
+     * @param ink style ink to add
+     * @return the new instance
+     */
     @Contract(value = "_ -> new", pure = true)
     default @NotNull InkyMessage with(@NotNull Ink ink) {
         return toBuilder().addInk(ink).build();
     }
 
+    /**
+     * Creates new instance of InkyMessage with the provided style inks added.
+     * @param inks style inks to add
+     * @return the new instance
+     */
     @Contract(value = "_ -> new", pure = true)
     default @NotNull InkyMessage with(@NotNull Ink @NotNull ... inks) {
         return toBuilder().addInks(inks).build();
     }
 
+    /**
+     * Creates new instance of InkyMessage with the provided style inks added.
+     * @param inks style inks to add
+     * @return the new instance
+     */
     @Contract(value = "_ -> new", pure = true)
     default @NotNull InkyMessage with(@NotNull Iterable<? extends @NotNull Ink> inks) {
         return toBuilder().addInks(inks).build();
@@ -447,6 +473,9 @@ public sealed interface InkyMessage extends ComponentSerializer<Component, Compo
         return InkyMessageImpl.STANDARD.toBuilder();
     }
 
+    /**
+     * Builder of InkyMessage instances.
+     */
     class Builder implements AbstractBuilder<InkyMessage> {
         private Map<String, Modifier> modifiers;
         private Map<String, Placeholder> placeholders;
@@ -487,6 +516,11 @@ public sealed interface InkyMessage extends ComponentSerializer<Component, Compo
             this.decodeProcessors = decodeProcessors;
         }
 
+        /**
+         * Adds style ink, replacing the existing one with the same label or symbol.
+         * @param ink style ink to add
+         * @return this builder
+         */
         @Contract("_ -> this")
         public @NotNull InkyMessage.Builder addInk(@NotNull Ink ink) {
             return switch (ink) {
@@ -499,312 +533,582 @@ public sealed interface InkyMessage extends ComponentSerializer<Component, Compo
             };
         }
 
+        /**
+         * Adds style inks, replacing the existing ones with the same labels or symbols.
+         * @param inks style inks to add
+         * @return this builder
+         */
         @Contract("_ -> this")
         public @NotNull InkyMessage.Builder addInks(@NotNull Ink @NotNull ... inks) {
             for (var ink : inks) addInk(ink);
             return this;
         }
 
+        /**
+         * Adds style inks, replacing the existing ones with the same labels or symbols.
+         * @param inks style inks to add
+         * @return this builder
+         */
         @Contract("_ -> this")
         public @NotNull InkyMessage.Builder addInks(@NotNull Iterable<? extends @NotNull Ink> inks) {
             for (var ink : inks) addInk(ink);
             return this;
         }
 
+        /**
+         * Copy of replacers that are currently set.
+         * @return replacers
+         */
         @Contract("-> new")
         public @NotNull Collection<Replacer> replacers() {
             return new HashSet<>(replacers);
         }
 
+        /**
+         * Sets replacers, removing the existing ones.
+         * @param replacers replacers to set
+         * @return this builder
+         */
         @Contract("_ -> this")
         public @NotNull InkyMessage.Builder replacers(@NotNull Replacer @NotNull ... replacers) {
             return replacers(Arrays.asList(replacers));
         }
 
+        /**
+         * Sets replacers, removing the existing ones.
+         * @param replacers replacers to set
+         * @return this builder
+         */
         @Contract("_ -> this")
         public @NotNull InkyMessage.Builder replacers(@NotNull Collection<? extends @NotNull Replacer> replacers) {
             this.replacers = new HashSet<>(replacers);
             return this;
         }
 
+        /**
+         * Sets replacers, removing the existing ones.
+         * @param replacers replacers to set
+         * @return this builder
+         */
         @Contract("_ -> this")
         public @NotNull InkyMessage.Builder replacers(@NotNull Iterable<? extends @NotNull Replacer> replacers) {
             this.replacers = new HashSet<>();
             return addReplacers(replacers);
         }
 
+        /**
+         * Adds replacer.
+         * @param replacer replacer to add
+         * @return this builder
+         */
         @Contract("_ -> this")
         public @NotNull InkyMessage.Builder addReplacer(@NotNull Replacer replacer) {
             this.replacers.add(replacer);
             return this;
         }
 
+        /**
+         * Adds replacers.
+         * @param replacers replacers to add
+         * @return this builder
+         */
         @Contract("_ -> this")
         public @NotNull InkyMessage.Builder addReplacers(@NotNull Replacer @NotNull ... replacers) {
             return addReplacers(Arrays.asList(replacers));
         }
 
+        /**
+         * Adds replacers.
+         * @param replacers replacers to add
+         * @return this builder
+         */
         @Contract("_ -> this")
         public @NotNull InkyMessage.Builder addReplacers(@NotNull Collection<? extends @NotNull Replacer> replacers) {
             this.replacers.addAll(replacers);
             return this;
         }
 
+        /**
+         * Removes replacer.
+         * @param replacer replacer to remove
+         * @return this builder
+         */
         @Contract("_ -> this")
         public @NotNull InkyMessage.Builder removeReplacer(@NotNull Replacer replacer) {
             this.replacers.remove(replacer);
             return this;
         }
 
+        /**
+         * Removes replacers.
+         * @param replacers replacers to remove
+         * @return this builder
+         */
         @Contract("_ -> this")
         public @NotNull InkyMessage.Builder removeReplacers(@NotNull Replacer @NotNull ... replacers) {
             return removeReplacers(Arrays.asList(replacers));
         }
 
+        /**
+         * Removes replacers.
+         * @param replacers replacers to remove
+         * @return this builder
+         */
         @Contract("_ -> this")
         public @NotNull InkyMessage.Builder removeReplacers(@NotNull Collection<? extends @NotNull Replacer> replacers) {
             this.replacers.removeAll(replacers);
             return this;
         }
 
+        /**
+         * Adds replacers.
+         * @param replacers replacers to add
+         * @return this builder
+         */
         @Contract("_ -> this")
         public @NotNull InkyMessage.Builder addReplacers(@NotNull Iterable<? extends @NotNull Replacer> replacers) {
             for (var replacer : replacers) addReplacer(replacer);
             return this;
         }
 
+        /**
+         * Copy of placeholders that are currently set.
+         * @return placeholders
+         */
         @Contract("-> new")
         public @NotNull Collection<Placeholder> placeholders() {
             return new HashSet<>(placeholders.values());
         }
 
+        /**
+         * Sets placeholders, removing the existing ones.
+         * @param placeholders placeholders to set
+         * @return this builder
+         */
         @Contract("_ -> this")
         public @NotNull InkyMessage.Builder placeholders(@NotNull Placeholder @NotNull ... placeholders) {
             return placeholders(Arrays.asList(placeholders));
         }
 
+        /**
+         * Sets placeholders, removing the existing ones.
+         * @param placeholders placeholders to set
+         * @return this builder
+         */
         @Contract("_ -> this")
         public @NotNull InkyMessage.Builder placeholders(@NotNull Collection<? extends @NotNull Placeholder> placeholders) {
             this.placeholders = new HashMap<>(placeholders.size());
             return addPlaceholders(placeholders);
         }
 
+        /**
+         * Sets placeholders, removing the existing ones.
+         * @param placeholders placeholders to set
+         * @return this builder
+         */
         @Contract("_ -> this")
         public @NotNull InkyMessage.Builder placeholders(@NotNull Iterable<? extends @NotNull Placeholder> placeholders) {
             this.placeholders = new HashMap<>();
             return addPlaceholders(placeholders);
         }
 
+        /**
+         * Sets placeholders, removing the existing ones.
+         * @param placeholders map of placeholders by their labels
+         * @return this builder
+         */
         @Contract("_ -> this")
         public @NotNull InkyMessage.Builder placeholders(@NotNull Map<String, Placeholder> placeholders) {
             this.placeholders = new HashMap<>(placeholders);
             return this;
         }
 
+        /**
+         * Adds placeholder, replacing the existing one with the same label.
+         * @param placeholder placeholder to add
+         * @return this builder
+         */
         @Contract("_ -> this")
         public @NotNull InkyMessage.Builder addPlaceholder(@NotNull Placeholder placeholder) {
             this.placeholders.put(placeholder.label(), placeholder);
             return this;
         }
 
+        /**
+         * Adds placeholders, replacing the existing ones with the same labels.
+         * @param placeholders placeholders to add
+         * @return this builder
+         */
         @Contract("_ -> this")
         public @NotNull InkyMessage.Builder addPlaceholders(@NotNull Placeholder @NotNull ... placeholders) {
             return addPlaceholders(Arrays.asList(placeholders));
         }
 
+        /**
+         * Adds placeholders, replacing the existing ones with the same labels.
+         * @param placeholders placeholders to add
+         * @return this builder
+         */
         @Contract("_ -> this")
         public @NotNull InkyMessage.Builder addPlaceholders(@NotNull Iterable<? extends @NotNull Placeholder> placeholders) {
             for (var placeholder : placeholders) addPlaceholder(placeholder);
             return this;
         }
 
+        /**
+         * Adds placeholders, replacing the existing ones with the same labels.
+         * @param placeholders map of placeholders by their labels
+         * @return this builder
+         */
         @Contract("_ -> this")
         public @NotNull InkyMessage.Builder addPlaceholders(@NotNull Map<String, Placeholder> placeholders) {
             this.placeholders.putAll(placeholders);
             return this;
         }
 
+        /**
+         * Removes placeholder by its label.
+         * @param placeholderLabel label of placeholder to remove
+         * @return this builder
+         */
         @Contract("_ -> this")
         public @NotNull InkyMessage.Builder removePlaceholder(@NotNull String placeholderLabel) {
             this.placeholders.remove(placeholderLabel);
             return this;
         }
 
+        /**
+         * Removes placeholders by their labels.
+         * @param placeholderLabels labels of placeholders to remove
+         * @return this builder
+         */
         @Contract("_ -> this")
         public @NotNull InkyMessage.Builder removePlaceholders(@NotNull String @NotNull ... placeholderLabels) {
             return removePlaceholders(Arrays.asList(placeholderLabels));
         }
 
+        /**
+         * Removes placeholders by their labels.
+         * @param placeholderLabels labels of placeholders to remove
+         * @return this builder
+         */
         @Contract("_ -> this")
         public @NotNull InkyMessage.Builder removePlaceholders(@NotNull Iterable<? extends @NotNull String> placeholderLabels) {
             for (var placeholderLabel : placeholderLabels) removePlaceholder(placeholderLabel);
             return this;
         }
 
+        /**
+         * Copy of modifiers that are currently set.
+         * @return modifiers
+         */
         @Contract("-> new")
         public @NotNull Collection<Modifier> modifiers() {
             return new HashSet<>(modifiers.values());
         }
 
+        /**
+         * Sets modifiers, removing the existing ones.
+         * @param modifiers modifiers to set
+         * @return this builder
+         */
         @Contract("_ -> this")
         public @NotNull InkyMessage.Builder modifiers(@NotNull Modifier @NotNull ... modifiers) {
             return modifiers(Arrays.asList(modifiers));
         }
 
+        /**
+         * Sets modifiers, removing the existing ones.
+         * @param modifiers modifiers to set
+         * @return this builder
+         */
         @Contract("_ -> this")
         public @NotNull InkyMessage.Builder modifiers(@NotNull Collection<? extends @NotNull Modifier> modifiers) {
             this.modifiers = new HashMap<>(modifiers.size());
             return addModifiers(modifiers);
         }
 
+        /**
+         * Sets modifiers, removing the existing ones.
+         * @param modifiers modifiers to set
+         * @return this builder
+         */
         @Contract("_ -> this")
         public @NotNull InkyMessage.Builder modifiers(@NotNull Iterable<? extends @NotNull Modifier> modifiers) {
             this.modifiers = new HashMap<>();
             return addModifiers(modifiers);
         }
 
+        /**
+         * Sets modifiers, removing the existing ones.
+         * @param modifiers map of modifiers by their labels
+         * @return this builder
+         */
         @Contract("_ -> this")
         public @NotNull InkyMessage.Builder modifiers(@NotNull Map<String, Modifier> modifiers) {
             this.modifiers = new HashMap<>(modifiers);
             return this;
         }
 
+        /**
+         * Adds modifier, replacing the existing one with the same label.
+         * @param modifier modifier to add
+         * @return this builder
+         */
         @Contract("_ -> this")
         public @NotNull InkyMessage.Builder addModifier(@NotNull Modifier modifier) {
             this.modifiers.put(modifier.label(), modifier);
             return this;
         }
 
+        /**
+         * Adds modifiers, replacing the existing ones with the same labels.
+         * @param modifiers modifiers to add
+         * @return this builder
+         */
         @Contract("_ -> this")
         public @NotNull InkyMessage.Builder addModifiers(@NotNull Modifier @NotNull ... modifiers) {
             return addModifiers(Arrays.asList(modifiers));
         }
 
+        /**
+         * Adds modifiers, replacing the existing ones with the same labels.
+         * @param modifiers modifiers to add
+         * @return this builder
+         */
         @Contract("_ -> this")
         public @NotNull InkyMessage.Builder addModifiers(@NotNull Iterable<? extends @NotNull Modifier> modifiers) {
             for (var modifier : modifiers) addModifier(modifier);
             return this;
         }
 
+        /**
+         * Adds modifiers, replacing the existing ones with the same labels.
+         * @param modifiers map of modifiers by their labels
+         * @return this builder
+         */
         @Contract("_ -> this")
         public @NotNull InkyMessage.Builder addModifiers(@NotNull Map<String, Modifier> modifiers) {
             this.modifiers.putAll(modifiers);
             return this;
         }
 
+        /**
+         * Removes modifier by its label.
+         * @param modifierLabel label of modifier to remove
+         * @return this builder
+         */
         @Contract("_ -> this")
         public @NotNull InkyMessage.Builder removeModifier(@NotNull String modifierLabel) {
             this.modifiers.remove(modifierLabel);
             return this;
         }
 
+        /**
+         * Removes modifiers by their labels.
+         * @param modifierLabels labels of modifiers to remove
+         * @return this builder
+         */
         @Contract("_ -> this")
         public @NotNull InkyMessage.Builder removeModifiers(@NotNull String @NotNull ... modifierLabels) {
             return removeModifiers(Arrays.asList(modifierLabels));
         }
 
+        /**
+         * Removes modifiers by their labels.
+         * @param modifierLabels labels of modifiers to remove
+         * @return this builder
+         */
         @Contract("_ -> this")
         public @NotNull InkyMessage.Builder removeModifiers(@NotNull Iterable<@NotNull String> modifierLabels) {
             for (var modifierLabel : modifierLabels) removeModifier(modifierLabel);
             return this;
         }
 
+        /**
+         * Sets symbolic reset to a simple reset with the provided symbol.
+         * @param symbol symbol of reset
+         * @return this builder
+         * @see StandardSymbolicStyles#simpleReset(char)
+         */
         @Contract("_ -> this")
         public @NotNull InkyMessage.Builder symbolicReset(char symbol) {
             this.symbolicReset = simpleReset(symbol);
             return this;
         }
 
+        /**
+         * Copy of symbolics that are currently set.
+         * @return symbolics
+         */
         @Contract("-> new")
         public @NotNull Collection<SymbolicStyle> symbolics() {
             return new HashSet<>(symbolics.values());
         }
 
+        /**
+         * Sets symbolics, removing the existing ones.
+         * @param symbolics symbolics to set
+         * @return this builder
+         */
         @Contract("_ -> this")
         public @NotNull InkyMessage.Builder symbolics(@NotNull SymbolicStyle @NotNull ... symbolics) {
             return symbolics(Arrays.asList(symbolics));
         }
 
+        /**
+         * Sets symbolics, removing the existing ones.
+         * @param symbolics symbolics to set
+         * @return this builder
+         */
         @Contract("_ -> this")
         public @NotNull InkyMessage.Builder symbolics(@NotNull Collection<? extends @NotNull SymbolicStyle> symbolics) {
             this.symbolics = new HashMap<>(symbolics.size());
             return addSymbolics(symbolics);
         }
 
+        /**
+         * Sets symbolics, removing the existing ones.
+         * @param symbolics map of symbolics by their symbols
+         * @return this builder
+         */
         @Contract("_ -> this")
         public @NotNull InkyMessage.Builder symbolics(@NotNull Map<Character, SymbolicStyle> symbolics) {
             this.symbolics = new HashMap<>(symbolics);
             return this;
         }
 
+        /**
+         * Adds symbolic, replacing the existing one with the same symbol.
+         * @param symbolic symbolic to add
+         * @return this builder
+         */
         @Contract("_ -> this")
         public @NotNull InkyMessage.Builder addSymbolic(@NotNull SymbolicStyle symbolic) {
             this.symbolics.put(symbolic.symbol(), symbolic);
             return this;
         }
 
+        /**
+         * Adds symbolics, replacing the existing ones with the same symbols.
+         * @param symbolics symbolics to add
+         * @return this builder
+         */
         @Contract("_ -> this")
         public @NotNull InkyMessage.Builder addSymbolics(@NotNull SymbolicStyle @NotNull ... symbolics) {
             return addSymbolics(Arrays.asList(symbolics));
         }
 
+        /**
+         * Adds symbolics, replacing the existing ones with the same symbols.
+         * @param symbolics symbolics to add
+         * @return this builder
+         */
         @Contract("_ -> this")
         public @NotNull InkyMessage.Builder addSymbolics(@NotNull Iterable<? extends @NotNull SymbolicStyle> symbolics) {
             for (var symbolic : symbolics) addSymbolic(symbolic);
             return this;
         }
 
+        /**
+         * Adds symbolics, replacing the existing ones with the same symbols.
+         * @param symbolics map of symbolics by their symbols
+         * @return this builder
+         */
         @Contract("_ -> this")
         public @NotNull InkyMessage.Builder addSymbolics(@NotNull Map<Character, SymbolicStyle> symbolics) {
             this.symbolics.putAll(symbolics);
             return this;
         }
 
+        /**
+         * Removes symbolic style by its symbol.
+         * @param symbolicSymbol symbol of symbolic style to remove
+         * @return this builder
+         */
         @Contract("_ -> this")
         public @NotNull InkyMessage.Builder removeSymbolic(@NotNull Character symbolicSymbol) {
             this.symbolics.remove(symbolicSymbol);
             return this;
         }
 
+        /**
+         * Removes symbolic styles by their symbols.
+         * @param symbolicsSymbols symbols of symbolic styles to remove
+         * @return this builder
+         */
         @Contract("_ -> this")
         public @NotNull InkyMessage.Builder removeSymbolics(@NotNull Character @NotNull ... symbolicsSymbols) {
             return removeSymbolics(Arrays.asList(symbolicsSymbols));
         }
 
+        /**
+         * Removes symbolic styles by their symbols.
+         * @param symbolicSymbols symbols of symbolic styles to remove
+         * @return this builder
+         */
         @Contract("_ -> this")
         public @NotNull InkyMessage.Builder removeSymbolics(@NotNull Iterable<? extends @NotNull Character> symbolicSymbols) {
             for (var symbolicSymbol : symbolicSymbols) removeSymbolic(symbolicSymbol);
             return this;
         }
 
+        /**
+         * Removes symbolic styles by their symbols.
+         * @param symbolicSymbols symbols of symbolic styles to remove
+         * @return this builder
+         */
         @Contract("_ -> this")
         public @NotNull InkyMessage.Builder removeSymbolics(char @NotNull ... symbolicSymbols) {
             for (var symbolicSymbol : symbolicSymbols) removeSymbolic(symbolicSymbol);
             return this;
         }
 
+        /**
+         * Processors applied during serialization.
+         * @return encode processors
+         */
         @Contract(pure = true)
         public @NotNull EncodeProcessors encodeProcessors() {
             return encodeProcessors;
         }
 
+        /**
+         * Sets processors applied during serialization.
+         * @param encodeProcessors encode processors
+         * @return this builder
+         */
         @Contract("_ -> this")
         public @NotNull InkyMessage.Builder encodeProcessors(@NotNull EncodeProcessors encodeProcessors) {
             this.encodeProcessors = encodeProcessors;
             return this;
         }
 
+        /**
+         * Processors applied during deserialization.
+         * @return decode processors
+         */
         @Contract(pure = true)
         public @NotNull DecodeProcessors decodeProcessors() {
             return decodeProcessors;
         }
 
+        /**
+         * Sets processors applied during deserialization.
+         * @param decodeProcessors decode processors
+         * @return this builder
+         */
         @Contract("_ -> this")
         public @NotNull InkyMessage.Builder decodeProcessors(@NotNull DecodeProcessors decodeProcessors) {
             this.decodeProcessors = decodeProcessors;
             return this;
         }
 
+        /**
+         * Builds new InkyMessage instance.
+         * @return the new instance
+         * @throws NullPointerException if symbolic reset is not set
+         */
         @Contract("-> new")
         @Override
         public @NotNull InkyMessage build() {

@@ -14,8 +14,11 @@ import static net.kyori.adventure.text.format.NamedTextColor.*;
 import static net.kyori.adventure.text.format.TextColor.color;
 import static net.kyori.adventure.text.format.TextDecoration.*;
 
+/**
+ * Symbolic styles provided by InkyMessage.
+ */
 public final class StandardSymbolicStyles {
-    private StandardSymbolicStyles() {}
+    private StandardSymbolicStyles() { }
 
     private static final Map<TextDecoration, State> RESET_DECORATIONS;
     static {
@@ -100,10 +103,20 @@ public final class StandardSymbolicStyles {
 
     private static final @NotNull SymbolicStyle STANDARD_RESET = simpleReset('r');
 
+    /**
+     * Standard symbolic reset, {@code &r}.
+     * @return the standard reset
+     * @see StandardSymbolicStyles#standardResetSymbol()
+     */
     public static @NotNull SymbolicStyle standardReset() {
         return STANDARD_RESET;
     }
 
+    /**
+     * Symbol of the standard symbolic reset.
+     * @return the symbol
+     * @see StandardSymbolicStyles#standardReset()
+     */
     public static char standardResetSymbol() {
         return 'r';
     }
@@ -130,6 +143,7 @@ public final class StandardSymbolicStyles {
 
     /**
      * Combined decorations and colors defined by the notchian client/server
+     * @return notchian format
      * @see StandardSymbolicStyles#notchianColors()
      * @see StandardSymbolicStyles#notchianDecorations()
      */
@@ -160,6 +174,7 @@ public final class StandardSymbolicStyles {
 
     /**
      * Combined decorations and colors defined by the bedrock client/server
+     * @return bedrock format
      * @see StandardSymbolicStyles#bedrockColors()
      * @see StandardSymbolicStyles#bedrockDecorations()
      */
@@ -201,11 +216,20 @@ public final class StandardSymbolicStyles {
         return new ChainedSymbolicColor(symbol, color);
     }
 
+    /**
+     * Creates a symbolic style that resets the color and decorations of the final style
+     * @param symbol symbol of this style
+     * @return a new simple reset
+     */
     @Contract(value = "_ -> new", pure = true)
     public static @NotNull SymbolicStyle simpleReset(char symbol) {
         return new SimpleSymbolicReset(symbol);
     }
 
+    /**
+     * Map of all decorations set to {@link State#NOT_SET}
+     * @return reset decorations
+     */
     @Contract(pure = true)
     public static @NotNull @Unmodifiable Map<TextDecoration, State> resetDecorations() {
         return RESET_DECORATIONS;

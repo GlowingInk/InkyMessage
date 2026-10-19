@@ -18,7 +18,7 @@ import static ink.glowing.text.modifier.standard.StandardModifiers.*;
 import static ink.glowing.text.symbolic.standard.StandardSymbolicStyles.resetDecorations;
 
 @ApiStatus.Internal
-final class Stringifier { private Stringifier() {}
+final class Stringifier { private Stringifier() { }
     public static @NotNull String stringify(@NotNull Component text, @NotNull InkyMessage inkyMessage) {
         StringBuilder builder = new StringBuilder();
         stringify(builder, new TreeSet<>(), text, inkyMessage, new boolean[]{false});

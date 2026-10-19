@@ -21,7 +21,7 @@ import static net.kyori.adventure.text.Component.*;
  * But it also means that it's impossible to remove them. TODO
  */
 public final class StandardPlaceholders {
-    private StandardPlaceholders() {}
+    private StandardPlaceholders() { }
     private static final Placeholder LANG = placeholder(
             "lang",
             value -> translatable(value),
@@ -84,46 +84,99 @@ public final class StandardPlaceholders {
             STANDARD.stream().collect(Collectors.toMap(Labeled::label, identity()))
     );
 
+    /**
+     * Placeholders that are required for proper serialization of Adventure components.
+     * @return required placeholders
+     * @see ink.glowing.text.InkyMessage#inkyMessage()
+     */
     public static @NotNull @Unmodifiable Collection<@NotNull Placeholder> requiredPlaceholders() {
         return REQUIRED;
     }
 
+    /**
+     * Placeholders that are required for proper serialization of Adventure components.
+     * @return map of required placeholders by their labels
+     * @see #requiredPlaceholders()
+     */
     public static @NotNull @Unmodifiable Map<String, @NotNull Placeholder> requiredPlaceholdersMap() {
         return REQUIRED_MAP;
     }
 
+    /**
+     * Placeholders that are included in the standard InkyMessage instance, besides the required ones.
+     * @return standard placeholders
+     * @see ink.glowing.text.InkyMessage#inkyMessage()
+     */
     public static @NotNull @Unmodifiable Collection<@NotNull Placeholder> standardPlaceholders() {
         return STANDARD;
     }
 
+    /**
+     * Placeholders that are included in the standard InkyMessage instance, besides the required ones.
+     * @return map of standard placeholders by their labels
+     * @see #standardPlaceholders()
+     */
     public static @NotNull @Unmodifiable Map<String, @NotNull Placeholder> standardPlaceholdersMap() {
         return STANDARD_MAP;
     }
 
+    /**
+     * Placeholder of translatable component. Parameter is the translation key.
+     * Provides {@code arg} and {@code fallback} local modifiers.
+     * @return the placeholder
+     * @see ink.glowing.text.modifier.standard.StandardModifiers#langArgModifier()
+     * @see ink.glowing.text.modifier.standard.StandardModifiers#langFallbackModifier()
+     */
     public static @NotNull Placeholder langPlaceholder() {
         return LANG;
     }
 
+    /**
+     * Placeholder of keybind component. Parameter is the keybind name.
+     * @return the placeholder
+     */
     public static @NotNull Placeholder keybindPlaceholder() {
         return KEYBIND;
     }
 
+    /**
+     * Placeholder of score component. Parameter is the score holder name and objective, separated by space.
+     * @return the placeholder
+     */
     public static @NotNull Placeholder scorePlaceholder() {
         return SCORE;
     }
 
+    /**
+     * Placeholder of selector component. Parameter is the selector pattern.
+     * Provides {@code separator} local modifier.
+     * @return the placeholder
+     * @see ink.glowing.text.modifier.standard.StandardModifiers#selectorSeparatorModifier()
+     */
     public static @NotNull Placeholder selectorPlaceholder() {
         return SELECTOR;
     }
 
+    /**
+     * Placeholder of a line break.
+     * @return the placeholder
+     */
     public static @NotNull Placeholder newlinePlaceholder() {
         return NEWLINE;
     }
 
+    /**
+     * Placeholder of player head object component. Parameter is the player UUID or name.
+     * @return the placeholder
+     */
     public static @NotNull Placeholder headPlaceholder() {
         return HEAD;
     }
 
+    /**
+     * Placeholder of sprite object component. Parameter is the sprite key, optionally preceded by the atlas key and space.
+     * @return the placeholder
+     */
     public static @NotNull Placeholder spritePlaceholder() {
         return SPRITE;
     }

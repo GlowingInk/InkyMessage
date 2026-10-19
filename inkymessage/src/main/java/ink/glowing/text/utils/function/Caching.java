@@ -7,17 +7,41 @@ import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
+/**
+ * Utility methods for creating caching functions.
+ */
 public final class Caching {
-    private Caching() {}
+    private Caching() { }
 
+    /**
+     * Wraps function so its results are cached per input in a {@link HashMap}.
+     * @param function function to wrap
+     * @param <T> type of input
+     * @param <R> type of result
+     * @return caching function
+     */
     public static <T, R> @NotNull Function<T, R> caching(@NotNull Function<T, R> function) {
         return new CFunction<>(function, new HashMap<T, R>()::computeIfAbsent);
     }
 
+    /**
+     * Wraps function so its results are cached using the provided compute function.
+     * @param function function to wrap
+     * @param computeFunction cache compute function, like {@link java.util.Map#computeIfAbsent}
+     * @param <T> type of input
+     * @param <R> type of result
+     * @return caching function
+     */
     public static <T, R> @NotNull Function<T, R> caching(@NotNull Function<T, R> function, @NotNull BiFunction<T, Function<T, R>, R> computeFunction) {
         return new CFunction<>(function, computeFunction);
     }
 
+    /**
+     * Wraps supplier so it is computed only once.
+     * @param supplier supplier to wrap
+     * @param <R> type of result
+     * @return caching supplier
+     */
     public static <R> @NotNull Supplier<R> caching(@NotNull Supplier<R> supplier) {
         return new CSupplier<>(supplier);
     }
