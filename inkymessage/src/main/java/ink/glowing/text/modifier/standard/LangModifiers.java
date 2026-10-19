@@ -7,7 +7,6 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TranslatableComponent;
 import net.kyori.adventure.text.TranslationArgument;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.TestOnly;
 import org.jetbrains.annotations.Unmodifiable;
 
 import java.util.ArrayList;
@@ -21,7 +20,6 @@ import static net.kyori.adventure.text.TranslationArgument.component;
 final class LangModifiers {
     private LangModifiers() { }
 
-    @TestOnly
     enum ArgsModifier implements Modifier { // TODO Merge with Arg
         INSTANCE;
 
