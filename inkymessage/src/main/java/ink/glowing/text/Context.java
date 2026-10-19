@@ -15,8 +15,11 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 
+import static ink.glowing.text.modifier.ModifierFinder.modifierFinder;
+import static ink.glowing.text.placeholder.PlaceholderFinder.placeholderFinder;
 import static ink.glowing.text.replace.ReplacementMatcher.composeReplacementMatchers;
 import static ink.glowing.text.replace.ReplacementMatcher.replacementMatcher;
+import static ink.glowing.text.symbolic.SymbolicStyleFinder.symbolicStyleFinder;
 
 /**
  * Context of (de)serialization, holding the inks available to the parser.
@@ -72,9 +75,9 @@ public record Context(
         var replacers = this.replacers;
 
         switch (ink) {
-            case Modifier mod -> modifiers = modifiers.thenModifierFinder(mod);
-            case Placeholder ph -> placeholders = placeholders.thenPlaceholderFinder(ph);
-            case SymbolicStyle sym -> symbolics = symbolics.thenSymbolicStyleFinder(sym);
+            case Modifier mod -> modifiers = mod.thenModifierFinder(modifiers);
+            case Placeholder ph -> placeholders = ph.thenPlaceholderFinder(placeholders);
+            case SymbolicStyle sym -> symbolics = sym.thenSymbolicStyleFinder(symbolics);
             case Replacer rep -> replacers = composeReplacementMatchers(rep, replacers);
             case Ink.Provider pr -> {
                 return with(pr.inks());
@@ -115,16 +118,16 @@ public record Context(
         with(inks, modifiersMap, placeholdersMap, symbolicsMap, replacersSet);
 
         if (!modifiersMap.isEmpty()) {
-            modifiers = modifiers.thenModifierFinder(modifiersMap::get);
+            modifiers = modifierFinder(modifiersMap).thenModifierFinder(modifiers);
         }
         if (!placeholdersMap.isEmpty()) {
-            placeholders = placeholders.thenPlaceholderFinder(placeholdersMap::get);
+            placeholders = placeholderFinder(placeholdersMap).thenPlaceholderFinder(placeholders);
         }
         if (!symbolicsMap.isEmpty()) {
-            symbolics = symbolics.thenSymbolicStyleFinder(symbolicsMap::get);
+            symbolics = symbolicStyleFinder(symbolicsMap).thenSymbolicStyleFinder(symbolics);
         }
         if (!replacersSet.isEmpty()) {
-            replacers = composeReplacementMatchers(replacers, replacementMatcher(replacersSet));
+            replacers = composeReplacementMatchers(replacementMatcher(replacersSet), replacers);
         }
 
         return new Context(this.inkyMessage, modifiers, placeholders, symbolics, replacers, this.symbolicReset);
