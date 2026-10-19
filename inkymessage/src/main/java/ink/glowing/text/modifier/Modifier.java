@@ -39,7 +39,7 @@ public non-sealed interface Modifier extends Ink, Labeled, ModifierFinder {
 
     @Override
     @ApiStatus.NonExtendable
-    default Modifier findModifier(@NotNull String label) {
+    default @Nullable Modifier findModifier(@NotNull String label) {
         return label.equals(label()) ? this : null;
     }
 
