@@ -24,8 +24,8 @@ import org.jetbrains.annotations.Unmodifiable;
 
 import java.util.*;
 
-import static ink.glowing.text.processor.DecodeProcessors.identityDecodePreProcessors;
-import static ink.glowing.text.processor.EncodeProcessors.identityEncodePreprocessors;
+import static ink.glowing.text.processor.DecodeProcessors.identityDecodeProcessors;
+import static ink.glowing.text.processor.EncodeProcessors.identityEncodeProcessors;
 import static ink.glowing.text.symbolic.standard.StandardSymbolicStyles.simpleReset;
 import static ink.glowing.text.utils.TextUtils.indexOf;
 
@@ -314,9 +314,9 @@ public sealed interface InkyMessage extends ComponentSerializer<Component, Compo
 
     /**
      * Returns the base Context of this InkyMessage instance.
-     * @return a new context
+     * @return the base context
      */
-    @Contract(value = "-> new", pure = true)
+    @Contract(pure = true)
     @NotNull Context baseContext();
 
     /**
@@ -492,8 +492,8 @@ public sealed interface InkyMessage extends ComponentSerializer<Component, Compo
             this.symbolics = new HashMap<>();
             this.replacers = new HashSet<>();
 
-            this.encodeProcessors = identityEncodePreprocessors();
-            this.decodeProcessors = identityDecodePreProcessors();
+            this.encodeProcessors = identityEncodeProcessors();
+            this.decodeProcessors = identityDecodeProcessors();
         }
 
         Builder(

@@ -14,7 +14,8 @@ public interface EncodeProcessors extends Processors<Component, String, EncodePr
      * Processors that don't change anything.
      * @return identity processors
      */
-    static @NotNull EncodeProcessors identityEncodePreprocessors() {
+    @Contract(pure = true)
+    static @NotNull EncodeProcessors identityEncodeProcessors() {
         return EncodeProcessorsImpl.IDENTITY;
     }
 

@@ -15,7 +15,7 @@ public interface DecodeProcessors extends Processors<String, Component, DecodePr
      * @return identity processors
      */
     @Contract(pure = true)
-    static @NotNull DecodeProcessors identityDecodePreProcessors() {
+    static @NotNull DecodeProcessors identityDecodeProcessors() {
         return DecodeProcessorsImpl.IDENTITY;
     }
 
