@@ -112,9 +112,9 @@ public interface ModifierFinder {
         var iterator = modifierFinders.iterator();
         if (!iterator.hasNext()) return EMPTY;
         ModifierFinder result = iterator.next();
-        do {
+        while (iterator.hasNext()) {
             result = result.thenModifierFinder(iterator.next());
-        } while (iterator.hasNext());
+        }
         return result;
     }
 }

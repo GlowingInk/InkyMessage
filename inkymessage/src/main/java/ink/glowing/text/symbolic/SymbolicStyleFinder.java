@@ -111,9 +111,9 @@ public interface SymbolicStyleFinder {
         var iterator = symbolicStyleFinders.iterator();
         if (!iterator.hasNext()) return EMPTY;
         SymbolicStyleFinder result = iterator.next();
-        do {
+        while (iterator.hasNext()) {
             result = result.thenSymbolicStyleFinder(iterator.next());
-        } while (iterator.hasNext());
+        }
         return result;
     }
 }

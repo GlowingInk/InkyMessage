@@ -112,9 +112,9 @@ public interface PlaceholderFinder {
         var iterator = placeholderFinders.iterator();
         if (!iterator.hasNext()) return EMPTY;
         PlaceholderFinder result = iterator.next();
-        do {
+        while (iterator.hasNext()) {
             result = result.thenPlaceholderFinder(iterator.next());
-        } while (iterator.hasNext());
+        }
         return result;
     }
 }
