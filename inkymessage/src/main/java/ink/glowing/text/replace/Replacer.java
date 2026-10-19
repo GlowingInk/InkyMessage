@@ -134,7 +134,8 @@ public non-sealed interface Replacer extends Ink, ReplacementMatcher {
 
     /**
      * Spot of the string to replace.
-     * Spots are ordered by their start descending, and then by their end descending.
+     * Spots are ordered by their start descending, and then by their end ascending,
+     * so the longest spot is matched first when iterated in descending order.
      * @param start starting index (inclusive)
      * @param end ending index (exclusive)
      * @param count zero-based index of the occurrence
@@ -144,7 +145,7 @@ public non-sealed interface Replacer extends Ink, ReplacementMatcher {
         @Override
         public int compareTo(@NotNull Replacer.FoundSpot o) {
             if (start == o.start) {
-                return Integer.compare(o.end, end);
+                return Integer.compare(end, o.end);
             } else if (start < o.start) {
                 return 1;
             }
