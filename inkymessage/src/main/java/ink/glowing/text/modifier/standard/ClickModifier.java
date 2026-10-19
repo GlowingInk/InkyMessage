@@ -84,6 +84,11 @@ enum ClickModifier implements Modifier {
     }
 
     @Override
+    public @NotNull ArgumentValue.Type unknownArgumentType(@NotNull String parameter) {
+        return ArgumentValue.Type.STRING;
+    }
+
+    @Override
     public @NotNull @LabelPattern String label() {
         return "click";
     }

@@ -90,7 +90,7 @@ public final class StandardModifiers {
      * Creates a modifier that allows to open specified URL using provided scheme.
      * @param scheme scheme (prefix) for the URL
      */
-    public static @NotNull Modifier urlModifier(@Pattern("[a-z\\d\\+\\-]+") @NotNull String scheme) {
+    public static @NotNull Modifier urlModifier(@Pattern("[a-z\\d+\\-]+") @NotNull String scheme) {
         return new UrlModifier(scheme);
     }
 

@@ -28,9 +28,7 @@ public non-sealed interface Modifier extends Ink, Labeled, ModifierFinder {
         return label.equals(label()) ? this : null;
     }
 
-    default @NotNull ArgumentValue.Type unknownArgumentType(@NotNull String parameter) {
-        return ArgumentValue.Type.STRING;
-    }
+    @NotNull ArgumentValue.Type unknownArgumentType(@NotNull String parameter);
 
     @ApiStatus.Internal
     default @NotNull String asFormatted(@NotNull String param, @NotNull String value) {
@@ -45,36 +43,6 @@ public non-sealed interface Modifier extends Ink, Labeled, ModifierFinder {
     @ApiStatus.Internal
     default @NotNull String asFormatted(@NotNull String param, @NotNull Component value, @NotNull InkyMessage inkyMessage) {
         return asFormatted(param, inkyMessage.serialize(value));
-    }
-
-    @Deprecated
-    interface Plain extends Modifier {
-        @Override
-        default @NotNull UnaryOperator<Component> prepareModification(@NotNull Modifier.Arguments arguments, @NotNull Context context) {
-            return (text) -> modify(text, arguments.parameter(), arguments.get(0).asString());
-        }
-
-        @NotNull Component modify(@NotNull Component text, @NotNull String param, @NotNull String value);
-
-        @Override
-        default ArgumentValue.@NotNull Type unknownArgumentType(@NotNull String parameter) {
-            return ArgumentValue.Type.STRING;
-        }
-    }
-
-    @Deprecated
-    interface Complex extends Modifier {
-        @Override
-        default @NotNull UnaryOperator<Component> prepareModification(@NotNull Modifier.Arguments arguments, @NotNull Context context) {
-            return (text) -> modify(text, arguments.parameter(), arguments.get(0).asComponent());
-        }
-
-        @NotNull Component modify(@NotNull Component text, @NotNull String param, @NotNull Component value);
-
-        @Override
-        default ArgumentValue.@NotNull Type unknownArgumentType(@NotNull String parameter) {
-            return ArgumentValue.Type.COMPONENT;
-        }
     }
 
     interface Arguments {

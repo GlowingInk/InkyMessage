@@ -1,5 +1,6 @@
 package ink.glowing.text.modifier.standard;
 
+import ink.glowing.text.Context;
 import ink.glowing.text.InkyMessage;
 import ink.glowing.text.modifier.Modifier;
 import net.kyori.adventure.text.Component;
@@ -10,19 +11,23 @@ import org.jetbrains.annotations.Unmodifiable;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.UnaryOperator;
 
-enum DecorModifier implements Modifier.Plain {
+import static java.util.function.UnaryOperator.identity;
+
+enum DecorModifier implements Modifier {
     INSTANCE;
 
     @Override
-    public @NotNull Component modify(@NotNull Component text, @NotNull String param, @NotNull String value) {
-        TextDecoration decoration = decorByName(param);
-        if (decoration == null) return text;
-        return switch (value) {
-            case "unset", "not_set" -> text.decoration(decoration, TextDecoration.State.NOT_SET);
-            case "false", "removed" -> text.decoration(decoration, TextDecoration.State.FALSE);
-            default -> text.decoration(decoration, TextDecoration.State.TRUE);
+    public @NotNull UnaryOperator<Component> prepareModification(@NotNull Arguments arguments, @NotNull Context context) {
+        TextDecoration decoration = decorByName(arguments.parameter());
+        if (decoration == null) return identity();
+        TextDecoration.State state = switch (arguments.get(0).asString()) {
+            case "unset", "not_set" -> TextDecoration.State.NOT_SET;
+            case "false", "removed" -> TextDecoration.State.FALSE;
+            default -> TextDecoration.State.TRUE;
         };
+        return text -> text.decoration(decoration, state);
     }
 
     @Override
@@ -36,6 +41,11 @@ enum DecorModifier implements Modifier.Plain {
             }
         }
         return modifierStr;
+    }
+
+    @Override
+    public @NotNull ArgumentValue.Type unknownArgumentType(@NotNull String parameter) {
+        return ArgumentValue.Type.STRING;
     }
 
     @Override

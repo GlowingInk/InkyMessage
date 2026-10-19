@@ -19,4 +19,9 @@ record CallbackModifier(@NotNull @Subst("label") String label, UnaryOperator<Com
     public @NotNull UnaryOperator<Component> prepareModification(@NotNull Arguments arguments, @NotNull Context context) {
         return mod;
     }
+
+    @Override
+    public @NotNull ArgumentValue.Type unknownArgumentType(@NotNull String parameter) {
+        return ArgumentValue.Type.STRING;
+    }
 }

@@ -14,6 +14,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.UnaryOperator;
 
+import static java.util.function.UnaryOperator.identity;
 import static net.kyori.adventure.text.Component.empty;
 import static net.kyori.adventure.text.TranslationArgument.component;
 
@@ -47,38 +48,46 @@ final class LangModifiers {
         }
     }
 
-    enum ArgModifier implements Modifier.Complex {
+    enum ArgModifier implements Modifier {
         INSTANCE;
 
         private static final TranslationArgument EMPTY_ARG = component(empty());
 
         @Override
-        public @NotNull Component modify(@NotNull Component text, @NotNull String param, @NotNull Component value) {
-            if (text instanceof TranslatableComponent lang) {
+        public @NotNull UnaryOperator<Component> prepareModification(@NotNull Arguments arguments, @NotNull Context context) {
+            String param = arguments.parameter();
+            int place;
+            if (param.isEmpty()) {
+                place = -1;
+            } else {
+                try {
+                    place = Integer.parseInt(param) - 1;
+                } catch (NumberFormatException ignored) {
+                    return identity();
+                }
+                if (place < 0) return identity();
+            }
+            var value = component(arguments.get(0).asComponent()); // TODO Other types
+            return text -> {
+                if (!(text instanceof TranslatableComponent lang)) return text;
                 var args = new ArrayList<>(lang.arguments());
-                if (!param.isEmpty()) {
-                    int place;
-                    try {
-                        place = Integer.parseInt(param) - 1;
-                    } catch (NumberFormatException ignored) {
-                        return text;
-                    }
-                    if (place < 0) return text;
+                if (place != -1) {
                     if (args.size() > place) {
-                        args.set(place, component(value));
+                        args.set(place, value);
                         return lang.arguments(args);
                     }
-                    if (place != args.size()) {
-                        while (place > args.size()) {
-                            args.add(EMPTY_ARG);
-                        }
+                    while (place > args.size()) {
+                        args.add(EMPTY_ARG);
                     }
                 }
-
-                args.add(component(value)); // TODO Other types
+                args.add(value);
                 return lang.arguments(args);
-            }
-            return text;
+            };
+        }
+
+        @Override
+        public @NotNull Modifier.ArgumentValue.Type unknownArgumentType(@NotNull String parameter) {
+            return ArgumentValue.Type.COMPONENT;
         }
 
         @Override
@@ -99,13 +108,14 @@ final class LangModifiers {
         }
     }
 
-    enum FallbackModifier implements Modifier.Plain {
+    enum FallbackModifier implements Modifier {
         INSTANCE;
 
         @Override
-        public @NotNull Component modify(@NotNull Component text, @NotNull String param, @NotNull String value) {
-            return text instanceof TranslatableComponent lang
-                    ? lang.fallback(value)
+        public @NotNull UnaryOperator<Component> prepareModification(@NotNull Arguments arguments, @NotNull Context context) {
+            String fallback = arguments.get(0).asString();
+            return text -> text instanceof TranslatableComponent lang
+                    ? lang.fallback(fallback)
                     : text;
         }
 
@@ -114,6 +124,11 @@ final class LangModifiers {
             return text instanceof TranslatableComponent lang && lang.fallback() != null
                     ? List.of(asFormatted("", lang.fallback()))
                     : List.of();
+        }
+
+        @Override
+        public @NotNull ArgumentValue.Type unknownArgumentType(@NotNull String parameter) {
+            return ArgumentValue.Type.STRING;
         }
 
         @Override
